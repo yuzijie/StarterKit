@@ -1,4 +1,4 @@
-# Examples/
+## Examples/
 
 This folder contains HTML files, icons and other text files.
 

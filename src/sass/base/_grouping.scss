@@ -1,0 +1,21 @@
+figure {
+  margin: 1em 40px; /* normalize.css v3.0.2 (Line: 200) */
+}
+
+hr {
+  -moz-box-sizing: content-box; /* normalize.css v3.0.2 (Line: 212) */
+  box-sizing: content-box; /* normalize.css v3.0.2 (Line: 213) */
+  height: 0; /* normalize.css v3.0.2 (Line: 214) */
+}
+
+pre {
+  overflow: auto; /* normalize.css v3.0.2 (Line: 222) */
+}
+
+code,
+kbd,
+pre,
+samp {
+  font-family: monospace, monospace; /* normalize.css v3.0.2 (Line: 233) */
+  font-size: 1em; /* normalize.css v3.0.2 (Line: 234) */
+}

@@ -1,0 +1,250 @@
+/* General */
+html {
+  -ms-text-size-adjust: 100%;
+  /* normalize.css v3.0.2 (Line: 11) */
+  -webkit-text-size-adjust: 100%;
+  /* normalize.css v3.0.2 (Line: 12) */ }
+
+body {
+  margin: 0;
+  /* normalize.css v3.0.2 (Line: 20) */ }
+
+/* HTML5 display definitions */
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+main,
+menu,
+nav,
+section,
+summary {
+  display: block;
+  /* normalize.css v3.0.2 (Line: 46) */ }
+
+audio,
+canvas,
+progress,
+video {
+  display: inline-block;
+  /* normalize.css v3.0.2 (Line: 58) */
+  vertical-align: baseline;
+  /* normalize.css v3.0.2 (Line: 59) */ }
+
+audio:not([controls]) {
+  display: none;
+  /* normalize.css v3.0.2 (Line: 68) */
+  height: 0;
+  /* normalize.css v3.0.2 (Line: 69) */ }
+
+[hidden],
+template {
+  display: none;
+  /* normalize.css v3.0.2 (Line: 79) */ }
+
+/* Links */
+a {
+  background-color: transparent;
+  /* normalize.css v3.0.2 (Line: 90) */ }
+
+a:active,
+a:hover {
+  outline: 0;
+  /* normalize.css v3.0.2 (Line: 99) */ }
+
+/* Text-level semantics */
+abbr[title] {
+  border-bottom: 1px dotted;
+  /* normalize.css v3.0.2 (Line: 110) */ }
+
+b,
+strong {
+  font-weight: bold;
+  /* normalize.css v3.0.2 (Line: 119) */ }
+
+dfn {
+  font-style: italic;
+  /* normalize.css v3.0.2 (Line: 127) */ }
+
+h1 {
+  font-size: 2em;
+  /* normalize.css v3.0.2 (Line: 136) */
+  margin: 0.67em 0;
+  /* normalize.css v3.0.2 (Line: 137) */ }
+
+mark {
+  background: #ff0;
+  /* normalize.css v3.0.2 (Line: 145) */
+  color: #000;
+  /* normalize.css v3.0.2 (Line: 146) */ }
+
+small {
+  font-size: 80%;
+  /* normalize.css v3.0.2 (Line: 154) */ }
+
+sub,
+sup {
+  font-size: 75%;
+  /* normalize.css v3.0.2 (Line: 163) */
+  line-height: 0;
+  /* normalize.css v3.0.2 (Line: 164) */
+  position: relative;
+  /* normalize.css v3.0.2 (Line: 165) */
+  vertical-align: baseline;
+  /* normalize.css v3.0.2 (Line: 166) */ }
+
+sup {
+  top: -0.5em;
+  /* normalize.css v3.0.2 (Line: 170) */ }
+
+sub {
+  bottom: -0.25em;
+  /* normalize.css v3.0.2 (Line: 174) */ }
+
+/* Embedded content */
+img {
+  border: 0;
+  /* normalize.css v3.0.2 (Line: 185) */ }
+
+svg:not(:root) {
+  overflow: hidden;
+  /* normalize.css v3.0.2 (Line: 193) */ }
+
+/* Grouping content */
+figure {
+  margin: 1em 40px;
+  /* normalize.css v3.0.2 (Line: 200) */ }
+
+hr {
+  -moz-box-sizing: content-box;
+  /* normalize.css v3.0.2 (Line: 212) */
+  box-sizing: content-box;
+  /* normalize.css v3.0.2 (Line: 213) */
+  height: 0;
+  /* normalize.css v3.0.2 (Line: 214) */ }
+
+pre {
+  overflow: auto;
+  /* normalize.css v3.0.2 (Line: 222) */ }
+
+code,
+kbd,
+pre,
+samp {
+  font-family: monospace, monospace;
+  /* normalize.css v3.0.2 (Line: 233) */
+  font-size: 1em;
+  /* normalize.css v3.0.2 (Line: 234) */ }
+
+/* Forms */
+button,
+input,
+optgroup,
+select,
+textarea {
+  color: inherit;
+  /* normalize.css v3.0.2 (Line: 257) */
+  font: inherit;
+  /* normalize.css v3.0.2 (Line: 258) */
+  margin: 0;
+  /* normalize.css v3.0.2 (Line: 259) */ }
+
+button {
+  overflow: visible;
+  /* normalize.css v3.0.2 (Line: 267) */ }
+
+button,
+select {
+  text-transform: none;
+  /* normalize.css v3.0.2 (Line: 279) */ }
+
+button,
+html input[type="button"],
+input[type="reset"],
+input[type="submit"] {
+  -webkit-appearance: button;
+  /* normalize.css v3.0.2 (Line: 294) */
+  cursor: pointer;
+  /* normalize.css v3.0.2 (Line: 295) */ }
+
+button[disabled],
+html input[disabled] {
+  cursor: default;
+  /* normalize.css v3.0.2 (Line: 304) */ }
+
+button::-moz-focus-inner,
+input::-moz-focus-inner {
+  border: 0;
+  /* normalize.css v3.0.2 (Line: 313) */
+  padding: 0;
+  /* normalize.css v3.0.2 (Line: 314) */ }
+
+input {
+  line-height: normal;
+  /* normalize.css v3.0.2 (Line: 323) */ }
+
+input[type="checkbox"],
+input[type="radio"] {
+  box-sizing: border-box;
+  /* normalize.css v3.0.2 (Line: 336) */
+  padding: 0;
+  /* normalize.css v3.0.2 (Line: 337) */ }
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  height: auto;
+  /* normalize.css v3.0.2 (Line: 348) */ }
+
+input[type="search"] {
+  -webkit-appearance: textfield;
+  /* normalize.css v3.0.2 (Line: 358) */
+  -moz-box-sizing: content-box;
+  /* normalize.css v3.0.2 (Line: 359) */
+  -webkit-box-sizing: content-box;
+  /* normalize.css v3.0.2 (Line: 360) */
+  box-sizing: content-box;
+  /* normalize.css v3.0.2 (Line: 361) */ }
+
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+  /* normalize.css v3.0.2 (Line: 372) */ }
+
+fieldset {
+  border: 1px solid #c0c0c0;
+  /* normalize.css v3.0.2 (Line: 380) */
+  margin: 0 2px;
+  /* normalize.css v3.0.2 (Line: 381) */
+  padding: 0.35em 0.625em 0.75em;
+  /* normalize.css v3.0.2 (Line: 382) */ }
+
+legend {
+  border: 0;
+  /* normalize.css v3.0.2 (Line: 391) */
+  padding: 0;
+  /* normalize.css v3.0.2 (Line: 392) */ }
+
+textarea {
+  overflow: auto;
+  /* normalize.css v3.0.2 (Line: 400) */ }
+
+optgroup {
+  font-weight: bold;
+  /* normalize.css v3.0.2 (Line: 409) */ }
+
+/* Tables */
+table {
+  border-collapse: collapse;
+  /* normalize.css v3.0.2 (Line: 420) */
+  border-spacing: 0;
+  /* normalize.css v3.0.2 (Line: 421) */ }
+
+td,
+th {
+  padding: 0;
+  /* normalize.css v3.0.2 (Line: 426) */ }
+
+/*# sourceMappingURL=main.css.map */

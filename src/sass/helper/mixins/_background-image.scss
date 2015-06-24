@@ -1,0 +1,38 @@
+/*
+ * SVG background images with PNG and retina fallback
+ *
+ * This mixin depends on Modernizr to inject no-svg class onto <html> element.
+ *
+ * You need one .svg file, that will serve as the default background image.
+ * You’ll also need a regular .png that serves as a fallback for non-svg-supporting browsers.
+ * And last you need a twice as large .png as a second fallback to retina screens.
+ *
+ * All in all you need this:
+ * pattern.svg
+ * pattern.png
+ * pattern@2x.png
+ *
+ * Usage:
+ *   body {
+ *     @include background-image('pattern');
+ *   }
+ *
+ */
+
+$image-path: '../img' !default;
+$fallback-extension: 'png' !default;
+$retina-suffix: '@2x';
+
+@mixin background-image($name, $size:false){
+    background-image: url(#{$image-path}/#{$name}.svg);
+    @if($size){
+        background-size: $size;
+    }
+    .no-svg &{
+        background-image: url(#{$image-path}/#{$name}.#{$fallback-extension});
+
+        @media only screen and (-moz-min-device-pixel-ratio: 1.5), only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-device-pixel-ratio: 1.5) {
+          background-image: url(#{$image-path}/#{$name}#{$retina-suffix}.#{$fallback-extension});
+        }
+    }
+}

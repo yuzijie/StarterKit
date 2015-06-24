@@ -1,0 +1,13 @@
+@mixin border-radius ($radius: 4px) {
+  border-radius         : $radius;
+  -moz-border-radius    : $radius;
+  -webkit-border-radius : $radius;
+}
+
+@mixin border-radius-all ($topleft: 4px, $topright: 4px, $bottomright: 4px, $bottomleft: 4px) {
+  border-radius         : $topleft $topright $bottomright $bottomleft;
+  -moz-border-radius    : $topleft $topright $bottomright $bottomleft;
+  -ms-border-radius     : $topleft $topright $bottomright $bottomleft;
+  -o-border-radius      : $topleft $topright $bottomright $bottomleft;
+  -webkit-border-radius : $topleft $topright $bottomright $bottomleft;
+}

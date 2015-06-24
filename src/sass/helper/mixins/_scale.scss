@@ -1,0 +1,7 @@
+@mixin scale ($multiplier) {
+  transform         : scale($multiplier);
+  -moz-transform    : scale($multiplier);
+  -ms-transform     : scale($multiplier);
+  -o-transform      : scale($multiplier);
+  -webkit-transform : scale($multiplier);
+}

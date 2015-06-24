@@ -1,0 +1,59 @@
+/*
+ * Breakpoints
+ *
+ * Usage:
+ *
+ *   .sidebar {
+ *     width: 60%;
+ *     float: left;
+ *     margin: 0 2% 0 0;
+ *     @include bp-small {
+ *       width: 100%;
+ *       float: none;
+ *       margin: 0;
+ *     }
+ *   }
+ *
+ */
+
+$bp-huge-width: 1140px !default;
+$bp-large-width: 960px !default;
+$bp-medium-width: 768px !default;
+$bp-small-width: 640px !default;
+$bp-tiny-width: 480px !default;
+
+@mixin bp-huge {
+    @media only screen and (min-width: $bp-huge-width) {
+        @content;
+    }
+}
+
+@mixin bp-large {
+    @media only screen and (min-width: $bp-large-width) {
+        @content;
+    }
+}
+
+@mixin bp-medium {
+    @media only screen and (min-width: $bp-medium-width) {
+        @content;
+    }
+}
+
+@mixin bp-small {
+    @media only screen and (min-width: $bp-small-width) {
+        @content;
+    }
+}
+
+@mixin bp-tiny {
+    @media only screen and (min-width: $bp-tiny-width) {
+        @content;
+    }
+}
+
+@mixin bp-dust {
+    @media only screen and (max-width: $bp-tiny-width) {
+        @content;
+    }
+}

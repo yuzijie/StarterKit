@@ -1,0 +1,15 @@
+@mixin background-alpha($color, $alpha) {
+  $acolor           : hsla(hue($color), saturation($color), lightness($color), $alpha);
+  $iecolor          : argb($acolor);
+
+  background-color  : $color; /* fallback color */
+  background-color  : $acolor;
+
+  /* IE */
+  background-color  : transparent\9;
+  filter            : progid:DXImageTransform.Microsoft.gradient(startColorstr= #{$iecolor}, endColorstr= #{$iecolor});
+  zoom              : 1;
+  &:nth-child(n) {
+    filter : none;
+  }
+}

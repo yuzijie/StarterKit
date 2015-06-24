@@ -1,0 +1,7 @@
+@mixin transform ($deg) {
+  transform         : $deg;
+  -moz-transform    : $deg;
+  -ms-transform     : $deg;
+  -o-transform      : $deg;
+  -webkit-transform : $deg;
+}

@@ -1,0 +1,17 @@
+{
+  "name": "starter_kit",
+  "version": "1.0.0",
+  "description": "YU Zijie's starter kit for creating websites",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yuzijie/StarterKit.git"
+  },
+  "author": "YU ZIJIE",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yuzijie/StarterKit/issues"
+  },
+  "homepage": "https://github.com/yuzijie/StarterKit#readme",
+  "private": true
+}

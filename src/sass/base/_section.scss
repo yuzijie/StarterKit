@@ -8,4 +8,22 @@ html {
 
 body {
   margin: 0; /* normalize.css v3.0.2 (Line: 20) */
+  @include font-feature-settings("kern", "liga", "pnum"); /* bitters v1.0.0 */
+  -webkit-font-smoothing: antialiased; /* bitters v1.0.0 */
+  color: $base-font-color; /* bitters v1.0.0 */
+  font-family: $base-font-family; /* bitters v1.0.0 */
+  font-size: $base-font-size; /* bitters v1.0.0 */
+  line-height: $base-line-height; /* bitters v1.0.0 */
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: $heading-font-family; /* bitters v1.0.0 */
+  font-size: $base-font-size; /* bitters v1.0.0 */
+  line-height: $heading-line-height; /* bitters v1.0.0 */
+  margin: 0 0 $small-spacing; /* bitters v1.0.0 */
 }

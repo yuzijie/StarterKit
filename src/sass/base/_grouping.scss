@@ -5,14 +5,16 @@ figure {
 hr {
   -moz-box-sizing: content-box; /* normalize.css v3.0.2 (Line: 212) */
   box-sizing: content-box; /* normalize.css v3.0.2 (Line: 213) */
-  // height: 0; /* normalize.css v3.0.2 (Line: 214) */
+  height: 0; /* normalize.css v3.0.2 (Line: 214) */
 
   /* A better looking default horizontal rule */
   display: block; /* boilerplate v5.2.0 (Line: 42) */
-  height: 1px; /* boilerplate v5.2.0 (Line: 43) */
+  // height: 1px; /* boilerplate v5.2.0 (Line: 43) */
   border: 0; /* boilerplate v5.2.0 (Line: 44) */
-  border-top: 1px solid #ccc; /* boilerplate v5.2.0 (Line: 45) */
-  margin: 1em 0; /* boilerplate v5.2.0 (Line: 46) */
+  // border-top: 1px solid #ccc; /* boilerplate v5.2.0 (Line: 45) */
+  border-bottom: 1px $base-border-style $base-border-color; /* bitters v1.0.0 */
+  // margin: 1em 0; /* boilerplate v5.2.0 (Line: 46) */
+  margin: $base-spacing 0; /* bitters v1.0.0 */
   padding: 0; /* boilerplate v5.2.0 (Line: 47) */
 }
 
@@ -26,4 +28,40 @@ pre,
 samp {
   font-family: monospace, monospace; /* normalize.css v3.0.2 (Line: 233) */
   font-size: 1em; /* normalize.css v3.0.2 (Line: 234) */
+}
+
+p {
+  margin: 0 0 $small-spacing; /* bitters v1.0.0 */
+}
+
+ul,
+ol {
+  list-style-type: none; /* bitters v1.0.0 */
+  margin: 0; /* bitters v1.0.0 */
+  padding: 0; /* bitters v1.0.0 */
+
+  &%default-ul {
+    list-style-type: disc; /* bitters v1.0.0 */
+    margin-bottom: $small-spacing; /* bitters v1.0.0 */
+    padding-left: $base-spacing; /* bitters v1.0.0 */
+  }
+
+  &%default-ol {
+    list-style-type: decimal; /* bitters v1.0.0 */
+    margin-bottom: $small-spacing; /* bitters v1.0.0 */
+    padding-left: $base-spacing; /* bitters v1.0.0 */
+  }
+}
+
+dl {
+  margin-bottom: $small-spacing; /* bitters v1.0.0 */
+
+  dt {
+    font-weight: bold; /* bitters v1.0.0 */
+    margin-top: $small-spacing; /* bitters v1.0.0 */
+  }
+
+  dd {
+    margin: 0; /* bitters v1.0.0 */
+  }
 }

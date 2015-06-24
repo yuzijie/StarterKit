@@ -1,8 +1,18 @@
 a {
   background-color: transparent; /* normalize.css v3.0.2 (Line: 90) */
-}
+  color: $action-color; /* bitters v1.0.0 */
+  text-decoration: none; /* bitters v1.0.0 */
+  transition: color 0.1s linear; /* bitters v1.0.0 */
 
-a:active,
-a:hover {
-  outline: 0; /* normalize.css v3.0.2 (Line: 99) */
+  &:active,
+  &:focus,
+  &:hover {
+    color: darken($action-color, 15%); /* bitters v1.0.0 */
+    outline: 0; /* normalize.css v3.0.2 (Line: 99) */
+  }
+
+  // &:active,
+  // &:focus {
+  //   outline: none; /* bitters v1.0.0 */
+  // }
 }

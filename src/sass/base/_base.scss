@@ -1,3 +1,13 @@
+/* Bourbon support */
+@import "../../../node_modules/bourbon/app/assets/stylesheets/bourbon";
+
+/* Variables */
+@import "variable";
+
+/* Bourbon Neat */
+@import "grid";
+@import "../../../node_modules/bourbon-neat/app/assets/stylesheets/neat";
+
 /* Sections */
 @import "section";
 
@@ -25,5 +35,5 @@
 /* Helper Classes */
 @import "helper";
 
-/* print */
+/* Print */
 @import "print";

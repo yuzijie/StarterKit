@@ -1,5 +1,7 @@
 img {
   border: 0; /* normalize.css v3.0.2 (Line: 185) */
+  margin: 0; /* bitters v1.0.0 */
+  max-width: 100%; /* bitters v1.0.0 */
 }
 
 svg:not(:root) {

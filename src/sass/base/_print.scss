@@ -1,0 +1,65 @@
+/* ==========================================================================
+   Print styles.
+   Inlined to avoid the additional HTTP request:
+   http://www.phpied.com/delay-loading-your-print-css/
+   ========================================================================== */
+
+@media print {
+  *,
+  *:before,
+  *:after {
+    background: transparent !important; /* boilerplate v5.2.0 (Line: 215) */
+    color: #000 !important; /* boilerplate v5.2.0 (Line: 216) */
+    box-shadow: none !important; /* boilerplate v5.2.0 (Line: 218) */
+    text-shadow: none !important; /* boilerplate v5.2.0 (Line: 219) */
+  }
+
+  a,
+  a:visited {
+    text-decoration: underline; /* boilerplate v5.2.0 (Line: 224) */
+  }
+
+  a[href]:after {
+    content: " (" attr(href) ")"; /* boilerplate v5.2.0 (Line: 228) */
+  }
+
+  abbr[title]:after {
+    content: " (" attr(title) ")"; /* boilerplate v5.2.0 (Line: 232) */
+  }
+
+  a[href^="#"]:after,
+  a[href^="javascript:"]:after {
+    content: ""; /* boilerplate v5.2.0 (Line: 242) */
+  }
+
+  pre,
+  blockquote {
+    border: 1px solid #999; /* boilerplate v5.2.0 (Line: 247) */
+    page-break-inside: avoid; /* boilerplate v5.2.0 (Line: 248) */
+  }
+
+  thead {
+    display: table-header-group; /* boilerplate v5.2.0 (Line: 257) */
+  }
+
+  tr,
+  img {
+    page-break-inside: avoid; /* boilerplate v5.2.0 (Line: 262) */
+  }
+
+  img {
+    max-width: 100% !important; /* boilerplate v5.2.0 (Line: 266) */
+  }
+
+  p,
+  h2,
+  h3 {
+    orphans: 3; /* boilerplate v5.2.0 (Line: 272) */
+    widows: 3; /* boilerplate v5.2.0 (Line: 273) */
+  }
+
+  h2,
+  h3 {
+    page-break-after: avoid; /* boilerplate v5.2.0 (Line: 278) */
+  }
+}

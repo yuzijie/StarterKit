@@ -1,9 +1,16 @@
-/* General */
+@charset "UTF-8";
+/* Sections */
 html {
   -ms-text-size-adjust: 100%;
   /* normalize.css v3.0.2 (Line: 11) */
   -webkit-text-size-adjust: 100%;
-  /* normalize.css v3.0.2 (Line: 12) */ }
+  /* normalize.css v3.0.2 (Line: 12) */
+  color: #222;
+  /* boilerplate v5.2.0 (Line: 14) */
+  font-size: 1em;
+  /* boilerplate v5.2.0 (Line: 15) */
+  line-height: 1.4;
+  /* boilerplate v5.2.0 (Line: 16) */ }
 
 body {
   margin: 0;
@@ -44,6 +51,15 @@ audio:not([controls]) {
 template {
   display: none;
   /* normalize.css v3.0.2 (Line: 79) */ }
+
+audio,
+canvas,
+iframe,
+img,
+svg,
+video {
+  vertical-align: middle;
+  /* boilerplate v5.2.0 (Line: 62) */ }
 
 /* Links */
 a {
@@ -104,6 +120,18 @@ sub {
   bottom: -0.25em;
   /* normalize.css v3.0.2 (Line: 174) */ }
 
+::-moz-selection {
+  background: #b3d4fc;
+  /* boilerplate v5.2.0 (Line: 28) */
+  text-shadow: none;
+  /* boilerplate v5.2.0 (Line: 29) */ }
+
+::selection {
+  background: #b3d4fc;
+  /* boilerplate v5.2.0 (Line: 33) */
+  text-shadow: none;
+  /* boilerplate v5.2.0 (Line: 34) */ }
+
 /* Embedded content */
 img {
   border: 0;
@@ -123,8 +151,19 @@ hr {
   /* normalize.css v3.0.2 (Line: 212) */
   box-sizing: content-box;
   /* normalize.css v3.0.2 (Line: 213) */
-  height: 0;
-  /* normalize.css v3.0.2 (Line: 214) */ }
+  /* A better looking default horizontal rule */
+  display: block;
+  /* boilerplate v5.2.0 (Line: 42) */
+  height: 1px;
+  /* boilerplate v5.2.0 (Line: 43) */
+  border: 0;
+  /* boilerplate v5.2.0 (Line: 44) */
+  border-top: 1px solid #ccc;
+  /* boilerplate v5.2.0 (Line: 45) */
+  margin: 1em 0;
+  /* boilerplate v5.2.0 (Line: 46) */
+  padding: 0;
+  /* boilerplate v5.2.0 (Line: 47) */ }
 
 pre {
   overflow: auto;
@@ -214,12 +253,12 @@ input[type="search"]::-webkit-search-decoration {
   /* normalize.css v3.0.2 (Line: 372) */ }
 
 fieldset {
-  border: 1px solid #c0c0c0;
-  /* normalize.css v3.0.2 (Line: 380) */
-  margin: 0 2px;
-  /* normalize.css v3.0.2 (Line: 381) */
-  padding: 0.35em 0.625em 0.75em;
-  /* normalize.css v3.0.2 (Line: 382) */ }
+  border: 0;
+  /* boilerplate v5.2.0 (Line: 70) */
+  margin: 0;
+  /* boilerplate v5.2.0 (Line: 71) */
+  padding: 0;
+  /* boilerplate v5.2.0 (Line: 72) */ }
 
 legend {
   border: 0;
@@ -229,7 +268,9 @@ legend {
 
 textarea {
   overflow: auto;
-  /* normalize.css v3.0.2 (Line: 400) */ }
+  /* normalize.css v3.0.2 (Line: 400) */
+  resize: vertical;
+  /* boilerplate v5.2.0 (Line: 80) */ }
 
 optgroup {
   font-weight: bold;
@@ -246,5 +287,146 @@ td,
 th {
   padding: 0;
   /* normalize.css v3.0.2 (Line: 426) */ }
+
+/* Helper Classes */
+/* boilerplate v5.2.0 (Line: 131-156) */
+/*
+ * Visually hide an element
+ *
+ * When you hide an element with display: none, that prevents screen readers from reading it to the user.
+ * Sometimes that’s fine, but in other cases this will make the site hard to use for people with screen readers.
+ * Thus, we have to use another technique for hiding elements while at the same time make them accessible.
+ *
+ * Usage:
+ *
+ * <button class="mobile-navigation-trigger">
+ *   <b class="visually-hidden">Open the navigation</b>
+ *   <img src="img/mobile-navigation-icon.svg">
+ * </button>
+ *
+ * .visually-hidden {
+ *   @extend %visuallyhidden;
+ * }
+ *
+ */
+.visuallyhidden {
+  border: 0;
+  margin: -1px;
+  padding: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip: rect(0, 0, 0, 0);
+  position: absolute;
+  /*
+   * Extends the .visuallyhidden class to allow the element
+   * to be focusable when navigated to via the keyboard:
+   * https://www.drupal.org/node/897638
+   */ }
+  .visuallyhidden.focusable:active, .visuallyhidden.focusable:focus {
+    clip: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    position: static;
+    width: auto; }
+
+/* boilerplate v5.2.0 (Line: 178-186) */
+/*
+ * Clearfix
+ *
+ * Usage:
+ *
+ * .container-with-floated-children {
+ *   @extend %clearfix;
+ * }
+ *
+ */
+.clearfix {
+  *zoom: 1; }
+  .clearfix:before, .clearfix:after {
+    content: " ";
+    display: table; }
+  .clearfix:after {
+    clear: both; }
+
+.hidden {
+  display: none !important;
+  /* boilerplate v5.2.0 (Line: 123) */ }
+
+.invisible {
+  visibility: hidden;
+  /* boilerplate v5.2.0 (Line: 163) */ }
+
+/* print */
+/* ==========================================================================
+   Print styles.
+   Inlined to avoid the additional HTTP request:
+   http://www.phpied.com/delay-loading-your-print-css/
+   ========================================================================== */
+@media print {
+  *,
+  *:before,
+  *:after {
+    background: transparent !important;
+    /* boilerplate v5.2.0 (Line: 215) */
+    color: #000 !important;
+    /* boilerplate v5.2.0 (Line: 216) */
+    box-shadow: none !important;
+    /* boilerplate v5.2.0 (Line: 218) */
+    text-shadow: none !important;
+    /* boilerplate v5.2.0 (Line: 219) */ }
+
+  a,
+  a:visited {
+    text-decoration: underline;
+    /* boilerplate v5.2.0 (Line: 224) */ }
+
+  a[href]:after {
+    content: " (" attr(href) ")";
+    /* boilerplate v5.2.0 (Line: 228) */ }
+
+  abbr[title]:after {
+    content: " (" attr(title) ")";
+    /* boilerplate v5.2.0 (Line: 232) */ }
+
+  a[href^="#"]:after,
+  a[href^="javascript:"]:after {
+    content: "";
+    /* boilerplate v5.2.0 (Line: 242) */ }
+
+  pre,
+  blockquote {
+    border: 1px solid #999;
+    /* boilerplate v5.2.0 (Line: 247) */
+    page-break-inside: avoid;
+    /* boilerplate v5.2.0 (Line: 248) */ }
+
+  thead {
+    display: table-header-group;
+    /* boilerplate v5.2.0 (Line: 257) */ }
+
+  tr,
+  img {
+    page-break-inside: avoid;
+    /* boilerplate v5.2.0 (Line: 262) */ }
+
+  img {
+    max-width: 100% !important;
+    /* boilerplate v5.2.0 (Line: 266) */ }
+
+  p,
+  h2,
+  h3 {
+    orphans: 3;
+    /* boilerplate v5.2.0 (Line: 272) */
+    widows: 3;
+    /* boilerplate v5.2.0 (Line: 273) */ }
+
+  h2,
+  h3 {
+    page-break-after: avoid;
+    /* boilerplate v5.2.0 (Line: 278) */ } }
 
 /*# sourceMappingURL=main.css.map */

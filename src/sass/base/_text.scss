@@ -40,3 +40,13 @@ sup {
 sub {
   bottom: -0.25em; /* normalize.css v3.0.2 (Line: 174) */
 }
+
+::-moz-selection {
+  background: #b3d4fc; /* boilerplate v5.2.0 (Line: 28) */
+  text-shadow: none; /* boilerplate v5.2.0 (Line: 29) */
+}
+
+::selection {
+  background: #b3d4fc; /* boilerplate v5.2.0 (Line: 33) */
+  text-shadow: none; /* boilerplate v5.2.0 (Line: 34) */
+}

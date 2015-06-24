@@ -5,7 +5,15 @@ figure {
 hr {
   -moz-box-sizing: content-box; /* normalize.css v3.0.2 (Line: 212) */
   box-sizing: content-box; /* normalize.css v3.0.2 (Line: 213) */
-  height: 0; /* normalize.css v3.0.2 (Line: 214) */
+  // height: 0; /* normalize.css v3.0.2 (Line: 214) */
+
+  /* A better looking default horizontal rule */
+  display: block; /* boilerplate v5.2.0 (Line: 42) */
+  height: 1px; /* boilerplate v5.2.0 (Line: 43) */
+  border: 0; /* boilerplate v5.2.0 (Line: 44) */
+  border-top: 1px solid #ccc; /* boilerplate v5.2.0 (Line: 45) */
+  margin: 1em 0; /* boilerplate v5.2.0 (Line: 46) */
+  padding: 0; /* boilerplate v5.2.0 (Line: 47) */
 }
 
 pre {

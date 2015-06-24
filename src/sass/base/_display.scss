@@ -30,3 +30,12 @@ audio:not([controls]) {
 template {
   display: none; /* normalize.css v3.0.2 (Line: 79) */
 }
+
+audio,
+canvas,
+iframe,
+img,
+svg,
+video {
+  vertical-align: middle; /* boilerplate v5.2.0 (Line: 62) */
+}

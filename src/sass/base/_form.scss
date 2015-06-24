@@ -64,9 +64,12 @@ input[type="search"]::-webkit-search-decoration {
 }
 
 fieldset {
-  border: 1px solid #c0c0c0; /* normalize.css v3.0.2 (Line: 380) */
-  margin: 0 2px; /* normalize.css v3.0.2 (Line: 381) */
-  padding: 0.35em 0.625em 0.75em; /* normalize.css v3.0.2 (Line: 382) */
+  // border: 1px solid #c0c0c0; /* normalize.css v3.0.2 (Line: 380) */
+  // margin: 0 2px; /* normalize.css v3.0.2 (Line: 381) */
+  // padding: 0.35em 0.625em 0.75em; /* normalize.css v3.0.2 (Line: 382) */
+  border: 0; /* boilerplate v5.2.0 (Line: 70) */
+  margin: 0; /* boilerplate v5.2.0 (Line: 71) */
+  padding: 0; /* boilerplate v5.2.0 (Line: 72) */
 }
 
 legend {
@@ -76,6 +79,7 @@ legend {
 
 textarea {
   overflow: auto; /* normalize.css v3.0.2 (Line: 400) */
+  resize: vertical; /* boilerplate v5.2.0 (Line: 80) */
 }
 
 optgroup {

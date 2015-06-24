@@ -13,5 +13,9 @@
     "url": "https://github.com/yuzijie/StarterKit/issues"
   },
   "homepage": "https://github.com/yuzijie/StarterKit#readme",
-  "private": true
+  "private": true,
+  "dependencies": {
+    "bourbon": "^4.2.3",
+    "bourbon-neat": "^1.7.2"
+  }
 }

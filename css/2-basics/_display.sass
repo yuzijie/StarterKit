@@ -12,13 +12,6 @@ section,
 summary
   display: block /* normalize.css v3.0.2: line 46 */
 
-audio,
-canvas,
-progress,
-video
-  display: inline-block /* normalize.css v3.0.2: line 58 */
-  vertical-align: baseline /* normalize.css v3.0.2: line 59 */
-
 audio:not([controls])
   display: none /* normalize.css v3.0.2: line 68 */
   height: 0 /* normalize.css v3.0.2: line 69 */
@@ -26,3 +19,26 @@ audio:not([controls])
 [hidden],
 template
   display: none /* normalize.css v3.0.2: line 79 */
+
+img
+  border: 0 /* normalize.css v3.0.2: line 185 */
+
+svg:not(:root)
+  overflow: hidden /* normalize.css v3.0.2: line 193 */
+
+// audio, canvas, progress, video
+//   display: inline-block /* normalize.css v3.0.2: line 58 */
+//   vertical-align: baseline /* normalize.css v3.0.2: line 59 */
+//
+// audio, canvas, iframe, img, svg, video
+//   vertical-align: middle /* HTML5 Boilerplate v5.2.0: Line 62 */
+
+audio,
+canvas,
+progress,
+iframe,
+img,
+svg,
+video
+  display: inline-block /* yuzijie */
+  vertical-align: middle /* yuzijie */

@@ -1,0 +1,14 @@
+/*
+ * Set a rem font size with pixel fallback
+ *
+ * Usage:
+ *
+ *   p {
+ *     @include rem-font(14px);
+ *   }
+ *
+ */
+
+@mixin rem-font($size)
+  font-size: $size
+  font-size: rem($size)

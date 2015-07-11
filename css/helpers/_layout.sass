@@ -1,0 +1,35 @@
+@import "../vendors/neat-helpers"
+
+// Neat Overrides
+// $column: 90;
+// $gutter: 30;
+// $grid-columns: 12;
+// $max-width: em(1088);
+
+//$column: modular-scale(10, 1em, $golden);
+//$gutter: modular-scale(1, 1em, $golden);
+
+// Breakpoints
+$bp-huge: em(1140) /* yuzijie */
+$bp-large: em(960px) /* yuzijie */
+$bp-medium: em(768) /* yuzijie */
+$bp-small: em(640) /* yuzijie */
+$bp-tiny: em(480) /* yuzijie */
+
+$max-width: $bp-huge /* yuzijie */
+
+// Media Query Context
+$huge-screen-up: new-breakpoint(min-width $bp-huge 12) /* yuzijie */
+$large-screen-up: new-breakpoint(min-width $bp-large 12) /* yuzijie */
+$medium-screen-up: new-breakpoint(min-width $bp-medium 12) /* yuzijie */
+$small-screen-up: new-breakpoint(min-width $bp-small 12) /* yuzijie */
+$tiny-screen-up: new-breakpoint(min-width $bp-tiny 12) /* yuzijie */
+
+$huge-screen-down: new-breakpoint(max-width $bp-huge 12) /* yuzijie */
+$large-screen-down: new-breakpoint(max-width $bp-large 12) /* yuzijie */
+$medium-screen-down: new-breakpoint(max-width $bp-medium 12) /* yuzijie */
+$small-screen-down: new-breakpoint(max-width $bp-small 12) /* yuzijie */
+$tiny-screen-down: new-breakpoint(max-width $bp-tiny 12) /* yuzijie */
+
+// Import neat
+@import "../vendors/neat"

@@ -10,6 +10,11 @@ textarea
 button
   overflow: visible /* normalize.css v3.0.2: line 267 */
 
+select
+  margin-bottom: $base-spacing /* bourbon bitters v1.0.0 */
+  max-width: 100% /* bourbon bitters v1.0.0 */
+  width: auto /* bourbon bitters v1.0.0 */
+
 button,
 select
   text-transform: none /* normalize.css v3.0.2: line 279 */
@@ -37,6 +42,8 @@ input[type="checkbox"],
 input[type="radio"]
   box-sizing: border-box /* normalize.css v3.0.2: line 336 */
   padding: 0 /* normalize.css v3.0.2: line 337 */
+  display: inline /* bourbon bitters v1.0.0 */
+  margin-right: $small-spacing / 2 /* bourbon bitters v1.0.0 */
 
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button
@@ -47,6 +54,7 @@ input[type="search"]
   -moz-box-sizing: content-box /* normalize.css v3.0.2: line 359 */
   -webkit-box-sizing: content-box /* normalize.css v3.0.2: line 360 */
   box-sizing: content-box /* normalize.css v3.0.2: line 361 */
+  /* @include appearance(none) /* bourbon bitters v1.0.0 */
 
 
 input[type="search"]::-webkit-search-cancel-button,
@@ -57,9 +65,13 @@ fieldset
   /* border: 1px solid #c0c0c0 /* normalize.css v3.0.2: line 380 */
   /* margin: 0 2px /* normalize.css v3.0.2: line 381 */
   /* padding: 0.35em 0.625em 0.75em /* normalize.css v3.0.2: line 382 */
-  border: 0 /* HTML5 Boilerplate v5.2.0: Line 70 */
-  margin: 0 /* HTML5 Boilerplate v5.2.0: Line 71 */
-  padding: 0 /* HTML5 Boilerplate v5.2.0: Line 72 */
+  /* border: 0 /* HTML5 Boilerplate v5.2.0: Line 70 */
+  /* margin: 0 /* HTML5 Boilerplate v5.2.0: Line 71 */
+  /* padding: 0 /* HTML5 Boilerplate v5.2.0: Line 72 */
+  background-color: lighten($base-border-color, 10%) /* bourbon bitters v1.0.0 */
+  border: $base-border /* bourbon bitters v1.0.0 */
+  margin: 0 0 $small-spacing /* bourbon bitters v1.0.0 */
+  padding: $base-spacing /* bourbon bitters v1.0.0 */
 
 legend
   border: 0 /* normalize.css v3.0.2: line 391 */
@@ -71,3 +83,47 @@ textarea
 
 optgroup
   font-weight: bold /* normalize.css v3.0.2: line 409 */
+
+input,
+label,
+select
+  display: block /* bourbon bitters v1.0.0 */
+  font-family: $base-font-family /* bourbon bitters v1.0.0 */
+  font-size: $base-font-size /* bourbon bitters v1.0.0 */
+
+label
+  font-weight: 600 /* bourbon bitters v1.0.0 */
+  margin-bottom: $small-spacing / 2 /* bourbon bitters v1.0.0 */
+
+  &.required::after
+    content: "*" /* bourbon bitters v1.0.0 */
+
+  abbr
+    display: none /* bourbon bitters v1.0.0 */
+
+#{$all-text-inputs},
+select[multiple=multiple],
+textarea
+  background-color: $base-background-color /* bourbon bitters v1.0.0 */
+  border: $base-border /* bourbon bitters v1.0.0 */
+  border-radius: $base-border-radius /* bourbon bitters v1.0.0 */
+  box-shadow: $form-box-shadow /* bourbon bitters v1.0.0 */
+  box-sizing: border-box /* bourbon bitters v1.0.0 */
+  font-family: $base-font-family /* bourbon bitters v1.0.0 */
+  font-size: $base-font-size /* bourbon bitters v1.0.0 */
+  margin-bottom: $base-spacing / 2 /* bourbon bitters v1.0.0 */
+  padding: $base-spacing / 3 /* bourbon bitters v1.0.0 */
+  transition: border-color /* bourbon bitters v1.0.0 */
+  width: 100% /* bourbon bitters v1.0.0 */
+
+  &:hover
+    border-color: darken($base-border-color, 10%) /* bourbon bitters v1.0.0 */
+
+  &:focus
+    border-color: $action-color /* bourbon bitters v1.0.0 */
+    box-shadow: $form-box-shadow-focus /* bourbon bitters v1.0.0 */
+    outline: none /* bourbon bitters v1.0.0 */
+
+input[type="file"]
+  padding-bottom: $small-spacing /* bourbon bitters v1.0.0 */
+  width: 100% /* bourbon bitters v1.0.0 */

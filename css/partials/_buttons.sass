@@ -1,0 +1,28 @@
+#{$all-button-inputs},
+button
+  @include appearance(none) /* bourbon bitters v1.0.0 */
+  -webkit-font-smoothing: antialiased /* bourbon bitters v1.0.0 */
+  background-color: $action-color /* bourbon bitters v1.0.0 */
+  border-radius: $base-border-radius /* bourbon bitters v1.0.0 */
+  border: none /* bourbon bitters v1.0.0 */
+  color: #fff /* bourbon bitters v1.0.0 */
+  cursor: pointer /* bourbon bitters v1.0.0 */
+  display: inline-block /* bourbon bitters v1.0.0 */
+  font-family: $base-font-family /* bourbon bitters v1.0.0 */
+  font-size: $base-font-size /* bourbon bitters v1.0.0 */
+  font-weight: 600 /* bourbon bitters v1.0.0 */
+  line-height: 1 /* bourbon bitters v1.0.0 */
+  padding: 0.75em 1em /* bourbon bitters v1.0.0 */
+  text-decoration: none /* bourbon bitters v1.0.0 */
+  user-select: none /* bourbon bitters v1.0.0 */
+  vertical-align: middle /* bourbon bitters v1.0.0 */
+  white-space: nowrap /* bourbon bitters v1.0.0 */
+
+  &:hover,
+  &:focus
+    background-color: darken($action-color, 15%) /* bourbon bitters v1.0.0 */
+    color: #fff /* bourbon bitters v1.0.0 */
+
+  &:disabled
+    cursor: not-allowed /* bourbon bitters v1.0.0 */
+    opacity: 0.5 /* bourbon bitters v1.0.0 */

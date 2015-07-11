@@ -1,0 +1,19 @@
+// a:active,
+// a:hover
+//   outline: 0 /* normalize.css v3.0.2: line 99 */
+
+a
+  background-color: transparent /* normalize.css v3.0.2: line 90 */
+  color: $action-color /* bourbon bitters v1.0.0 */
+  text-decoration: none /* bourbon bitters v1.0.0 */
+  transition: color 0.1s linear /* bourbon bitters v1.0.0 */
+
+  &:active,
+  &:focus,
+  &:hover
+    color: darken($action-color, 15%) /* bourbon bitters v1.0.0 */
+    outline: 0 /* yuzijie */
+
+  // &:active,
+  // &:focus
+  //   outline: none /* bourbon bitters v1.0.0 */

@@ -1,0 +1,37 @@
+// Typography
+$base-font-family: $helvetica !default; /* bourbon bitters v1.0.0 */
+$heading-font-family: $base-font-family !default; /* bourbon bitters v1.0.0 */
+
+// Font Sizes
+$base-font-size: 1em !default; /* bourbon bitters v1.0.0 */
+$heading-font-scale-ratio: 6 / 5 !default; /* yuzijie */
+$heading-font-scale-base: 0.8em !default; /* yuzijie */
+
+// Line height
+$base-line-height: 1.5 !default; /* bourbon bitters v1.0.0 */
+$heading-line-height: 1.2 !default; /* bourbon bitters v1.0.0 */
+
+// Other Sizes
+$base-border-radius: 3px !default; /* bourbon bitters v1.0.0 */
+$base-spacing: $base-line-height * 1em !default; /* bourbon bitters v1.0.0 */
+$small-spacing: $base-spacing / 2 !default; /* bourbon bitters v1.0.0 */
+$base-z-index: 0 !default; /* bourbon bitters v1.0.0 */
+
+// Colors
+$blue: #477dca !default; /* bourbon bitters v1.0.0 */
+$dark-gray: #333 !default; /* bourbon bitters v1.0.0 */
+$medium-gray: #999 !default; /* bourbon bitters v1.0.0 */
+$light-gray: #ddd !default; /* bourbon bitters v1.0.0 */
+
+// Font Colors
+$base-background-color: #fff !default; /* bourbon bitters v1.0.0 */
+$base-font-color: $dark-gray !default; /* bourbon bitters v1.0.0 */
+$action-color: $blue !default; /* bourbon bitters v1.0.0 */
+
+// Border
+$base-border-color: $light-gray !default; /* bourbon bitters v1.0.0 */
+$base-border: 1px solid $base-border-color !default; /* bourbon bitters v1.0.0 */
+
+// Forms
+$form-box-shadow: inset 0 1px 3px rgba(#000, 0.06) !default; /* bourbon bitters v1.0.0 */
+$form-box-shadow-focus: $form-box-shadow, 0 0 5px adjust-color($action-color, $lightness: -5%, $alpha: -0.3) !default; /* bourbon bitters v1.0.0 */

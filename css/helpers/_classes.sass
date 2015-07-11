@@ -1,0 +1,44 @@
+// Clear fix
+.clearfix
+  *zoom: 1
+  &:before,
+  &:after
+    content: " "
+    display: table
+  &:after
+    clear: both
+
+/*
+ * Visually hide an element
+ *
+ * When you hide an element with display: none, that prevents screen readers from reading it to the user.
+ * Sometimes that’s fine, but in other cases this will make the site hard to use for people with screen readers.
+ * Thus, we have to use another technique for hiding elements while at the same time make them accessible.
+ *
+ */
+
+.visuallyhidden
+  border: 0
+  margin: -1px
+  padding: 0
+  width: 1px
+  height: 1px
+  overflow: hidden
+  clip: rect(0 0 0 0)
+  clip: rect(0, 0, 0, 0)
+  position: absolute
+
+  /*
+   * Extends the .visuallyhidden class to allow the element
+   * to be focusable when navigated to via the keyboard:
+   * https://www.drupal.org/node/897638
+   */
+
+  &.focusable:active,
+  &.focusable:focus
+    clip: auto
+    height: auto
+    margin: 0
+    overflow: visible
+    position: static
+    width: auto

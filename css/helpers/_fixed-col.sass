@@ -1,0 +1,43 @@
+@mixin fixed-col($span, $container-width, $with-gutter: true)
+  $fc-column-width: modular-scale(3, 1em, $golden) !default
+  $fc-gutter-width: modular-scale(1, 1em, $golden) !default
+
+  $columns: nth($span, 1)
+  $container-columns: $grid-columns
+
+  @if length($span) == 3
+    $container-columns: nth($span, 3)
+  @else if length($span) == 2
+    $container-columns: nth($span, 2)
+
+  @if $with-gutter == true
+    $fc-container-width: ($fc-column-width * $container-columns) + ($fc-gutter-width * ($container-columns - 1))
+    margin-right: $fc-gutter-width / $fc-container-width * $container-width
+    width: ($fc-column-width * $columns + $fc-gutter-width * ($columns - 1)) / $fc-container-width * $container-width
+
+    &:last-child
+      margin-right: 0
+
+  @else
+    width: $columns / $container-columns * $container-width
+
+  float: left
+  display: block
+
+@mixin fixed-shift($span, $container-width, $with-gutter: true)
+  $fc-column-width: modular-scale(3, 1em, $golden) !default
+  $fc-gutter-width: modular-scale(1, 1em, $golden) !default
+
+  $columns: nth($span, 1)
+  $container-columns: $grid-columns
+
+  @if length($span) == 3
+    $container-columns: nth($span, 3)
+  @else if length($span) == 2
+    $container-columns: nth($span, 2)
+
+  @if $with-gutter == true
+    $fc-container-width: ($fc-column-width * $container-columns) + ($fc-gutter-width * ($container-columns - 1))
+    margin-left: ($fc-column-width + $fc-gutter-width) * $columns / $fc-container-width * $container-width
+  @else
+    margin-left: $columns / $container-columns * $container-width

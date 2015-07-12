@@ -1,4 +1,4 @@
-@mixin fixed-col($span, $container-width, $with-gutter: true)
+@mixin flex-columns($span, $with-gutter: true)
   $fc-column-width: modular-scale(3, 1em, $golden) !default
   $fc-gutter-width: modular-scale(1, 1em, $golden) !default
 
@@ -12,19 +12,19 @@
 
   @if $with-gutter == true
     $fc-container-width: ($fc-column-width * $container-columns) + ($fc-gutter-width * ($container-columns - 1))
-    margin-right: $fc-gutter-width / $fc-container-width * $container-width
-    width: ($fc-column-width * $columns + $fc-gutter-width * ($columns - 1)) / $fc-container-width * $container-width
+    width: percentage (($fc-column-width * $columns + $fc-gutter-width * ($columns - 1)) / $fc-container-width)
+    margin-right: percentage($fc-gutter-width / $fc-container-width)
 
     &:last-child
       margin-right: 0
 
   @else
-    width: $columns / $container-columns * $container-width
+    width: percentage($columns / $container-columns)
 
   float: left
   display: block
 
-@mixin fixed-shift($shift, $container-width, $with-gutter: true)
+@mixin flex-shift($shift, $with-gutter: true)
   $fc-column-width: modular-scale(3, 1em, $golden) !default
   $fc-gutter-width: modular-scale(1, 1em, $golden) !default
 
@@ -38,6 +38,6 @@
 
   @if $with-gutter == true
     $fc-container-width: ($fc-column-width * $container-columns) + ($fc-gutter-width * ($container-columns - 1))
-    margin-left: ($fc-column-width + $fc-gutter-width) * $columns / $fc-container-width * $container-width
+    margin-left: percentage(($fc-column-width + $fc-gutter-width) * $columns / $fc-container-width)
   @else
-    margin-left: $columns / $container-columns * $container-width
+    margin-left: percentage($columns / $container-columns)

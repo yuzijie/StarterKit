@@ -12,7 +12,7 @@
 
   @if $with-gutter == true
     $fc-container-width: ($fc-column-width * $container-columns) + ($fc-gutter-width * ($container-columns - 1))
-    width: percentage (($fc-column-width * $columns + $fc-gutter-width * ($columns - 1)) / $fc-container-width)
+    width: percentage(($fc-column-width * $columns + $fc-gutter-width * ($columns - 1)) / $fc-container-width)
     margin-right: percentage($fc-gutter-width / $fc-container-width)
 
     &:last-child

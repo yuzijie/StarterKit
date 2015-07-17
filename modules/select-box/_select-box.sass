@@ -1,0 +1,51 @@
+.select-box
+  $_select-box_height: em(40) !default
+  $_select-box_background-color: $blue !default
+  $_select-box_border-radius: $base-border-radius !default
+
+  // label
+  $_select-box_label-line-height: $_select-box_height !default
+  $_select-box_label-horizontal-margin: em(10) !default
+  $_select-box_label-color: white !default
+  $_select-box_label-text-shadow: 1px 1px 2px darken($_select-box_background-color, 10%) !default
+
+  // select
+  $_select-box_select-height: em(26) !default
+  $_select-box_select-min-width: em(120) !default
+  $_select-box_select-font-size: $base-font-size * 0.9 !default
+
+  // arrow
+  $_select-box_arrow-top: $_select-box_select-height/2 - ($_select-box_height - $_select-box_select-height)/2 + em(1) !default
+
+  background-color: $_select-box_background-color
+  box-sizing: border-box
+  display: inline-block
+  border-radius: $_select-box_border-radius
+  position: relative
+
+  &:after
+    content: "\25BE"
+    @include position(absolute, $_select-box_arrow-top $_select-box_label-horizontal-margin + em(1) null null)
+    color: $_select-box_label-color
+    @include size(em(10))
+
+  label
+    color: $_select-box_label-color
+    text-shadow: $_select-box_label-text-shadow
+    line-height: $_select-box_label-line-height
+    vertical-align: middle
+    margin: 0 $_select-box_label-horizontal-margin
+    padding: 0
+
+  select
+    $margin: ($_select-box_height - $_select-box_select-height)/2
+
+    @include appearance(none)
+    margin: $margin $_select-box_label-horizontal-margin $margin 0
+    min-width: $_select-box_select-min-width
+    border: none
+    padding: em(4) em(12) em(4) em(8)
+    font-size: $_select-box_select-font-size
+    border-radius: 0
+    background-color: lighten($_select-box_background-color, 10%)
+    color: $_select-box_label-color

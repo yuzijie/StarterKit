@@ -1,5 +1,4 @@
-a.button,
-#{$all-button-inputs}
+#{$all-button-inputs}, a.button
   @include appearance(none) /* bourbon bitters v1.0.0 */
   -webkit-font-smoothing: antialiased /* bourbon bitters v1.0.0 */
   background-color: $action-color /* bourbon bitters v1.0.0 */
@@ -23,6 +22,14 @@ a.button,
     background-color: darken($action-color, 15%) /* bourbon bitters v1.0.0 */
     color: #fff /* bourbon bitters v1.0.0 */
 
+#{$all-button-inputs}
   &:disabled
+    cursor: not-allowed /* bourbon bitters v1.0.0 */
+    opacity: 0.5 /* bourbon bitters v1.0.0 */
+
+a.button
+  &:active
+    background-color: $action-color
+  &.disabled
     cursor: not-allowed /* bourbon bitters v1.0.0 */
     opacity: 0.5 /* bourbon bitters v1.0.0 */

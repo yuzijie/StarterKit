@@ -14,7 +14,7 @@
   $_select-box_select-min-width: em(100) !default
   $_select-box_select-font-size: $base-font-size * 0.9 !default
   $_select-box_select-height: $_select-box_height !default
-  $_select-box_select-padding: em(2.3) em(18) em(2.2) em(10)
+  $_select-box_select-padding: em(2.3) em(20) em(2.2) em(10)
   $_select-box_select-color: $_select-box_label-color
 
   background-color: $_select-box_background-color
@@ -26,7 +26,7 @@
 
   &:after
     content: "\25BC"
-    @include position(absolute, 0 em(1) null null)
+    @include position(absolute, 0 em(2) null null)
     color: $_select-box_label-color
     font-size: $base-font-size * 0.9
     padding-top: em(11)

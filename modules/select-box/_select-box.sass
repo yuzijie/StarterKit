@@ -10,24 +10,26 @@
   $_select-box_label-text-shadow: 1px 1px 2px darken($_select-box_background-color, 10%) !default
 
   // select
-  $_select-box_select-height: em(26) !default
-  $_select-box_select-min-width: em(120) !default
+  $_select-box_select-background-color: lighten($_select-box_background-color, 10%) !default
+  $_select-box_select-min-width: em(100) !default
   $_select-box_select-font-size: $base-font-size * 0.9 !default
-
-  // arrow
-  $_select-box_arrow-top: $_select-box_select-height/2 - ($_select-box_height - $_select-box_select-height)/2 + em(1) !default
+  $_select-box_select-height: $_select-box_height !default
+  $_select-box_select-padding: em(2.3) em(18) em(2.2) em(10)
+  $_select-box_select-color: $_select-box_label-color
 
   background-color: $_select-box_background-color
   box-sizing: border-box
+  padding: 0
   display: inline-block
   border-radius: $_select-box_border-radius
   position: relative
 
   &:after
-    content: "\25BE"
-    @include position(absolute, $_select-box_arrow-top $_select-box_label-horizontal-margin + em(1) null null)
+    content: "\25BC"
+    @include position(absolute, 0 em(1) null null)
     color: $_select-box_label-color
-    @include size(em(10))
+    font-size: $base-font-size * 0.9
+    padding-top: em(11)
 
   label
     color: $_select-box_label-color
@@ -38,14 +40,17 @@
     padding: 0
 
   select
-    $margin: ($_select-box_height - $_select-box_select-height)/2
-
     @include appearance(none)
-    margin: $margin $_select-box_label-horizontal-margin $margin 0
-    min-width: $_select-box_select-min-width
-    border: none
-    padding: em(4) em(12) em(4) em(8)
-    font-size: $_select-box_select-font-size
+    margin: 0
+    border: 0
     border-radius: 0
-    background-color: lighten($_select-box_background-color, 10%)
-    color: $_select-box_label-color
+    box-sizing: content-box
+    height: $_select-box_height
+    min-width: $_select-box_select-min-width
+    padding: $_select-box_select-padding
+    font-size: $_select-box_select-font-size
+    border-bottom-right-radius: $_select-box_border-radius
+    border-top-right-radius: $_select-box_border-radius
+    background-color: $_select-box_select-background-color
+    color: $_select-box_select-color
+    cursor: pointer

@@ -28,8 +28,12 @@
     opacity: 0.5 /* bourbon bitters v1.0.0 */
 
 a.button
+  text-align: center
+
   &:active
     background-color: $action-color
   &.disabled
     cursor: not-allowed /* bourbon bitters v1.0.0 */
     opacity: 0.5 /* bourbon bitters v1.0.0 */
+  &.disabled:active
+    background-color: darken($action-color, 15%)

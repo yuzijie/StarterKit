@@ -1,3 +1,7 @@
-@import "variables"
+$include-font-awesome: false !default
+$fa-font-path: "../fonts" !default
+
 @import "bourbon"
-@import "font-awesome/font-awesome"
+
+@if $include-font-awesome
+  @import "font-awesome/font-awesome"

@@ -12,6 +12,7 @@ YU ZIJIE's Starter Kit For Creating Websites.
 
 ## System Requirement
 
+* Bash
 * [NodeJS][4]
 * [Ruby][5]
   * [SASS][6]

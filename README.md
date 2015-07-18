@@ -18,17 +18,7 @@ YU ZIJIE's Starter Kit For Creating Websites.
 
 ## How to use
 
-Add following lines to your main.scss file
-
-```
-@import "<root>/node_modules/yu-starter-kit/css/vendors/main" // some dependencies, must be on top
-@import "variables" // your custom variables
-@import "<root>/node_modules/yu-starter-kit/css/basics/main" // basic styles and helper mixins
-@import "<root>/node_modules/yu-starter-kit/css/helpers/main" // helper mixins
-@import "<root>/node_modules/yu-starter-kit/css/partials/main" // classes
-
-// rest of your sass
-```
+See `/test` folder
 
 [1]: https://html5boilerplate.com
 [2]: http://necolas.github.io/normalize.css

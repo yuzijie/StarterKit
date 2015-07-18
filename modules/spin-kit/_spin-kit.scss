@@ -1,0 +1,7 @@
+@import "spinners/sk-circle";
+
+@mixin spinkit($name: "spin-kit", $theme: 1, $conf:()) {
+  @if $theme == 1 {
+    @include spinkit-circle($name, $conf);
+  }
+}

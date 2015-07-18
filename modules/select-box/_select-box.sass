@@ -56,3 +56,9 @@
     background-color: $_select-box_select-background-color
     color: $_select-box_select-color
     cursor: pointer
+
+@mixin select-box-height($height)
+  & label
+    line-height: $height
+  & select
+    height: $height

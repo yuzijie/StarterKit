@@ -90,7 +90,7 @@
       @include transform(scale(1))
 
 @mixin spinkit-circle($name: "spin-kit", $conf:())
-  $default: (margin: em(100), size: em(40), background-color: #333)
+  $default: (margin: em(100), size: em(40), color: #333)
   $conf: map-merge($default, $conf)
 
   .#{$name}
@@ -99,4 +99,4 @@
     @extend %spinkit-circle
 
     .sk-child:before
-      background-color: map-get($conf, background-color)
+      background-color: map-get($conf, color)

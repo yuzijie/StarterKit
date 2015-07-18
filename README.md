@@ -10,15 +10,22 @@ YU ZIJIE's Starter Kit For Creating Websites.
 * [DevTips][7]
 * and some of my own collections
 
-## Requirement
+## System Requirement
 
 * [NodeJS][4]
 * [Ruby][5]
   * [SASS][6]
 
+## Dependencies
+
+* Modernizr
+* jQuery
+* Bourbon / Neat
+
 ## How to use
 
-See `/test` folder
+1. run: `npm install`
+2. Take a look at `/test` folder
 
 [1]: https://html5boilerplate.com
 [2]: http://necolas.github.io/normalize.css

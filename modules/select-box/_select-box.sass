@@ -8,6 +8,7 @@
   $_select-box_label-horizontal-margin: em(10) !default
   $_select-box_label-color: white !default
   $_select-box_label-text-shadow: 1px 1px 2px darken($_select-box_background-color, 10%) !default
+  $_select-box_label-font-size: $base-font-size !default
 
   // select
   $_select-box_select-background-color: lighten($_select-box_background-color, 10%) !default
@@ -38,6 +39,7 @@
     vertical-align: middle
     margin: 0 $_select-box_label-horizontal-margin
     padding: 0
+    font-size: $_select-box_label-font-size
 
   select
     @include appearance(none)

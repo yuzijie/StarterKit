@@ -70,11 +70,17 @@ DropdownMenu.prototype.getValues = function (self) {
 };
 
 DropdownMenu.prototype.updateItems = function () {
+    this.$items = null;
     this.$items = this.$menu.find("[data-value]:not(.disabled)");
+    if (this.$items.length > 0) this.listenMenu();
 };
 
 DropdownMenu.prototype.onItemClick = function (func) {
     if ($.isFunction(func)) this.itemAction = func
+};
+
+DropdownMenu.prototype.clearSelection = function () {
+    this.$items.filter(".selected").removeClass("selected");
 };
 
 module.exports = DropdownMenu;

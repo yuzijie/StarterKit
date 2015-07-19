@@ -1,13 +1,14 @@
 var DropdownMenu = function ($menu, $trigger, options) {
     this.$menu = $menu;
-    this.$items = this.$menu.children();
+    this.$items = this.$menu.find("[data-value]:not(.disabled)");
     this.itemAction = null;
     this.$trigger = $trigger;
 
     this.opts = $.extend({
         triggerOnHover: false, // options: "true" or "false"
         hideElsewhere: true, // options: "true" or "false", click elsewhere to hide the menu
-        multiSelection: false // options: "false" or "true"
+        multiSelection: false, // options: "false" or "true"
+        multiSingle: true // options: "true" or "false", allow one single selection on each column
     }, options);
 
     this.listenTrigger(this);
@@ -44,10 +45,12 @@ DropdownMenu.prototype.listenMenu = function (self) {
     self = self || this;
 
     self.$items.on("click", function () {
-        if ($(this).data().hasOwnProperty("value") && !$(this).hasClass("disabled")) {
-            $(this).toggleClass("selected");
-            if (self.opts.multiSelection === false) {
+        $(this).toggleClass("selected");
+        if (self.opts.multiSelection === false) {
+            if (self.opts.multiSingle === true) {
                 $(this).siblings(".selected").removeClass("selected");
+            } else {
+                self.$items.filter(".selected").not(this).removeClass("selected");
             }
         }
         if (self.itemAction) self.itemAction()
@@ -62,15 +65,12 @@ DropdownMenu.prototype.getValues = function (self) {
         output.push($(this).data("value"));
     });
 
-    if (output) {
-        if (self.opts.multiSelection === false) {
-            return output[0];
-        } else {
-            return output;
-        }
-    } else {
-        return null;
-    }
+    if (output) return output;
+    return null;
+};
+
+DropdownMenu.prototype.updateItems = function () {
+    this.$items = this.$menu.find("[data-value]:not(.disabled)");
 };
 
 DropdownMenu.prototype.onItemClick = function (func) {

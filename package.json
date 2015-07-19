@@ -15,7 +15,8 @@
   "homepage": "https://github.com/yuzijie/StarterKit#readme",
   "dependencies": {
     "bourbon": "^4.2.3",
-    "bourbon-neat": "^1.7.2"
+    "bourbon-neat": "^1.7.2",
+    "jquery-mousewheel": "^3.1.13"
   },
   "devDependencies": {
     "watchify": "^3.3.0"

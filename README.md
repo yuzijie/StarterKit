@@ -22,6 +22,7 @@ YU ZIJIE's Starter Kit For Creating Websites.
 * Modernizr
 * jQuery
 * Bourbon / Neat
+* [jQuery Mouse Wheel Plugin][8] (required by prevent-scroll.js)
 
 ## How to use
 
@@ -35,3 +36,4 @@ YU ZIJIE's Starter Kit For Creating Websites.
 [5]: https://www.ruby-lang.org
 [6]: http://sass-lang.com
 [7]: http://devtipsstarterkit.com
+[8]: https://github.com/jquery/jquery-mousewheel

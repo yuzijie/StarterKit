@@ -646,4 +646,22 @@ textarea,
   .spinner .sk-child:before {
     background-color: white; }
 
+.single-col-menu {
+  display: block;
+  position: absolute;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+  z-index: 999;
+  overflow-y: scroll;
+  margin-right: -14px; }
+
+.single-col-menu {
+  top: 100px;
+  left: 0;
+  background-color: white;
+  border-radius: 3px; }
+  .single-col-menu ul {
+    overflow: auto;
+    width: 100%;
+    height: 100%; }
+
 /*# sourceMappingURL=main.css.map */

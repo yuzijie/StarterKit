@@ -1,8 +1,12 @@
+var windowScroll = require("../../js/window-scroll.js");
+
 var DropdownMenu = function ($menu, $trigger, options) {
     this.$menu = $menu;
     this.$items = this.$menu.find("[data-value]:not(.disabled)");
-    this.itemAction = null;
     this.$trigger = $trigger;
+
+    this.itemClickAction = null;
+    this.leaveMenuAction = null;
 
     this.opts = $.extend({
         triggerOnHover: false, // options: "true" or "false"
@@ -18,19 +22,41 @@ var DropdownMenu = function ($menu, $trigger, options) {
 DropdownMenu.prototype.listenTrigger = function (self) {
     self = self || this;
 
+    // show menu when mouse enter trigger button
     if (this.opts.triggerOnHover === true) {
         this.$trigger.on("mouseenter", function () {
             self.$menu.show();
         });
-        this.$menu.on("mouseleave", function () {
-            self.$menu.hide();
-        });
     }
+
+    // disable window scroll when mouse enter menu
+    this.$menu.on("mouseenter", function () {
+        windowScroll.disable();
+    });
+
+    // enable window scroll when mouse leave menu
+    // hide menu and do some custom action
+    this.$menu.on("mouseleave", function () {
+        windowScroll.enable();
+        if (self.opts.triggerOnHover === true) {
+            self.$menu.hide();
+        }
+        if (self.leaveMenuAction) self.leaveMenuAction();
+    });
+
+    // click trigger toggle menu
     this.$trigger.on("click", function (e) {
         e.preventDefault();
         self.$menu.toggle();
     });
+
     if (this.opts.hideElsewhere === true) {
+        // window scroll dismiss menu
+        $(window).on("scroll", function () {
+            self.$menu.hide();
+        });
+
+        // click elsewhere dismiss menu
         $(document).on("click", function (e) {
             if (!self.$menu.is(e.target) && !self.$trigger.is(e.target) &&
                 self.$menu.has(e.target).length === 0 &&
@@ -53,7 +79,7 @@ DropdownMenu.prototype.listenMenu = function (self) {
                 self.$items.filter(".selected").not(this).removeClass("selected");
             }
         }
-        if (self.itemAction) self.itemAction()
+        if (self.itemClickAction) self.itemClickAction();
     });
 };
 
@@ -76,7 +102,11 @@ DropdownMenu.prototype.updateItems = function () {
 };
 
 DropdownMenu.prototype.onItemClick = function (func) {
-    if ($.isFunction(func)) this.itemAction = func
+    if ($.isFunction(func)) this.itemClickAction = func;
+};
+
+DropdownMenu.prototype.onLeaveMenu = function (func) {
+    if ($.isFunction(func)) this.leaveMenuAction = func;
 };
 
 DropdownMenu.prototype.clearSelection = function () {

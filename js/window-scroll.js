@@ -1,7 +1,7 @@
 // Disable scrolling temporarily
 // http://stackoverflow.com/questions/4770025/how-to-disable-scrolling-temporarily/4770179#4770179
 
-var WindowScroll = function () {
+var windowScroll = (function () {
     // left: 37, up: 38, right: 39, down: 40,
     // spacebar: 32, pageup: 33, pagedown: 34, end: 35, home: 36
     var keys = {37: 1, 38: 1, 39: 1, 40: 1, 32: 1, 33: 1, 34: 1};
@@ -42,6 +42,6 @@ var WindowScroll = function () {
         enable: enableScroll,
         disable: disableScroll
     };
-};
+})();
 
-module.exports = WindowScroll();
+module.exports = windowScroll;

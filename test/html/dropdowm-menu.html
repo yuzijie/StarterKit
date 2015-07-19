@@ -1,0 +1,81 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Starter Kit</title>
+    <meta name="description" content="YU's starter kit">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../gen/main.css">
+    <script src="../gen/modernizr-2.8.3.min.js"></script>
+
+    <style>
+        .selected {
+            background-color: red;
+        }
+
+        .selected a {
+            color: white;
+        }
+
+        li {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        li:active {
+            background: green;
+        }
+
+        li.selected:hover {
+            background-color: red;
+        }
+    </style>
+
+</head>
+<body style="min-height: 3000px">
+
+<div class="dropdown-menu" style="position: relative; border: 1px dashed black; width: 200px; margin: 20px auto">
+    <div id="trigger" style="border: 1px solid silver; margin: 10px auto; width: 100px; height: 100px;">
+        <a href="#" style="display: block; text-align: center; line-height: 100px;">Click Me!</a>
+    </div>
+
+    <div class="single-col-menu">
+        <ul>
+            <li class="header">header 1</li>
+            <li data-value="i1">item 1</li>
+            <li data-value="i2" class="disabled">item 2</li>
+            <li data-value="i3">item 3</li>
+            <li class="header">header 2</li>
+            <li data-value="i4">item 4</li>
+            <li data-value="i5">item 5</li>
+            <li data-value="i6">item 6</li>
+            <li class="divider"></li>
+            <li class="header">header 1</li>
+            <li data-value="i1">item 1</li>
+            <li data-value="i2" class="disabled">item 2</li>
+            <li data-value="i3">item 3</li>
+            <li class="header">header 2</li>
+            <li data-value="i4">item 4</li>
+            <li data-value="i5">item 5</li>
+            <li data-value="i6">item 6</li>
+            <li class="divider"></li>
+            <li class="header">header 1</li>
+            <li data-value="i1">item 1</li>
+            <li data-value="i2" class="disabled">item 2</li>
+            <li data-value="i3">item 3</li>
+            <li class="header">header 2</li>
+            <li data-value="i4">item 4</li>
+            <li data-value="i5">item 5</li>
+            <li data-value="i6">item 6</li>
+        </ul>
+    </div>
+</div>
+
+<div id="result" class="clearfix"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="../gen/jquery-2.1.4.min.js"><\/script>')</script>
+<script src="../gen/main.js"></script>
+</body>
+</html>

@@ -3,6 +3,11 @@
 // var dropdown = new DropdownMenu($menu, {options: value});
 // var dropdown = new DropdownMenu($menu);
 //
+// Require:
+// prevent-scroll.js
+//
+var preventScroll = require("../../js/prevent-scroll.js");
+
 var DropdownMenu = function ($menu, options) {
     // Objects
     this.$menu = $menu;
@@ -15,7 +20,8 @@ var DropdownMenu = function ($menu, options) {
         closeOnLeave: false,   // Close menu on mouse left menu area
         multiSelection: false, // Select multiple items
         colSelection: true,    // Allow one single selection on each column
-        preventClose: []       // Prevent menu from closing when clicking these elements
+        preventClose: [],      // Prevent menu from closing when clicking these elements
+        preventScroll: []      // List of elements that need background scroll prevention
     }, options);
 
     // Add this.$menu to prevent close array
@@ -34,6 +40,12 @@ var DropdownMenu = function ($menu, options) {
     // Set Listeners
     this.setMenuListener(this);
     this.setItemListener(this);
+
+    // prevent scroll
+    if (!this.opts.preventScroll) this.opts.preventScroll = [this.$menu.find("ul")];
+    $.each(this.opts.preventScroll, function (index, $element) {
+        preventScroll($element);
+    });
 };
 
 DropdownMenu.prototype.setMenuListener = function (context) {

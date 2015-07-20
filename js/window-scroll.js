@@ -1,4 +1,4 @@
-// Disable scrolling temporarily
+// Disable scrolling for **all** elements temporarily
 // http://stackoverflow.com/questions/4770025/how-to-disable-scrolling-temporarily/4770179#4770179
 
 var windowScroll = (function () {

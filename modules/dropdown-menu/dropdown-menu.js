@@ -1,90 +1,143 @@
-var windowScroll = require("../../js/window-scroll.js");
-
-var DropdownMenu = function ($menu, $trigger, options) {
+// Usage:
+//
+// var dropdown = new DropdownMenu($menu, {options: value});
+// var dropdown = new DropdownMenu($menu);
+//
+var DropdownMenu = function ($menu, options) {
+    // Objects
     this.$menu = $menu;
     this.$items = this.$menu.find("[data-value]:not(.disabled)");
-    this.$trigger = $trigger;
 
-    this.itemClickAction = null;
-    this.leaveMenuAction = null;
-
+    // Options
     this.opts = $.extend({
-        triggerOnHover: false, // options: "true" or "false"
-        hideElsewhere: true, // options: "true" or "false", click elsewhere to hide the menu
-        multiSelection: false, // options: "false" or "true"
-        multiSingle: true // options: "true" or "false", allow one single selection on each column
+        closeOnScroll: false,  // Close menu on page scrolling
+        closeOnClick: true,    // Close menu on clicking outside of the menu
+        closeOnLeave: false,   // Close menu on mouse left menu area
+        multiSelection: false, // Select multiple items
+        colSelection: true,    // Allow one single selection on each column
+        preventClose: []       // Prevent menu from closing when clicking these elements
     }, options);
 
-    this.listenTrigger(this);
-    this.listenMenu(this);
+    // Add menu to prevent close array
+    this.opts.preventClose.unshift(this.$menu);
+
+    // Custom actions
+    this.itemClickAction = null;
+    this.menuOpenAction = null;
+    this.menuCloseAction = null;
+    this.menuToggleAction = null;
+
+    // Set Listeners
+    this.setMenuListener(this);
+    this.setItemListener(this);
 };
 
-DropdownMenu.prototype.listenTrigger = function (self) {
-    self = self || this;
+DropdownMenu.prototype.setMenuListener = function (context) {
+    var self = context || this;
 
-    // show menu when mouse enter trigger button
-    if (this.opts.triggerOnHover === true) {
-        this.$trigger.on("mouseenter", function () {
-            self.$menu.show();
-        });
-    }
-
-    // disable window scroll when mouse enter menu
-    this.$menu.on("mouseenter", function () {
-        windowScroll.disable();
+    self.$menu.on("dropdown:open", function () {
+        $(this).show();
+        if (self.menuOpenAction) self.menuOpenAction();
+    }).on("dropdown:close", function () {
+        $(this).hide();
+        if (self.menuCloseAction) self.menuCloseAction();
+    }).on("dropdown:toggle", function () {
+        $(this).toggle();
+        if (self.menuToggleAction) self.menuToggleAction();
     });
 
-    // enable window scroll when mouse leave menu
-    // hide menu and do some custom action
-    this.$menu.on("mouseleave", function () {
-        windowScroll.enable();
-        if (self.opts.triggerOnHover === true) {
-            self.$menu.hide();
-        }
-        if (self.leaveMenuAction) self.leaveMenuAction();
-    });
-
-    // click trigger toggle menu
-    this.$trigger.on("click", function (e) {
-        e.preventDefault();
-        self.$menu.toggle();
-    });
-
-    if (this.opts.hideElsewhere === true) {
-        // window scroll dismiss menu
+    if (self.opts.closeOnScroll === true) {
         $(window).on("scroll", function () {
-            self.$menu.hide();
+            self.$menu.trigger("dropdown:close");
         });
+    }
 
-        // click elsewhere dismiss menu
+    if (self.opts.closeOnClick === true) {
         $(document).on("click", function (e) {
-            if (!self.$menu.is(e.target) && !self.$trigger.is(e.target) &&
-                self.$menu.has(e.target).length === 0 &&
-                self.$trigger.has(e.target).length === 0) {
-                self.$menu.hide();
+            var hide = true, i;
+            for (i = 0; i < self.opts.preventClose.length; i++) {
+                var $element = self.opts.preventClose[i];
+                if ($element.is(e.target) || $element.has(e.target).length > 0) hide = false;
             }
+            if (hide === true) self.$menu.trigger("dropdown:close");
+        });
+    }
+
+    if (self.opts.closeOnLeave === true) {
+        self.$menu.on("mouseleave", function () {
+            self.$menu.trigger("dropdown:close");
         });
     }
 };
 
-DropdownMenu.prototype.listenMenu = function (self) {
-    self = self || this;
+DropdownMenu.prototype.setItemListener = function (context) {
+    var self = context || this;
 
     self.$items.on("click", function () {
-        $(this).toggleClass("selected");
+        var $this = $(this);
+        $this.toggleClass("selected");
+
         if (self.opts.multiSelection === false) {
             if (self.opts.multiSingle === true) {
-                $(this).siblings(".selected").removeClass("selected");
+                $this.siblings(".selected").removeClass("selected");
             } else {
                 self.$items.filter(".selected").not(this).removeClass("selected");
             }
         }
-        if (self.itemClickAction) self.itemClickAction();
+
+        if (self.itemClickAction) self.itemClickAction($this);
     });
 };
 
-DropdownMenu.prototype.getValues = function (self) {
-    self = self || this;
+DropdownMenu.prototype.open = function () {
+    this.$menu.trigger("dropdown:open");
+    return this;
+};
+
+DropdownMenu.prototype.close = function () {
+    this.$menu.trigger("dropdown:close");
+    return this;
+};
+
+DropdownMenu.prototype.toggle = function () {
+    this.$menu.trigger("dropdown:toggle");
+    return this;
+};
+
+DropdownMenu.prototype.onItemClick = function (func) {
+    if ($.isFunction(func)) this.itemClickAction = func;
+    return this;
+};
+
+DropdownMenu.prototype.onMenuOpen = function (func) {
+    if ($.isFunction(func)) this.menuOpenAction = func;
+    return this;
+};
+
+DropdownMenu.prototype.onMenuClose = function (func) {
+    if ($.isFunction(func)) this.menuCloseAction = func;
+    return this;
+};
+
+DropdownMenu.prototype.onMenuToggle = function (func) {
+    if ($.isFunction(func)) this.menuToggleAction = func;
+    return this;
+};
+
+DropdownMenu.prototype.clearSelection = function () {
+    this.$items.filter(".selected").removeClass("selected");
+    return this;
+};
+
+DropdownMenu.prototype.updateMenuItems = function () {
+    this.$items = null;
+    this.$items = this.$menu.find("[data-value]:not(.disabled)");
+    if (this.$items.length > 0) this.setItemListener(this);
+    return this;
+};
+
+DropdownMenu.prototype.getValuesArray = function (context) {
+    var self = context || this;
     var output = [];
 
     self.$items.filter(".selected").each(function () {
@@ -93,24 +146,6 @@ DropdownMenu.prototype.getValues = function (self) {
 
     if (output) return output;
     return null;
-};
-
-DropdownMenu.prototype.updateItems = function () {
-    this.$items = null;
-    this.$items = this.$menu.find("[data-value]:not(.disabled)");
-    if (this.$items.length > 0) this.listenMenu();
-};
-
-DropdownMenu.prototype.onItemClick = function (func) {
-    if ($.isFunction(func)) this.itemClickAction = func;
-};
-
-DropdownMenu.prototype.onLeaveMenu = function (func) {
-    if ($.isFunction(func)) this.leaveMenuAction = func;
-};
-
-DropdownMenu.prototype.clearSelection = function () {
-    this.$items.filter(".selected").removeClass("selected");
 };
 
 module.exports = DropdownMenu;

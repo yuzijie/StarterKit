@@ -18,8 +18,12 @@ var DropdownMenu = function ($menu, options) {
         preventClose: []       // Prevent menu from closing when clicking these elements
     }, options);
 
-    // Add menu to prevent close array
-    this.opts.preventClose.unshift(this.$menu);
+    // Add this.$menu to prevent close array
+    if (this.opts.preventClose.constructor === Array) {
+        this.opts.preventClose.unshift(this.$menu);
+    } else if (this.opts.preventClose) {
+        this.opts.preventClose = [this.$menu, this.opts.preventClose];
+    }
 
     // Custom actions
     this.itemClickAction = null;

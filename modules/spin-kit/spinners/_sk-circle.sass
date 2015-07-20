@@ -1,102 +1,102 @@
 %spinkit-circle
-  position: relative
+    position: relative
 
-  .sk-child
-    width: 100%
-    height: 100%
-    position: absolute
-    left: 0
-    top: 0
-
-  .sk-child:before
-    content: ''
-    display: block
-    margin: 0 auto
-    width: 15%
-    height: 15%
-    border-radius: 100%
-    @include animation(sk-circleBounceDelay 1.2s infinite ease-in-out both)
-
-  .sk-circle2
-    @include transform(rotate(30deg))
-
-  .sk-circle3
-    @include transform(rotate(60deg))
-
-  .sk-circle4
-    @include transform(rotate(90deg))
-
-  .sk-circle5
-    @include transform(rotate(120deg))
-
-  .sk-circle6
-    @include transform(rotate(150deg))
-
-  .sk-circle7
-    @include transform(rotate(180deg))
-
-  .sk-circle8
-    @include transform(rotate(210deg))
-
-  .sk-circle9
-    @include transform(rotate(240deg))
-
-  .sk-circle10
-    @include transform(rotate(270deg))
-
-  .sk-circle11
-    @include transform(rotate(300deg))
-
-  .sk-circle12
-    @include transform(rotate(330deg))
-
-  .sk-circle2:before
-    @include animation-delay(-1.1s)
-
-  .sk-circle3:before
-    @include animation-delay(-1s)
-
-  .sk-circle4:before
-    @include animation-delay(-0.9s)
-
-  .sk-circle5:before
-    @include animation-delay(-0.8s)
-
-  .sk-circle6:before
-    @include animation-delay(-0.7s)
-
-  .sk-circle7:before
-    @include animation-delay(-0.6s)
-
-  .sk-circle8:before
-    @include animation-delay(-0.5s)
-
-  .sk-circle9:before
-    @include animation-delay(-0.4s)
-
-  .sk-circle10:before
-    @include animation-delay(-0.3s)
-
-  .sk-circle11:before
-    @include animation-delay(-0.2s)
-
-  .sk-circle12:before
-    @include animation-delay(-0.1s)
-
-  @include keyframes(sk-circleBounceDelay)
-    0%, 80%, 100%
-      @include transform(scale(0))
-    40%
-      @include transform(scale(1))
-
-@mixin spinkit-circle($name: "spin-kit", $conf:())
-  $default: (margin: em(100), size: em(40), color: #333)
-  $conf: map-merge($default, $conf)
-
-  .#{$name}
-    margin: map-get($conf, margin) auto
-    @include size(map-get($conf, size))
-    @extend %spinkit-circle
+    .sk-child
+        width: 100%
+        height: 100%
+        position: absolute
+        left: 0
+        top: 0
 
     .sk-child:before
-      background-color: map-get($conf, color)
+        content: ''
+        display: block
+        margin: 0 auto
+        width: 15%
+        height: 15%
+        border-radius: 100%
+        @include animation(sk-circleBounceDelay 1.2s infinite ease-in-out both)
+
+    .sk-circle2
+        @include transform(rotate(30deg))
+
+    .sk-circle3
+        @include transform(rotate(60deg))
+
+    .sk-circle4
+        @include transform(rotate(90deg))
+
+    .sk-circle5
+        @include transform(rotate(120deg))
+
+    .sk-circle6
+        @include transform(rotate(150deg))
+
+    .sk-circle7
+        @include transform(rotate(180deg))
+
+    .sk-circle8
+        @include transform(rotate(210deg))
+
+    .sk-circle9
+        @include transform(rotate(240deg))
+
+    .sk-circle10
+        @include transform(rotate(270deg))
+
+    .sk-circle11
+        @include transform(rotate(300deg))
+
+    .sk-circle12
+        @include transform(rotate(330deg))
+
+    .sk-circle2:before
+        @include animation-delay(-1.1s)
+
+    .sk-circle3:before
+        @include animation-delay(-1s)
+
+    .sk-circle4:before
+        @include animation-delay(-0.9s)
+
+    .sk-circle5:before
+        @include animation-delay(-0.8s)
+
+    .sk-circle6:before
+        @include animation-delay(-0.7s)
+
+    .sk-circle7:before
+        @include animation-delay(-0.6s)
+
+    .sk-circle8:before
+        @include animation-delay(-0.5s)
+
+    .sk-circle9:before
+        @include animation-delay(-0.4s)
+
+    .sk-circle10:before
+        @include animation-delay(-0.3s)
+
+    .sk-circle11:before
+        @include animation-delay(-0.2s)
+
+    .sk-circle12:before
+        @include animation-delay(-0.1s)
+
+    @include keyframes(sk-circleBounceDelay)
+        0%, 80%, 100%
+            @include transform(scale(0))
+        40%
+            @include transform(scale(1))
+
+@mixin spinkit-circle($name: "spin-kit", $conf:())
+    $default: (margin: em(100), size: em(40), color: #333)
+    $conf: map-merge($default, $conf)
+
+    .#{$name}
+        margin: map-get($conf, margin) auto
+        @include size(map-get($conf, size))
+        @extend %spinkit-circle
+
+        .sk-child:before
+            background-color: map-get($conf, color)

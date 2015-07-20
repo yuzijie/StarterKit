@@ -1,7 +1,12 @@
 @import "spinners/sk-circle";
 
-@mixin spinkit($name: "spin-kit", $theme: 1, $conf:()) {
-  @if $theme == 1 {
-    @include spinkit-circle($name, $conf);
-  }
+@mixin spinkit($name: "spin-kit", $conf:()) {
+    $default: (
+            theme: 1
+    );
+    $conf: map-merge($default, $conf);
+
+    @if map-get($conf, theme) == "1" {
+        @include spinkit-circle($name, $conf);
+    }
 }

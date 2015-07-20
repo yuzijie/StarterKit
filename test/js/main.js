@@ -7,13 +7,15 @@ if ($spinkit) {
 }
 
 var $dropdownMenu = $(".single-col-menu");
-if ($dropdownMenu) {
-    var dropdown = new DropdownMenu($dropdownMenu, $("#trigger"), {
-        triggerOnHover: false,
-        multiSelection: false,
-        multiSingle: true
-    });
+var $button = $("#trigger");
 
-    dropdown.onItemClick(function () {
+if ($dropdownMenu) {
+    var dropdown = new DropdownMenu($dropdownMenu, {
+        preventClose: $button,
+        closeOnScroll: false,
+        multiSelection: false
+    });
+    $button.on("click", function () {
+        dropdown.toggle();
     });
 }

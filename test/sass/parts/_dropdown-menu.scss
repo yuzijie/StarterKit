@@ -1,5 +1,6 @@
 @import "../../../modules/dropdown-menu/dropdown-menu";
 
 @include dropdown-menu("single-col-menu", (
-        position: 100px null null 0
+        position: 100px null null 0,
+        height: 400px
 ));

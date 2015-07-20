@@ -1,0 +1,108 @@
+%dropdown-menu-single {
+    display: none;
+    position: absolute;
+    @include material-shadow(2);
+    z-index: 999;
+    ul {
+        overflow: auto;
+        li {
+            display: block;
+            cursor: pointer;
+            &.divider,
+            &.header {
+                cursor: default;
+                &:hover {
+                    background: none;
+                }
+            }
+        }
+        li.disabled {
+            cursor: not-allowed;
+            &:hover {
+                background: none;
+            }
+        }
+    }
+}
+
+@mixin dropdown-menu-single($name: "dropdown-menu", $conf:()) {
+    $default: (
+            hide-scrollbar: false,
+            position: 0 null null 0,
+            background-color: #FEFEFE,
+            border-tyle: 1px solid #F7F7F7,
+            border-radius: $base-border-radius,
+            width: em(160),
+            list-vertical-padding: rem(6),
+            list-horizontal-padding: rem(25),
+            selected-background-color: $blue,
+            selected-font-color: white,
+            hover-background-color: $silver,
+            disabled-font-color: $silver,
+            header-font-size: $base-font-size * 0.9,
+            header-font-weight: bold,
+            header-font-color: lighten($base-font-color, 25%),
+            divider-style: $base-border
+    );
+    $conf: map-merge($default, $conf);
+
+    .#{$name} {
+        @extend %dropdown-menu-single;
+        @include position(null, map-get($conf, position));
+
+        background-color: map-get($conf, background-color);
+        border: map-get($conf, border-tyle);
+        width: map-get($conf, width);
+
+        @if map-get($conf, hide-scrollbar) == true {
+            border-radius: map-get($conf, border-radius);
+            overflow: hidden;
+        }
+
+        ul {
+            @if map-get($conf, hide-scrollbar) == true {
+                margin: 0 -15px 0 0;
+            } @else {
+                margin: 0;
+            }
+            @if map-has-key($conf, height) {
+                height: map-get($conf, height);
+            }
+
+            li {
+                padding: map-get($conf, list-vertical-padding) map-get($conf, list-horizontal-padding);
+                &:first-child {
+                    margin-top: map-get($conf, list-vertical-padding);
+                }
+                &:last-child {
+                    margin-bottom: map-get($conf, list-vertical-padding);
+                }
+
+                &:hover {
+                    background: map-get($conf, hover-background-color);
+                }
+
+                &.divider {
+                    border-bottom: map-get($conf, divider-style);
+                    margin-bottom: map-get($conf, list-vertical-padding);
+                    margin-top: map-get($conf, list-vertical-padding) * -1;
+                }
+
+                &.header {
+                    font-size: map-get($conf, header-font-size);
+                    font-weight: map-get($conf, header-font-weight);
+                    color: map-get($conf, header-font-color);
+                }
+
+                &.selected {
+                    background: map-get($conf, selected-background-color);
+                    color: map-get($conf, selected-font-color);
+                }
+            }
+
+            li.disabled {
+                color: map-get($conf, disabled-font-color);
+            }
+        }
+    }
+}

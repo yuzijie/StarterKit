@@ -1,140 +1,174 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-// Disable scrolling temporarily
-// http://stackoverflow.com/questions/4770025/how-to-disable-scrolling-temporarily/4770179#4770179
+// prevent parent element from scrolling when scroll child element
+// require jQuery Mouse Wheel Plugin
+require("../node_modules/jquery-mousewheel/jquery.mousewheel.js")($);
 
-var windowScroll = (function () {
-    // left: 37, up: 38, right: 39, down: 40,
-    // spacebar: 32, pageup: 33, pagedown: 34, end: 35, home: 36
-    var keys = {37: 1, 38: 1, 39: 1, 40: 1, 32: 1, 33: 1, 34: 1};
-
-    function preventDefault(e) { // pure javascript prevent default
-        e = e || window.event;
-        if (e.preventDefault)
+var PreventScroll = function ($target) {
+    $target.on("mousewheel", function (e) {
+        if (($target.scrollTop() === $target[0].scrollHeight - $target.outerHeight() && e.deltaY < 0) ||
+            ($target.scrollTop() === 0 && e.deltaY > 0)) {
             e.preventDefault();
-        e.returnValue = false;
-    }
-
-    function preventDefaultForScrollKeys(e) {
-        if (keys[e.keyCode]) {
-            preventDefault(e);
-            return false;
         }
-    }
+    });
+};
 
-    function disableScroll() {
-        if (window.addEventListener) // older FF
-            window.addEventListener('DOMMouseScroll', preventDefault, false);
-        window.onwheel = preventDefault; // modern standard
-        window.onmousewheel = document.onmousewheel = preventDefault; // older browsers, IE
-        window.ontouchmove  = preventDefault; // mobile
-        document.onkeydown  = preventDefaultForScrollKeys;
-    }
+module.exports = PreventScroll;
 
-    function enableScroll() {
-        if (window.removeEventListener)
-            window.removeEventListener('DOMMouseScroll', preventDefault, false);
-        window.onmousewheel = document.onmousewheel = null;
-        window.onwheel = null;
-        window.ontouchmove = null;
-        document.onkeydown = null;
-    }
+},{"../node_modules/jquery-mousewheel/jquery.mousewheel.js":4}],2:[function(require,module,exports){
+// Usage:
+//
+// var dropdown = new DropdownMenu($menu, {options: value});
+// var dropdown = new DropdownMenu($menu);
+//
+// Require:
+// prevent-scroll.js
+//
+var preventScroll = require("../../js/prevent-scroll.js");
 
-    return {
-        enable: enableScroll,
-        disable: disableScroll
-    };
-})();
-
-module.exports = windowScroll;
-
-},{}],2:[function(require,module,exports){
-var windowScroll = require("../../js/window-scroll.js");
-
-var DropdownMenu = function ($menu, $trigger, options) {
+var DropdownMenu = function ($menu, options) {
+    // Objects
     this.$menu = $menu;
     this.$items = this.$menu.find("[data-value]:not(.disabled)");
-    this.$trigger = $trigger;
 
-    this.itemClickAction = null;
-    this.leaveMenuAction = null;
-
+    // Options
     this.opts = $.extend({
-        triggerOnHover: false, // options: "true" or "false"
-        hideElsewhere: true, // options: "true" or "false", click elsewhere to hide the menu
-        multiSelection: false, // options: "false" or "true"
-        multiSingle: true // options: "true" or "false", allow one single selection on each column
+        closeOnScroll: false,  // Close menu on page scrolling
+        closeOnClick: true,    // Close menu on clicking outside of the menu
+        closeOnLeave: false,   // Close menu on mouse left menu area
+        multiSelection: false, // Select multiple items
+        colSelection: true,    // Allow one single selection on each column
+        preventClose: [],      // Prevent menu from closing when clicking these elements
+        preventScroll: null    // Elements that need background scroll prevention
     }, options);
 
-    this.listenTrigger(this);
-    this.listenMenu(this);
-};
-
-DropdownMenu.prototype.listenTrigger = function (self) {
-    self = self || this;
-
-    // show menu when mouse enter trigger button
-    if (this.opts.triggerOnHover === true) {
-        this.$trigger.on("mouseenter", function () {
-            self.$menu.show();
-        });
+    // Add this.$menu to prevent close array
+    if (this.opts.preventClose.constructor === Array) {
+        this.opts.preventClose.unshift(this.$menu);
+    } else if (this.opts.preventClose) {
+        this.opts.preventClose = [this.$menu, this.opts.preventClose];
     }
 
-    // disable window scroll when mouse enter menu
-    this.$menu.on("mouseenter", function () {
-        windowScroll.disable();
+    // Custom actions
+    this.itemClickAction = null;
+    this.menuOpenAction = null;
+    this.menuCloseAction = null;
+    this.menuToggleAction = null;
+
+    // Set Listeners
+    this.setMenuListener(this);
+    this.setItemListener(this);
+
+    // prevent scroll
+    if (!this.opts.preventScroll) this.opts.preventScroll = this.$menu.find("ul");
+    preventScroll(this.opts.preventScroll);
+};
+
+DropdownMenu.prototype.setMenuListener = function (context) {
+    var self = context || this;
+
+    self.$menu.on("dropdown:open", function () {
+        $(this).show();
+        if (self.menuOpenAction) self.menuOpenAction();
+    }).on("dropdown:close", function () {
+        $(this).hide();
+        if (self.menuCloseAction) self.menuCloseAction();
+    }).on("dropdown:toggle", function () {
+        $(this).toggle();
+        if (self.menuToggleAction) self.menuToggleAction();
     });
 
-    // enable window scroll when mouse leave menu
-    // hide menu and do some custom action
-    this.$menu.on("mouseleave", function () {
-        windowScroll.enable();
-        if (self.opts.triggerOnHover === true) {
-            self.$menu.hide();
-        }
-        if (self.leaveMenuAction) self.leaveMenuAction();
-    });
-
-    // click trigger toggle menu
-    this.$trigger.on("click", function (e) {
-        e.preventDefault();
-        self.$menu.toggle();
-    });
-
-    if (this.opts.hideElsewhere === true) {
-        // window scroll dismiss menu
+    if (self.opts.closeOnScroll === true) {
         $(window).on("scroll", function () {
-            self.$menu.hide();
+            self.$menu.trigger("dropdown:close");
         });
+    }
 
-        // click elsewhere dismiss menu
+    if (self.opts.closeOnClick === true) {
         $(document).on("click", function (e) {
-            if (!self.$menu.is(e.target) && !self.$trigger.is(e.target) &&
-                self.$menu.has(e.target).length === 0 &&
-                self.$trigger.has(e.target).length === 0) {
-                self.$menu.hide();
+            var hide = true, i;
+            for (i = 0; i < self.opts.preventClose.length; i++) {
+                var $element = self.opts.preventClose[i];
+                if ($element.is(e.target) || $element.has(e.target).length > 0) hide = false;
             }
+            if (hide === true) self.$menu.trigger("dropdown:close");
+        });
+    }
+
+    if (self.opts.closeOnLeave === true) {
+        self.$menu.on("mouseleave", function () {
+            self.$menu.trigger("dropdown:close");
         });
     }
 };
 
-DropdownMenu.prototype.listenMenu = function (self) {
-    self = self || this;
+DropdownMenu.prototype.setItemListener = function (context) {
+    var self = context || this;
 
     self.$items.on("click", function () {
-        $(this).toggleClass("selected");
+        var $this = $(this);
+        $this.toggleClass("selected");
+
         if (self.opts.multiSelection === false) {
             if (self.opts.multiSingle === true) {
-                $(this).siblings(".selected").removeClass("selected");
+                $this.siblings(".selected").removeClass("selected");
             } else {
                 self.$items.filter(".selected").not(this).removeClass("selected");
             }
         }
-        if (self.itemClickAction) self.itemClickAction();
+
+        if (self.itemClickAction) self.itemClickAction($this);
     });
 };
 
-DropdownMenu.prototype.getValues = function (self) {
-    self = self || this;
+DropdownMenu.prototype.open = function () {
+    this.$menu.trigger("dropdown:open");
+    return this;
+};
+
+DropdownMenu.prototype.close = function () {
+    this.$menu.trigger("dropdown:close");
+    return this;
+};
+
+DropdownMenu.prototype.toggle = function () {
+    this.$menu.trigger("dropdown:toggle");
+    return this;
+};
+
+DropdownMenu.prototype.onItemClick = function (func) {
+    if ($.isFunction(func)) this.itemClickAction = func;
+    return this;
+};
+
+DropdownMenu.prototype.onMenuOpen = function (func) {
+    if ($.isFunction(func)) this.menuOpenAction = func;
+    return this;
+};
+
+DropdownMenu.prototype.onMenuClose = function (func) {
+    if ($.isFunction(func)) this.menuCloseAction = func;
+    return this;
+};
+
+DropdownMenu.prototype.onMenuToggle = function (func) {
+    if ($.isFunction(func)) this.menuToggleAction = func;
+    return this;
+};
+
+DropdownMenu.prototype.clearSelection = function () {
+    this.$items.filter(".selected").removeClass("selected");
+    return this;
+};
+
+DropdownMenu.prototype.updateMenuItems = function () {
+    this.$items = null;
+    this.$items = this.$menu.find("[data-value]:not(.disabled)");
+    if (this.$items.length > 0) this.setItemListener(this);
+    return this;
+};
+
+DropdownMenu.prototype.getValuesArray = function (context) {
+    var self = context || this;
     var output = [];
 
     self.$items.filter(".selected").each(function () {
@@ -145,27 +179,9 @@ DropdownMenu.prototype.getValues = function (self) {
     return null;
 };
 
-DropdownMenu.prototype.updateItems = function () {
-    this.$items = null;
-    this.$items = this.$menu.find("[data-value]:not(.disabled)");
-    if (this.$items.length > 0) this.listenMenu();
-};
-
-DropdownMenu.prototype.onItemClick = function (func) {
-    if ($.isFunction(func)) this.itemClickAction = func;
-};
-
-DropdownMenu.prototype.onLeaveMenu = function (func) {
-    if ($.isFunction(func)) this.leaveMenuAction = func;
-};
-
-DropdownMenu.prototype.clearSelection = function () {
-    this.$items.filter(".selected").removeClass("selected");
-};
-
 module.exports = DropdownMenu;
 
-},{"../../js/window-scroll.js":1}],3:[function(require,module,exports){
+},{"../../js/prevent-scroll.js":1}],3:[function(require,module,exports){
 module.exports = function (className) {
     className = className || "spin-kit";
     var output = '<div class="' + className + '">';
@@ -186,6 +202,229 @@ module.exports = function (className) {
 };
 
 },{}],4:[function(require,module,exports){
+/*!
+ * jQuery Mousewheel 3.1.13
+ *
+ * Copyright jQuery Foundation and other contributors
+ * Released under the MIT license
+ * http://jquery.org/license
+ */
+
+(function (factory) {
+    if ( typeof define === 'function' && define.amd ) {
+        // AMD. Register as an anonymous module.
+        define(['jquery'], factory);
+    } else if (typeof exports === 'object') {
+        // Node/CommonJS style for Browserify
+        module.exports = factory;
+    } else {
+        // Browser globals
+        factory(jQuery);
+    }
+}(function ($) {
+
+    var toFix  = ['wheel', 'mousewheel', 'DOMMouseScroll', 'MozMousePixelScroll'],
+        toBind = ( 'onwheel' in document || document.documentMode >= 9 ) ?
+                    ['wheel'] : ['mousewheel', 'DomMouseScroll', 'MozMousePixelScroll'],
+        slice  = Array.prototype.slice,
+        nullLowestDeltaTimeout, lowestDelta;
+
+    if ( $.event.fixHooks ) {
+        for ( var i = toFix.length; i; ) {
+            $.event.fixHooks[ toFix[--i] ] = $.event.mouseHooks;
+        }
+    }
+
+    var special = $.event.special.mousewheel = {
+        version: '3.1.12',
+
+        setup: function() {
+            if ( this.addEventListener ) {
+                for ( var i = toBind.length; i; ) {
+                    this.addEventListener( toBind[--i], handler, false );
+                }
+            } else {
+                this.onmousewheel = handler;
+            }
+            // Store the line height and page height for this particular element
+            $.data(this, 'mousewheel-line-height', special.getLineHeight(this));
+            $.data(this, 'mousewheel-page-height', special.getPageHeight(this));
+        },
+
+        teardown: function() {
+            if ( this.removeEventListener ) {
+                for ( var i = toBind.length; i; ) {
+                    this.removeEventListener( toBind[--i], handler, false );
+                }
+            } else {
+                this.onmousewheel = null;
+            }
+            // Clean up the data we added to the element
+            $.removeData(this, 'mousewheel-line-height');
+            $.removeData(this, 'mousewheel-page-height');
+        },
+
+        getLineHeight: function(elem) {
+            var $elem = $(elem),
+                $parent = $elem['offsetParent' in $.fn ? 'offsetParent' : 'parent']();
+            if (!$parent.length) {
+                $parent = $('body');
+            }
+            return parseInt($parent.css('fontSize'), 10) || parseInt($elem.css('fontSize'), 10) || 16;
+        },
+
+        getPageHeight: function(elem) {
+            return $(elem).height();
+        },
+
+        settings: {
+            adjustOldDeltas: true, // see shouldAdjustOldDeltas() below
+            normalizeOffset: true  // calls getBoundingClientRect for each event
+        }
+    };
+
+    $.fn.extend({
+        mousewheel: function(fn) {
+            return fn ? this.bind('mousewheel', fn) : this.trigger('mousewheel');
+        },
+
+        unmousewheel: function(fn) {
+            return this.unbind('mousewheel', fn);
+        }
+    });
+
+
+    function handler(event) {
+        var orgEvent   = event || window.event,
+            args       = slice.call(arguments, 1),
+            delta      = 0,
+            deltaX     = 0,
+            deltaY     = 0,
+            absDelta   = 0,
+            offsetX    = 0,
+            offsetY    = 0;
+        event = $.event.fix(orgEvent);
+        event.type = 'mousewheel';
+
+        // Old school scrollwheel delta
+        if ( 'detail'      in orgEvent ) { deltaY = orgEvent.detail * -1;      }
+        if ( 'wheelDelta'  in orgEvent ) { deltaY = orgEvent.wheelDelta;       }
+        if ( 'wheelDeltaY' in orgEvent ) { deltaY = orgEvent.wheelDeltaY;      }
+        if ( 'wheelDeltaX' in orgEvent ) { deltaX = orgEvent.wheelDeltaX * -1; }
+
+        // Firefox < 17 horizontal scrolling related to DOMMouseScroll event
+        if ( 'axis' in orgEvent && orgEvent.axis === orgEvent.HORIZONTAL_AXIS ) {
+            deltaX = deltaY * -1;
+            deltaY = 0;
+        }
+
+        // Set delta to be deltaY or deltaX if deltaY is 0 for backwards compatabilitiy
+        delta = deltaY === 0 ? deltaX : deltaY;
+
+        // New school wheel delta (wheel event)
+        if ( 'deltaY' in orgEvent ) {
+            deltaY = orgEvent.deltaY * -1;
+            delta  = deltaY;
+        }
+        if ( 'deltaX' in orgEvent ) {
+            deltaX = orgEvent.deltaX;
+            if ( deltaY === 0 ) { delta  = deltaX * -1; }
+        }
+
+        // No change actually happened, no reason to go any further
+        if ( deltaY === 0 && deltaX === 0 ) { return; }
+
+        // Need to convert lines and pages to pixels if we aren't already in pixels
+        // There are three delta modes:
+        //   * deltaMode 0 is by pixels, nothing to do
+        //   * deltaMode 1 is by lines
+        //   * deltaMode 2 is by pages
+        if ( orgEvent.deltaMode === 1 ) {
+            var lineHeight = $.data(this, 'mousewheel-line-height');
+            delta  *= lineHeight;
+            deltaY *= lineHeight;
+            deltaX *= lineHeight;
+        } else if ( orgEvent.deltaMode === 2 ) {
+            var pageHeight = $.data(this, 'mousewheel-page-height');
+            delta  *= pageHeight;
+            deltaY *= pageHeight;
+            deltaX *= pageHeight;
+        }
+
+        // Store lowest absolute delta to normalize the delta values
+        absDelta = Math.max( Math.abs(deltaY), Math.abs(deltaX) );
+
+        if ( !lowestDelta || absDelta < lowestDelta ) {
+            lowestDelta = absDelta;
+
+            // Adjust older deltas if necessary
+            if ( shouldAdjustOldDeltas(orgEvent, absDelta) ) {
+                lowestDelta /= 40;
+            }
+        }
+
+        // Adjust older deltas if necessary
+        if ( shouldAdjustOldDeltas(orgEvent, absDelta) ) {
+            // Divide all the things by 40!
+            delta  /= 40;
+            deltaX /= 40;
+            deltaY /= 40;
+        }
+
+        // Get a whole, normalized value for the deltas
+        delta  = Math[ delta  >= 1 ? 'floor' : 'ceil' ](delta  / lowestDelta);
+        deltaX = Math[ deltaX >= 1 ? 'floor' : 'ceil' ](deltaX / lowestDelta);
+        deltaY = Math[ deltaY >= 1 ? 'floor' : 'ceil' ](deltaY / lowestDelta);
+
+        // Normalise offsetX and offsetY properties
+        if ( special.settings.normalizeOffset && this.getBoundingClientRect ) {
+            var boundingRect = this.getBoundingClientRect();
+            offsetX = event.clientX - boundingRect.left;
+            offsetY = event.clientY - boundingRect.top;
+        }
+
+        // Add information to the event object
+        event.deltaX = deltaX;
+        event.deltaY = deltaY;
+        event.deltaFactor = lowestDelta;
+        event.offsetX = offsetX;
+        event.offsetY = offsetY;
+        // Go ahead and set deltaMode to 0 since we converted to pixels
+        // Although this is a little odd since we overwrite the deltaX/Y
+        // properties with normalized deltas.
+        event.deltaMode = 0;
+
+        // Add event and delta to the front of the arguments
+        args.unshift(event, delta, deltaX, deltaY);
+
+        // Clearout lowestDelta after sometime to better
+        // handle multiple device types that give different
+        // a different lowestDelta
+        // Ex: trackpad = 3 and mouse wheel = 120
+        if (nullLowestDeltaTimeout) { clearTimeout(nullLowestDeltaTimeout); }
+        nullLowestDeltaTimeout = setTimeout(nullLowestDelta, 200);
+
+        return ($.event.dispatch || $.event.handle).apply(this, args);
+    }
+
+    function nullLowestDelta() {
+        lowestDelta = null;
+    }
+
+    function shouldAdjustOldDeltas(orgEvent, absDelta) {
+        // If this is an older event and the delta is divisable by 120,
+        // then we are assuming that the browser is treating this as an
+        // older mouse wheel event and that we should divide the deltas
+        // by 40 to try and get a more usable deltaFactor.
+        // Side note, this actually impacts the reported scroll distance
+        // in older browsers and can cause scrolling to be slower than native.
+        // Turn this off by setting $.event.special.mousewheel.settings.adjustOldDeltas to false.
+        return special.settings.adjustOldDeltas && orgEvent.type === 'mousewheel' && absDelta % 120 === 0;
+    }
+
+}));
+
+},{}],5:[function(require,module,exports){
 var template = require("../../modules/spin-kit/templates/sk-circle.js")("spinner");
 var DropdownMenu = require("../../modules/dropdown-menu/dropdown-menu.js");
 
@@ -195,15 +434,17 @@ if ($spinkit) {
 }
 
 var $dropdownMenu = $(".single-col-menu");
-if ($dropdownMenu) {
-    var dropdown = new DropdownMenu($dropdownMenu, $("#trigger"), {
-        triggerOnHover: false,
-        multiSelection: false,
-        multiSingle: true
-    });
+var $button = $("#trigger");
 
-    dropdown.onItemClick(function () {
+if ($dropdownMenu) {
+    var dropdown = new DropdownMenu($dropdownMenu, {
+        preventClose: $button,
+        closeOnScroll: false,
+        multiSelection: false
+    });
+    $button.on("click", function () {
+        dropdown.toggle();
     });
 }
 
-},{"../../modules/dropdown-menu/dropdown-menu.js":2,"../../modules/spin-kit/templates/sk-circle.js":3}]},{},[4]);
+},{"../../modules/dropdown-menu/dropdown-menu.js":2,"../../modules/spin-kit/templates/sk-circle.js":3}]},{},[5]);

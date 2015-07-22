@@ -32,27 +32,27 @@ var DropdownMenu = function ($menu, options) {
 
     // Options
     this.opts = $.extend({
-        closeOnScroll: false,  // Close menu on page scrolling
-        closeOnClick: true,    // Close menu on clicking outside of the menu
-        closeOnLeave: false,   // Close menu on mouse left menu area
-        multiSelection: false, // Select multiple items
-        colSelection: true,    // Allow one single selection on each column
-        preventClose: [],      // Prevent menu from closing when clicking these elements
-        preventScroll: null    // Elements that need background scroll prevention
+        closeOnScroll: false,   // Close menu on page scrolling
+        closeOnClick: true,     // Close menu on clicking outside of the menu
+        closeOnLeave: false,    // Close menu on mouse left menu area
+        multiSelection: false,  // Select multiple items
+        preventClose: [],       // Prevent menu close when clicking these elements
+        preventScroll: null,    // Elements that need background scroll prevention
+        highlightResult: false  // highlight matched string
     }, options);
 
-    // Add this.$menu to prevent close array
-    if (this.opts.preventClose.constructor === Array) {
+    // "preventClose" array
+    if (options.preventClose && options.preventClose.constructor !== Array) {
+        this.opts.preventClose = [this.$menu, this.opts.preventClose]
+    } else {
         this.opts.preventClose.unshift(this.$menu);
-    } else if (this.opts.preventClose) {
-        this.opts.preventClose = [this.$menu, this.opts.preventClose];
     }
 
     // Custom actions
-    this.itemClickAction = null;
     this.menuOpenAction = null;
     this.menuCloseAction = null;
-    this.menuToggleAction = null;
+    this.itemSelectAction = null; // run after item(s) has been selected
+    this.itemFilterAction = null; // run after items have been filtered
 
     // Set Listeners
     this.setMenuListener(this);
@@ -66,15 +66,24 @@ var DropdownMenu = function ($menu, options) {
 DropdownMenu.prototype.setMenuListener = function (context) {
     var self = context || this;
 
-    self.$menu.on("dropdown:open", function () {
-        $(this).show();
-        if (self.menuOpenAction) self.menuOpenAction();
-    }).on("dropdown:close", function () {
-        $(this).hide();
-        if (self.menuCloseAction) self.menuCloseAction();
-    }).on("dropdown:toggle", function () {
-        $(this).toggle();
-        if (self.menuToggleAction) self.menuToggleAction();
+    self.$menu.on("dropdown:open", function (event) {
+        if ($(this).is(":hidden")) {
+            $(this).show();
+            if (self.menuOpenAction) self.menuOpenAction(event);
+        }
+    }).on("dropdown:close", function (event) {
+        if ($(this).is(":visible")) {
+            $(this).hide();
+            if (self.menuCloseAction) self.menuCloseAction(event);
+        }
+    }).on("dropdown:toggle", function (event) {
+        if ($(this).is(":visible")) {
+            $(this).hide();
+            if (self.menuCloseAction) self.menuCloseAction(event);
+        } else {
+            $(this).show();
+            if (self.menuOpenAction) self.menuOpenAction(event);
+        }
     });
 
     if (self.opts.closeOnScroll === true) {
@@ -104,19 +113,18 @@ DropdownMenu.prototype.setMenuListener = function (context) {
 DropdownMenu.prototype.setItemListener = function (context) {
     var self = context || this;
 
-    self.$items.on("click", function () {
+    self.$items.on("dropdown:select", function (event) {
         var $this = $(this);
-        $this.toggleClass("selected");
-
+        $this.toggleClass("S");
         if (self.opts.multiSelection === false) {
-            if (self.opts.multiSingle === true) {
-                $this.siblings(".selected").removeClass("selected");
-            } else {
-                self.$items.filter(".selected").not(this).removeClass("selected");
-            }
+            $this.siblings(".S").removeClass("S");
+            self.$menu.trigger("dropdown:close");
         }
+        if (self.itemSelectAction) self.itemSelectAction(event);
+    });
 
-        if (self.itemClickAction) self.itemClickAction($this);
+    self.$items.on("click", function () {
+        $(this).trigger("dropdown:select");
     });
 };
 
@@ -135,11 +143,6 @@ DropdownMenu.prototype.toggle = function () {
     return this;
 };
 
-DropdownMenu.prototype.onItemClick = function (func) {
-    if ($.isFunction(func)) this.itemClickAction = func;
-    return this;
-};
-
 DropdownMenu.prototype.onMenuOpen = function (func) {
     if ($.isFunction(func)) this.menuOpenAction = func;
     return this;
@@ -150,33 +153,68 @@ DropdownMenu.prototype.onMenuClose = function (func) {
     return this;
 };
 
-DropdownMenu.prototype.onMenuToggle = function (func) {
-    if ($.isFunction(func)) this.menuToggleAction = func;
+DropdownMenu.prototype.onItemSelect = function (func) {
+    if ($.isFunction(func)) this.itemSelectAction = func;
     return this;
 };
 
-DropdownMenu.prototype.clearSelection = function () {
-    this.$items.filter(".selected").removeClass("selected");
+DropdownMenu.prototype.onItemFilter = function (func) {
+    if ($.isFunction(func)) this.itemFilterAction = func;
     return this;
 };
 
-DropdownMenu.prototype.updateMenuItems = function () {
+DropdownMenu.prototype.clearSelected = function () {
+    this.$items.filter(".S").removeClass("S");
+    return this;
+};
+
+DropdownMenu.prototype.showAll = function () {
+    this.$items.filter(".H").removeClass("H");
+    return this;
+};
+
+DropdownMenu.prototype.updateAll = function () {
     this.$items = null;
     this.$items = this.$menu.find("[data-value]:not(.disabled)");
     if (this.$items.length > 0) this.setItemListener(this);
     return this;
 };
 
-DropdownMenu.prototype.getValuesArray = function (context) {
+DropdownMenu.prototype.getValues = function (context) {
     var self = context || this;
     var output = [];
 
-    self.$items.filter(".selected").each(function () {
+    self.$items.filter(".S").each(function () {
         output.push($(this).data("value"));
     });
 
-    if (output) return output;
+    if (output.length > 0) return output;
     return null;
+};
+
+DropdownMenu.prototype.filter = function (searchString) {
+    var regex = "", $items = [];
+
+    if (this.opts.highlightResult === true) {
+        regex = new RegExp(searchString, "ig"); // "/searchString/ig"
+    } else {
+        regex = new RegExp(searchString, "i"); // "/searchString/i"
+    }
+
+    this.$items.each(function () {
+        var $this = $(this);
+        var text = $this.text();
+
+        if (regex.test(text)) {
+            if ($this.is(".H")) $this.removeClass("H");
+            $items.push($this);
+        } else {
+            if ($this.not(".H")) $this.addClass("H");
+        }
+    });
+
+    if(this.itemFilterAction) this.itemFilterAction($items);
+    return $items;
 };
 
 module.exports = DropdownMenu;
@@ -434,16 +472,28 @@ if ($spinkit) {
 }
 
 var $dropdownMenu = $(".single-col-menu");
-var $button = $("#trigger");
+var $input = $("#trigger");
 
 if ($dropdownMenu) {
     var dropdown = new DropdownMenu($dropdownMenu, {
-        preventClose: $button,
-        closeOnScroll: false,
-        multiSelection: false
+        preventClose: $input
     });
-    $button.on("click", function () {
-        dropdown.toggle();
+
+    dropdown.onMenuClose(function(){
+        this.showAll().clearSelection();
+    });
+
+    dropdown.onItemClick(function($this){
+        $input.find("#input").val($this.data("value"));
+    });
+
+    $input.find("#input").on("keyup", function () {
+        var text = $(this).val();
+        dropdown.filter(text).open();
+    });
+
+    $input.find("#input").on("focus", function () {
+        dropdown.open();
     });
 }
 

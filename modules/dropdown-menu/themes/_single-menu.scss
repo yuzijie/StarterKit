@@ -22,6 +22,9 @@
                 background: none;
             }
         }
+        li.hide {
+            display: none;
+        }
     }
 }
 
@@ -71,12 +74,6 @@
 
             li {
                 padding: map-get($conf, list-vertical-padding) map-get($conf, list-horizontal-padding);
-                &:first-child {
-                    margin-top: map-get($conf, list-vertical-padding);
-                }
-                &:last-child {
-                    margin-bottom: map-get($conf, list-vertical-padding);
-                }
 
                 &:hover {
                     background: map-get($conf, hover-background-color);

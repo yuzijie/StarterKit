@@ -7,15 +7,27 @@ if ($spinkit) {
 }
 
 var $dropdownMenu = $(".single-col-menu");
-var $button = $("#trigger");
+var $input = $("#trigger");
 
 if ($dropdownMenu) {
     var dropdown = new DropdownMenu($dropdownMenu, {
-        preventClose: $button,
-        closeOnScroll: false,
-        multiSelection: false
+        preventClose: $input
     });
-    $button.on("click", function () {
-        dropdown.toggle();
+
+    dropdown.onMenuClose(function(){
+        this.showAll().clearSelection();
+    });
+
+    dropdown.onItemClick(function($this){
+        $input.find("#input").val($this.data("value"));
+    });
+
+    $input.find("#input").on("keyup", function () {
+        var text = $(this).val();
+        dropdown.filter(text).open();
+    });
+
+    $input.find("#input").on("focus", function () {
+        dropdown.open();
     });
 }

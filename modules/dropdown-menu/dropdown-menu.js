@@ -18,10 +18,12 @@ var DropdownMenu = function ($menu, options) {
         closeOnScroll: false,   // Close menu on page scrolling
         closeOnClick: true,     // Close menu on clicking outside of the menu
         closeOnLeave: false,    // Close menu on mouse left menu area
+        closeOnSelect: true,    // Close menu when an item is selected
         multiSelection: false,  // Select multiple items
         preventClose: [],       // Prevent menu close when clicking these elements
         preventScroll: null,    // Elements that need background scroll prevention
-        highlightResult: false  // highlight matched string
+        highlightResult: false,  // highlight matched string
+        $noResult: $("<li>", {html: "没有结果了"}) // create a row show no result using jQuery
     }, options);
 
     // "preventClose" array
@@ -101,6 +103,8 @@ DropdownMenu.prototype.setItemListener = function (context) {
         $this.toggleClass("S");
         if (self.opts.multiSelection === false) {
             $this.siblings(".S").removeClass("S");
+        }
+        if (self.opts.closeOnSelect === true) {
             self.$menu.trigger("dropdown:close");
         }
         if (self.itemSelectAction) self.itemSelectAction(event);
@@ -146,7 +150,7 @@ DropdownMenu.prototype.onItemFilter = function (func) {
     return this;
 };
 
-DropdownMenu.prototype.clearSelected = function () {
+DropdownMenu.prototype.clearAllSelected = function () {
     this.$items.filter(".S").removeClass("S");
     return this;
 };
@@ -163,7 +167,7 @@ DropdownMenu.prototype.updateAll = function () {
     return this;
 };
 
-DropdownMenu.prototype.getValues = function (context) {
+DropdownMenu.prototype.getSelectedValues = function (context) {
     var self = context || this;
     var output = [];
 
@@ -175,8 +179,15 @@ DropdownMenu.prototype.getValues = function (context) {
     return null;
 };
 
+DropdownMenu.prototype.getAllSelected = function (context) {
+    var self = context || this;
+    var $output = self.$items.filter(".S");
+    if ($output.length > 0) return $output;
+    return null;
+};
+
 DropdownMenu.prototype.filter = function (searchString) {
-    var regex = "", $items = [];
+    var regex = "", showed = [], hid = [];
 
     if (this.opts.highlightResult === true) {
         regex = new RegExp(searchString, "ig"); // "/searchString/ig"
@@ -190,14 +201,21 @@ DropdownMenu.prototype.filter = function (searchString) {
 
         if (regex.test(text)) {
             if ($this.is(".H")) $this.removeClass("H");
-            $items.push($this);
+            showed.push(this);
         } else {
             if ($this.not(".H")) $this.addClass("H");
+            hid.push(this);
         }
     });
 
-    if(this.itemFilterAction) this.itemFilterAction($items);
-    return $items;
+    if (showed.length === 0) {
+        this.$items.parent().append(this.opts.$noResult);
+    } else {
+        this.opts.$noResult.remove();
+    }
+
+    if (this.itemFilterAction) this.itemFilterAction(showed, hid);
+    return this;
 };
 
 module.exports = DropdownMenu;

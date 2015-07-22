@@ -22,7 +22,7 @@
                 background: none;
             }
         }
-        li.hide {
+        li.H {
             display: none;
         }
     }
@@ -91,7 +91,7 @@
                     color: map-get($conf, header-font-color);
                 }
 
-                &.selected {
+                &.S {
                     background: map-get($conf, selected-background-color);
                     color: map-get($conf, selected-font-color);
                 }

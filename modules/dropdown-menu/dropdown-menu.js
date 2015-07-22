@@ -186,6 +186,13 @@ DropdownMenu.prototype.getAllSelected = function (context) {
     return null;
 };
 
+DropdownMenu.prototype.getAllUnselected = function (context) {
+    var self = context || this;
+    var $output = self.$items.filter(":not(.S)");
+    if ($output.length > 0) return $output;
+    return null;
+};
+
 DropdownMenu.prototype.filter = function (searchString) {
     var regex = "", showed = [], hid = [];
 
@@ -214,7 +221,7 @@ DropdownMenu.prototype.filter = function (searchString) {
         this.opts.$noResult.remove();
     }
 
-    if (this.itemFilterAction) this.itemFilterAction(showed, hid);
+    if (this.itemFilterAction) this.itemFilterAction($(showed), $(hid));
     return this;
 };
 

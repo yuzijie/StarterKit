@@ -28,7 +28,7 @@ var DropdownMenu = function ($menu, options) {
 
     // "preventClose" array
     if (options.preventClose && options.preventClose.constructor !== Array) {
-        this.opts.preventClose = [this.$menu, this.opts.preventClose]
+        this.opts.preventClose = [this.$menu, this.opts.preventClose];
     } else {
         this.opts.preventClose.unshift(this.$menu);
     }

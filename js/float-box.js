@@ -1,4 +1,6 @@
 var preventScroll = require("./prevent-scroll");
+var scrollbar = require("./scrollbar");
+var $body = $(document.body);
 
 function to$(item) {
     return (item instanceof jQuery) ? item : $(item);
@@ -80,7 +82,10 @@ FloatBox.prototype.setListener = function () {
 
 FloatBox.prototype.open = function () {
     if (this.self.is(":hidden")) {
-        if (this.opts.hasOverlay === true) $('body').addClass("overlay");
+        if (this.opts.hasOverlay === true) {
+            $body.addClass("overlay");
+            scrollbar.setPadding();
+        }
         this.self.show();
         if (this.boxOpenAction) this.boxOpenAction();
         return true;
@@ -91,7 +96,10 @@ FloatBox.prototype.open = function () {
 FloatBox.prototype.close = function () {
     if (this.self.is(":visible")) {
         this.self.hide();
-        if (this.opts.hasOverlay === true) $('body').removeClass("overlay");
+        if (this.opts.hasOverlay === true) {
+            scrollbar.resetPadding();
+            $body.removeClass("overlay");
+        }
         if (this.boxCloseAction) this.boxCloseAction();
         return true;
     }

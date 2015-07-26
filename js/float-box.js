@@ -21,7 +21,8 @@ var FloatBox = function (box, options) {
     this.opts = $.extend({
         closeOnScroll: false,  // Close box on page scrolling
         closeOnClick: false,   // Close box when clicking outside of it
-        closeOnLeave: false    // Close box after mouse left box area
+        closeOnLeave: false,   // Close box after mouse left box area
+        hasOverlay: false      // Box has overlay or not
     }, options);
 
     // Prevent closing when clicking
@@ -79,6 +80,7 @@ FloatBox.prototype.setListener = function () {
 
 FloatBox.prototype.open = function () {
     if (this.self.is(":hidden")) {
+        if (this.opts.hasOverlay === true) $('body').addClass("overlay");
         this.self.show();
         if (this.boxOpenAction) this.boxOpenAction();
         return true;
@@ -89,6 +91,7 @@ FloatBox.prototype.open = function () {
 FloatBox.prototype.close = function () {
     if (this.self.is(":visible")) {
         this.self.hide();
+        if (this.opts.hasOverlay === true) $('body').removeClass("overlay");
         if (this.boxCloseAction) this.boxCloseAction();
         return true;
     }

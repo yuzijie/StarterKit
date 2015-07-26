@@ -22,18 +22,19 @@ var getScrollbarWidth = function () {
     return scrollbarWidth;
 };
 
-var Scrollbar = function () {
-    this.scrollbarWidth = getScrollbarWidth();
-    this.bodyPad = parseInt(($body.css('padding-right') || 0), 10);
-    this.originalBodyPad = document.body.style.paddingRight || '';
+var scrollbarWidth = getScrollbarWidth();
+var bodyPad = parseInt(($body.css('padding-right') || 0), 10);
+var originalBodyPad = document.body.style.paddingRight || '';
+
+var setPadding = function () {
+    if (hasScrollbar()) $body.css('padding-right', bodyPad + scrollbarWidth);
 };
 
-Scrollbar.prototype.set = function () {
-    if (hasScrollbar()) $body.css('padding-right', this.bodyPad + this.scrollbarWidth);
+var resetPadding = function () {
+    $body.css("padding-right", originalBodyPad);
 };
 
-Scrollbar.prototype.reset = function () {
-    $body.css("padding-right", this.originalBodyPad);
+module.exports = {
+    setPadding: setPadding,
+    resetPadding: resetPadding
 };
-
-module.exports = Scrollbar;

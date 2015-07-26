@@ -1,31 +1,43 @@
 var preventScroll = require("./prevent-scroll");
 
+function to$(item) {
+    return (item instanceof jQuery) ? item : $(item);
+}
+
+function handle(option, func) {
+    if (option.constructor === Array) {
+        $.each(option, function (index, value) {
+            func(value);
+        });
+    } else func(option);
+}
+
 var FloatBox = function (box, options) {
-    // Object
-    this.self = (box instanceof jQuery) ? box : $(box);
-    options = options || {};
+    this.self = to$(box);
+    var that = this;
 
     // Options
+    options = options || {};
     this.opts = $.extend({
-        closeOnScroll: false,                 //   Close box on page scrolling
-        closeOnClick: false,                  //   Close box when clicking outside of it
-        closeOnLeave: false,                  //   Close box after mouse left box area
-        preventClose: [],                     //   Prevent menu close when clicking these elements
-        preventScroll: this.self.children()   //   Elements that need background scroll prevention
+        closeOnScroll: false,  // Close box on page scrolling
+        closeOnClick: false,   // Close box when clicking outside of it
+        closeOnLeave: false    // Close box after mouse left box area
     }, options);
 
-    // preventClose Array
-    if (options.preventClose && options.preventClose.constructor !== Array) {
-        this.opts.preventClose = [this.self, options.preventClose];
-    } else {
-        this.opts.preventClose.unshift(this.self);
+    // Prevent closing when clicking
+    this.preventClose = [this.self];
+    if (options.preventClose) {
+        handle(options.preventClose, function (item) {
+            that.preventClose.push(to$(item));
+        });
     }
 
-    // preventScroll
-    if (options.preventScroll && typeof options.preventScroll === "string") {
-        this.opts.preventScroll = this.self.find(options.preventScroll);
-    }
-    if (this.opts.preventScroll.length > 0) preventScroll(this.opts.preventScroll);
+    // Elements that need scroll prevention
+    if (options.preventScroll) {
+        handle(options.preventScroll, function (item) {
+            preventScroll(that.self.find(item));
+        });
+    } else preventScroll(that.self.children());
 
     // Custom actions
     this.boxOpenAction = null;
@@ -49,8 +61,8 @@ FloatBox.prototype.setListener = function () {
     if (that.opts.closeOnClick === true) {
         $(document).on("click", function (e) {
             var hide = true, i;
-            for (i = 0; i < that.opts.preventClose.length; i++) {
-                var $element = that.opts.preventClose[i];
+            for (i = 0; i < that.preventClose.length; i++) {
+                var $element = that.preventClose[i];
                 if ($element.is(e.target) || $element.has(e.target).length > 0) hide = false;
             }
             if (hide === true) that.close();
@@ -85,6 +97,7 @@ FloatBox.prototype.close = function () {
 
 FloatBox.prototype.toggle = function () {
     if (!this.open()) this.close();
+    return this;
 };
 
 FloatBox.prototype.onOpen = function (func) {
@@ -99,9 +112,10 @@ FloatBox.prototype.onClose = function (func) {
 
 FloatBox.prototype.attachTo = function (target) {
     if (target) {
-        target = (target instanceof jQuery) ? target : $(target);
+        target = to$(target);
         target.html(this.self);
     }
+    return this;
 };
 
 module.exports = FloatBox;

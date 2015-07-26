@@ -83,8 +83,8 @@ FloatBox.prototype.setListener = function () {
 FloatBox.prototype.open = function () {
     if (this.self.is(":hidden")) {
         if (this.opts.hasOverlay === true) {
-            $body.addClass("overlay");
             scrollbar.setPadding();
+            $body.addClass("overlay");
         }
         this.self.show();
         if (this.boxOpenAction) this.boxOpenAction();

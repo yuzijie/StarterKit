@@ -4,7 +4,6 @@
     @include position(fixed, 50% null null 50%);
     @include transform(translate(-50%, -50%));
     max-height: 90%;
-    z-index: 30;
 }
 
 @mixin modal($conf:()) {
@@ -12,7 +11,8 @@
             name: ".modal",
             border-radius: $base-border-radius,
             background-color: $base-background-color,
-            overlay-color: black
+            overlay-color: black,
+            base-z-index: 0
     );
     $conf: map-merge($default, $conf);
 
@@ -21,5 +21,6 @@
         @include material-shadow(2);
         border-radius: map-get($conf, border-radius);
         background-color: map-get($conf, background-color);
+        z-index: map-get($conf, base-z-index) + 30;
     }
 }

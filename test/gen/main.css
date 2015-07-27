@@ -511,7 +511,6 @@ body.overlay {
   display: none;
   position: absolute;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
-  z-index: 10;
   overflow: hidden; }
 
 @-webkit-keyframes sk-circleBounceDelay {
@@ -541,7 +540,6 @@ body.overlay {
   display: none;
   position: absolute;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
-  z-index: 10;
   overflow: hidden; }
 
 .dropdown {
@@ -549,7 +547,8 @@ body.overlay {
   left: 0;
   background-color: white;
   border: 1px solid #F7F7F7;
-  border-radius: 3px; }
+  border-radius: 3px;
+  z-index: 10; }
 
 .dropdown {
   height: 300px;

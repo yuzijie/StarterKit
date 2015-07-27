@@ -2,7 +2,6 @@
     display: none;
     position: absolute;
     @include material-shadow(2);
-    z-index: 10;
     overflow: hidden
 }
 
@@ -14,7 +13,8 @@
             position: 0 null null 0,
             background-color: white,
             border-radius: $base-border-radius,
-            border: 1px solid #F7F7F7
+            border: 1px solid #F7F7F7,
+            base-z-index: 0
     );
     $conf: map-merge($default, $conf);
 
@@ -24,5 +24,6 @@
         background-color: map-get($conf, background-color);
         border: map-get($conf, border);
         border-radius: map-get($conf, border-radius);
+        z-index: map-get($conf, base-z-index) + 10;
     }
 }

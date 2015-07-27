@@ -1,0 +1,13 @@
+@import "../../../modules/dropdown/dropdown";
+
+@include dropdown();
+
+.dropdown {
+    height: 300px;
+    width: 200px;
+    padding: 20px;
+
+    div {
+        height: 300px;
+    }
+}

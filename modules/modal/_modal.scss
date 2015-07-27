@@ -1,0 +1,25 @@
+%modal {
+    display: none;
+    position: fixed;
+    @include position(fixed, 50% null null 50%);
+    @include transform(translate(-50%, -50%));
+    max-height: 90%;
+    z-index: 30;
+}
+
+@mixin modal($conf:()) {
+    $default: (
+            name: ".modal",
+            border-radius: $base-border-radius,
+            background-color: $base-background-color,
+            overlay-color: black
+    );
+    $conf: map-merge($default, $conf);
+
+    #{map-get($conf, name)} {
+        @extend %modal;
+        @include material-shadow(2);
+        border-radius: map-get($conf, border-radius);
+        background-color: map-get($conf, background-color);
+    }
+}

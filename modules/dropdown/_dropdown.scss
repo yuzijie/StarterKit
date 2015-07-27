@@ -1,0 +1,28 @@
+%dropdown {
+    display: none;
+    position: absolute;
+    @include material-shadow(2);
+    z-index: 10;
+    overflow: hidden
+}
+
+@mixin dropdown($conf:()) {
+    // config
+    $default: (
+            hide-scrollbar: false,
+            name: ".dropdown",
+            position: 0 null null 0,
+            background-color: white,
+            border-radius: $base-border-radius,
+            border: 1px solid #F7F7F7
+    );
+    $conf: map-merge($default, $conf);
+
+    #{map-get($conf, name)} {
+        @extend %dropdown;
+        @include position(null, map-get($conf, position));
+        background-color: map-get($conf, background-color);
+        border: map-get($conf, border);
+        border-radius: map-get($conf, border-radius);
+    }
+}

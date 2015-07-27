@@ -1,0 +1,9 @@
+body.overlay
+    $overlay-background-color: rgba(0, 0, 0, 0.75) !default
+    overflow: hidden
+
+    &:after
+        content: ""
+        @include position(fixed, 0 0 0 0)
+        background-color: $overlay-background-color
+        z-index: 20

@@ -1,33 +1,55 @@
+var FloatBox = require("../../js/float-box");
+
 var template = require("../../modules/spin-kit/templates/sk-circle.js")("spinner");
-var DropdownMenu = require("../../modules/dropdown-menu/dropdown-menu.js");
+var dropdownHBS = require("../../modules/dropdown/dropdown.hbs");
+var modalHBS = require("../../modules/modal/modal.hbs");
 
 var $spinkit = $(".spinkit");
 if ($spinkit) {
     $spinkit.append(template);
 }
 
-var $dropdownMenu = $(".single-col-menu");
-var $input = $("#trigger");
+var $floatBox = $(".float-box");
+if ($floatBox.length > 0) {
+    var $target = $(".target");
+    var $button = $floatBox.find("button");
+    $floatBox.find("#float-box-opts").on("change", function () {
+        var text, html, opts, floatbox;
 
-if ($dropdownMenu) {
-    var dropdown = new DropdownMenu($dropdownMenu, {
-        preventClose: $input
-    });
+        switch ($(this).val()) {
+            case "dropdown":
+                $button.off();
+                text = {text: "this is a dropdown"};
+                html = dropdownHBS(text);
+                opts = {
+                    closeOnClick: true,
+                    preventClose: ["#float-box-opts", $button],
+                    preventScroll: [".scroll1", ".scroll2"],
+                    closeOnScroll: true
+                };
+                break;
+            case "modal":
+                $floatBox.find("button").off();
+                text = {text: "this is a modal"};
+                html = modalHBS(text);
+                opts = {
+                    hasOverlay: true,
+                    closeOnClick: true,
+                    preventClose: $button
+                };
+                break;
+            default:
+                html = null;
+                break;
+        }
 
-    dropdown.onMenuClose(function(){
-        this.showAll().clearSelection();
-    });
-
-    dropdown.onItemClick(function($this){
-        $input.find("#input").val($this.data("value"));
-    });
-
-    $input.find("#input").on("keyup", function () {
-        var text = $(this).val();
-        dropdown.filter(text).open();
-    });
-
-    $input.find("#input").on("focus", function () {
-        dropdown.open();
+        if (html) {
+            floatbox = new FloatBox(html, opts);
+            floatbox.attachTo($target);
+            $floatBox.find("button").on("click", function () {
+                floatbox.toggle();
+            });
+        }
     });
 }
+

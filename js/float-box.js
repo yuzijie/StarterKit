@@ -95,11 +95,11 @@ FloatBox.prototype.open = function () {
 
 FloatBox.prototype.close = function () {
     if (this.self.is(":visible")) {
-        this.self.hide();
         if (this.opts.hasOverlay === true) {
             scrollbar.resetPadding();
             $body.removeClass("overlay");
         }
+        this.self.hide();
         if (this.boxCloseAction) this.boxCloseAction();
         return true;
     }

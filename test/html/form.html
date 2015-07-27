@@ -1,0 +1,49 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Starter Kit</title>
+    <meta name="description" content="YU's starter kit">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../gen/main.css">
+    <script src="../gen/modernizr-2.8.3.min.js"></script>
+
+    <style>
+        form {
+            width: 400px;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body>
+
+<form method="post" id="usrForm">
+    <label for="name">Name</label>
+    <input type="text" id="name" name="name">
+
+    <label for="email">email</label>
+    <input type="email" id="email" name="email">
+
+    <label for="password">password</label>
+    <input type="password" id="password" name="password">
+
+    <label>multiple choices</label>
+    <div class="checkbox">
+        <input type="checkbox" id="c1" name="checkbox[]" value="c1">
+        <label for="c1">Check Box 1</label>
+        <input type="checkbox" id="c2" name="checkbox[]" value="c2">
+        <label for="c2">Check Box 2</label>
+        <input type="checkbox" id="c3" name="checkbox[]" value="c3">
+        <label for="c3">Check Box 3</label>
+    </div>
+    <label for="textarea">text area</label>
+    <textarea id="textarea" cols="30" rows="10" name="text"></textarea>
+    <input type="submit" value="send">
+</form>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="../gen/jquery-2.1.4.min.js"><\/script>')</script>
+<script src="../gen/main.js"></script>
+</body>
+</html>

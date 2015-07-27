@@ -1,14 +1,16 @@
 var FloatBox = require("../../js/float-box");
-
 var template = require("../../modules/spin-kit/templates/sk-circle.js")("spinner");
 var dropdownHBS = require("../../templates/dropdown.hbs");
 var modalHBS = require("../../templates/modal.hbs");
+var Form = require("../../js/form");
 
+// spin kit
 var $spinkit = $(".spinkit");
-if ($spinkit) {
+if ($spinkit.length > 0) {
     $spinkit.append(template);
 }
 
+// float-box.js
 var $floatBox = $(".float-box");
 if ($floatBox.length > 0) {
     var $target = $(".target");
@@ -53,3 +55,10 @@ if ($floatBox.length > 0) {
     });
 }
 
+// form.js
+var $userForm = $("#usrForm");
+if ($userForm.length > 0) {
+    var form = new Form($userForm, {
+        preventSubmit: true
+    });
+}

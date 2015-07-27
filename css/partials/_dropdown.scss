@@ -25,5 +25,11 @@
         border: map-get($conf, border);
         border-radius: map-get($conf, border-radius);
         z-index: map-get($conf, base-z-index) + 10;
+        @if map-has-key($conf, width) {
+            width: map-get($conf, width);
+        }
+        @if map-has-key($conf, height) {
+            height: map-get($conf, height);
+        }
     }
 }

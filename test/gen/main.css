@@ -507,6 +507,13 @@ body.overlay {
     background-color: rgba(0, 0, 0, 0.75);
     z-index: 20; }
 
+.dropdown {
+  display: none;
+  position: absolute;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+  z-index: 10;
+  overflow: hidden; }
+
 @-webkit-keyframes sk-circleBounceDelay {
   0%, 80%, 100% {
     -webkit-transform: scale(0); }

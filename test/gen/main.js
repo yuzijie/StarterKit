@@ -147,7 +147,7 @@ var PreventScroll = function ($target) {
 };
 module.exports = PreventScroll;
 
-},{"../node_modules/jquery-mousewheel/jquery.mousewheel.js":15}],3:[function(require,module,exports){
+},{"../node_modules/jquery-mousewheel/jquery.mousewheel.js":14}],3:[function(require,module,exports){
 var getScrollbarWidth = function () {
     var scrollDiv = document.createElement('div');
     scrollDiv.className = "scrollbar-measure";
@@ -181,19 +181,11 @@ module.exports = {
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper;
 
-  return "<div class=\"dropdown\">\n    <div>\n        "
-    + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
-    + "\n    </div>\n    <div style=\"height: 100px;overflow: hidden;margin-bottom: 10px\">\n        <div style=\"overflow: auto; height: 100px\" class=\"scroll1\">\n            <div style=\"height: 500px;background: blue\"></div>\n        </div>\n    </div>\n    <div style=\"height: 100px;overflow: hidden\">\n        <div style=\"overflow: auto; height: 100px\" class=\"scroll2\">\n            <div style=\"height: 500px;background: green\"></div>\n        </div>\n    </div>\n</div>\n";
-},"useData":true});
-},{"handlebars/runtime":14}],5:[function(require,module,exports){
-var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-    var helper;
-
   return "<div style=\"padding: 50px;\" class=\"modal\">\n    "
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
     + "\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":14}],6:[function(require,module,exports){
+},{"handlebars/runtime":13}],5:[function(require,module,exports){
 module.exports = function (className) {
     className = className || "spin-kit";
     var output = '<div class="' + className + '">';
@@ -213,7 +205,7 @@ module.exports = function (className) {
     return output;
 };
 
-},{}],7:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -274,7 +266,7 @@ inst['default'] = inst;
 
 exports['default'] = inst;
 module.exports = exports['default'];
-},{"./handlebars/base":8,"./handlebars/exception":9,"./handlebars/no-conflict":10,"./handlebars/runtime":11,"./handlebars/safe-string":12,"./handlebars/utils":13}],8:[function(require,module,exports){
+},{"./handlebars/base":7,"./handlebars/exception":8,"./handlebars/no-conflict":9,"./handlebars/runtime":10,"./handlebars/safe-string":11,"./handlebars/utils":12}],7:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -548,7 +540,7 @@ function createFrame(object) {
 }
 
 /* [args, ]options */
-},{"./exception":9,"./utils":13}],9:[function(require,module,exports){
+},{"./exception":8,"./utils":12}],8:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -587,7 +579,7 @@ Exception.prototype = new Error();
 
 exports['default'] = Exception;
 module.exports = exports['default'];
-},{}],10:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -608,7 +600,7 @@ exports['default'] = function (Handlebars) {
 
 module.exports = exports['default'];
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],11:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -841,7 +833,7 @@ function initData(context, data) {
   }
   return data;
 }
-},{"./base":8,"./exception":9,"./utils":13}],12:[function(require,module,exports){
+},{"./base":7,"./exception":8,"./utils":12}],11:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -856,7 +848,7 @@ SafeString.prototype.toString = SafeString.prototype.toHTML = function () {
 
 exports['default'] = SafeString;
 module.exports = exports['default'];
-},{}],13:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -971,12 +963,12 @@ function blockParams(params, ids) {
 function appendContextPath(contextPath, id) {
   return (contextPath ? contextPath + '.' : '') + id;
 }
-},{}],14:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 // Create a simple path alias to allow browserify to resolve
 // the runtime on a supported path.
 module.exports = require('./dist/cjs/handlebars.runtime')['default'];
 
-},{"./dist/cjs/handlebars.runtime":7}],15:[function(require,module,exports){
+},{"./dist/cjs/handlebars.runtime":6}],14:[function(require,module,exports){
 /*!
  * jQuery Mousewheel 3.1.13
  *
@@ -1199,11 +1191,19 @@ module.exports = require('./dist/cjs/handlebars.runtime')['default'];
 
 }));
 
-},{}],16:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
+var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+    var helper;
+
+  return "<div class=\"dropdown\">\n    <div>\n        "
+    + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
+    + "\n    </div>\n    <div style=\"height: 100px;overflow: hidden;margin-bottom: 10px\">\n        <div style=\"overflow: auto; height: 100px\" class=\"scroll1\">\n            <div style=\"height: 500px;background: blue\"></div>\n        </div>\n    </div>\n    <div style=\"height: 100px;overflow: hidden\">\n        <div style=\"overflow: auto; height: 100px\" class=\"scroll2\">\n            <div style=\"height: 500px;background: green\"></div>\n        </div>\n    </div>\n</div>\n";
+},"useData":true});
+},{"handlebars/runtime":13}],16:[function(require,module,exports){
 var FloatBox = require("../../js/float-box");
 
 var template = require("../../modules/spin-kit/templates/sk-circle.js")("spinner");
-var dropdownHBS = require("../../modules/dropdown/dropdown.hbs");
+var dropdownHBS = require("../../templates/dropdown.hbs");
 var modalHBS = require("../../modules/modal/modal.hbs");
 
 var $spinkit = $(".spinkit");
@@ -1256,4 +1256,4 @@ if ($floatBox.length > 0) {
 }
 
 
-},{"../../js/float-box":1,"../../modules/dropdown/dropdown.hbs":4,"../../modules/modal/modal.hbs":5,"../../modules/spin-kit/templates/sk-circle.js":6}]},{},[16]);
+},{"../../js/float-box":1,"../../modules/modal/modal.hbs":4,"../../modules/spin-kit/templates/sk-circle.js":5,"../../templates/dropdown.hbs":15}]},{},[16]);

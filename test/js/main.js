@@ -1,7 +1,7 @@
 var FloatBox = require("../../js/float-box");
 
 var template = require("../../modules/spin-kit/templates/sk-circle.js")("spinner");
-var dropdownHBS = require("../../modules/dropdown/dropdown.hbs");
+var dropdownHBS = require("../../templates/dropdown.hbs");
 var modalHBS = require("../../modules/modal/modal.hbs");
 
 var $spinkit = $(".spinkit");

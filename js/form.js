@@ -16,7 +16,7 @@ var Form = function (target, options) {
 
     // Options
     this.opts = $.extend({
-        preventSubmit: false
+        preventSubmit: true
     }, options || {});
 
     // Actions

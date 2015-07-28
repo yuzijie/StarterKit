@@ -162,10 +162,26 @@ var Form = function (target, options) {
     this.submitAction = null;
 
     // set Listener
-    this.setListener(this);
+    this.setInputListener(this);
+    this.setSubmitListener(this);
 };
 
-Form.prototype.setListener = function (context) {
+Form.prototype.setSubmitListener = function (context) {
+    context = context || this;
+
+    // on Submit
+    context.$target.on("submit", function (event) {
+        if (context.opts.preventSubmit === true) event.preventDefault();
+
+        if (context.allowSubmit === true) {
+            context.$submit.prop("disabled", true);
+            context.allowSubmit = false;
+            if (context.submitAction) context.submitAction(this, event);
+        }
+    });
+};
+
+Form.prototype.setInputListener = function (context) {
     context = context || this;
 
     // on Focus
@@ -193,17 +209,17 @@ Form.prototype.setListener = function (context) {
             }, 500);
         }
     });
+};
 
-    // on Submit
-    context.$target.on("submit", function (event) {
-        if (context.opts.preventSubmit === true) event.preventDefault();
+Form.prototype.refresh = function () {
+    this.$inputs.off(); // remove all events
 
-        if (context.allowSubmit === true) {
-            context.$submit.prop("disabled", true);
-            context.allowSubmit = false;
-            if (context.submitAction) context.submitAction(this, event);
-        }
-    });
+    // get all inputs and submit buttons
+    this.$inputs = this.$target.find(":input");
+    this.$submit = this.$target.find(":submit");
+
+    // set Listeners
+    this.setInputListener(this);
 };
 
 Form.prototype.buttonText = function (text) {
@@ -1391,9 +1407,12 @@ if ($floatBox.length > 0) {
 // form.js
 var $userForm = $("#usrForm");
 if ($userForm.length > 0) {
-    var form = new Form($userForm);
+    var form = new Form($userForm, {
+        preventSubmit: false
+    });
     form.onSubmit(function(){
         console.log(this.getData());
+        console.log(this.$target.serialize());
     });
 }
 

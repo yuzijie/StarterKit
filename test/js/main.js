@@ -58,8 +58,11 @@ if ($floatBox.length > 0) {
 // form.js
 var $userForm = $("#usrForm");
 if ($userForm.length > 0) {
-    var form = new Form($userForm);
+    var form = new Form($userForm, {
+        preventSubmit: false
+    });
     form.onSubmit(function(){
         console.log(this.getData());
+        console.log(this.$target.serialize());
     });
 }

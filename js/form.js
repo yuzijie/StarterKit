@@ -111,6 +111,10 @@ Form.prototype.getData = function () {
     return output;
 };
 
+Form.prototype.serialize = function () {
+    return this.$target.serialize();
+};
+
 Form.prototype.reEnable = function () {
     this.$submit.prop("disabled", false);
     this.allowSubmit = true;

@@ -47,7 +47,7 @@ FloatBox.prototype.setListener = function () {
     // Close box when clicking outside of it
     if (that.opts.closeOnClick === true) {
         $(document).on("click.floatBox", function (e) {
-            if (that.self.is(e.target) || that.self.has(e.target).length > 0) {
+            if (!that.self.is(e.target) && that.self.has(e.target).length === 0) {
                 that.close();
             }
         });

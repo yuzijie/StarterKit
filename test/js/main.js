@@ -3,6 +3,7 @@ var template = require("../../modules/spin-kit/templates/sk-circle.js")("spinner
 var dropdownHBS = require("../../templates/dropdown.hbs");
 var modalHBS = require("../../templates/modal.hbs");
 var Form = require("../../js/form");
+var Insert = require("../../js/insert");
 
 // spin kit
 var $spinkit = $(".spinkit");
@@ -13,49 +14,42 @@ if ($spinkit.length > 0) {
 // float-box.js
 var $floatBox = $(".float-box");
 if ($floatBox.length > 0) {
-    var $target = $(".target");
-    var $button = $floatBox.find("button");
-    $floatBox.find("#float-box-opts").on("change", function () {
-        var text, html, opts, floatbox;
+    var $target = $(".target"); // to show elements
+    var showcase = new Insert(dropdownHBS, $target);
+    var fbox, options;
+    showcase.onInsert(function ($el) {
+        fbox = new FloatBox($el, options);
+    });
 
-        switch ($(this).val()) {
+    var $select = $floatBox.find("#float-box-opts");
+    $select.change(function () {
+        switch ($select.val()) {
             case "dropdown":
-                $button.off();
-                text = {text: "this is a dropdown"};
-                html = dropdownHBS(text);
-                opts = {
+                options = {
                     closeOnClick: true,
-                    preventClose: ["#float-box-opts", $button],
                     preventScroll: [".scroll1", ".scroll2"],
                     closeOnScroll: true
                 };
+                showcase.changeTemplate(dropdownHBS);
+                showcase.reinsert({text: "this is a dropdown"});
                 break;
             case "modal":
-                $floatBox.find("button").off();
-                text = {text: "this is a modal"};
-                html = modalHBS(text);
-                opts = {
+                options = {
                     hasOverlay: true,
-                    closeOnClick: true,
-                    preventClose: $button
+                    closeOnClick: true
                 };
+                showcase.changeTemplate(modalHBS);
+                showcase.reinsert({text: "this is a dropdown"});
                 break;
             default:
-                html = null;
-                break;
-        }
-
-        if (html) {
-            floatbox = new FloatBox(html, opts);
-            floatbox.attachTo($target);
-            //floatbox.resetListener();
-            $floatBox.find("button").on("click", function () {
-                floatbox.toggle();
-            });
+                showcase.destroy();
+                break
         }
     });
+    $floatBox.find("button").click(function () {
+        fbox.toggle();
+    });
 }
-
 // form.js
 var $userForm = $("#usrForm");
 if ($userForm.length > 0) {

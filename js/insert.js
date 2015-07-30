@@ -27,13 +27,27 @@ Insert.prototype.insert = function (data) {
 };
 
 Insert.prototype.destroy = function () {
-    this.$element.remove();
-    this.$element = null;
+    if (this.$element) {
+        if (this.destroyAction) this.destroyAction(this.$element);
+        this.$element.remove();
+        this.$element = null;
+    }
+    return this;
+};
+
+Insert.prototype.reinsert = function (data) {
+    this.destroy();
+    this.insert(data);
     return this;
 };
 
 Insert.prototype.changeTarget = function (target) {
     this.$target = to$(target); // target to insert
+    return this;
+};
+
+Insert.prototype.changeTemplate = function (template) {
+    this.template = template;
     return this;
 };
 

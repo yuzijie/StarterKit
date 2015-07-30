@@ -30,53 +30,33 @@ var FloatBox = function (box, options) {
         hasOverlay: false      // Box has overlay or not
     }, options);
 
-    // Prevent closing when clicking
-    this.opts.preventClose = [this.self];
-    if (options.preventClose) {
-        handle(options.preventClose, function (item) {
-            that.opts.preventClose.push(to$(item));
-        });
-    }
-
-    // Elements that need scroll prevention
-    this.opts.preventScroll = [];
+    // Prevent Scroll
     if (options.preventScroll) {
         handle(options.preventScroll, function (item) {
-            that.opts.preventScroll.push(that.self.find(item));
-            prevent(that.self.find(item)); // preventScroll
+            prevent(that.self.find(item));
         });
-    } else {
-        that.opts.preventScroll.push(that.self.children());
-        prevent(that.self.children()); // preventScroll
-    }
+    } else prevent(that.self.children());
 
     // Custom actions
     this.boxOpenAction = null;
     this.boxCloseAction = null;
-
-    // Set Listener
-    this.setListener();
 };
 
 FloatBox.prototype.setListener = function () {
     var that = this;
 
+    // Close box when clicking outside of it
+    if (that.opts.closeOnClick === true) {
+        $(document).on("click.floatBox", function (e) {
+            if (!that.self.is(e.target) && that.self.has(e.target).length === 0) {
+                that.close();
+            }
+        });
+    }
     //Close menu on page scrolling
     if (that.opts.closeOnScroll === true) {
         $(window).on("scroll.floatBox", function () {
             that.close();
-        });
-    }
-
-    // Close box when clicking outside of it
-    if (that.opts.closeOnClick === true) {
-        $(document).on("click.floatBox", function (e) {
-            var hide = true, i;
-            for (i = 0; i < that.opts.preventClose.length; i++) {
-                var $element = that.opts.preventClose[i];
-                if ($element.is(e.target) || $element.has(e.target).length > 0) hide = false;
-            }
-            if (hide === true) that.close();
         });
     }
 
@@ -89,29 +69,24 @@ FloatBox.prototype.setListener = function () {
 };
 
 FloatBox.prototype.resetListener = function () {
-    // preventScroll
-    $.each(this.opts.preventScroll, function (index, value) {
-        value.off(".preventScroll");
-    });
-
-    // closeOnScroll
-    $(window).off(".floatBox");
-
-    // closeOnClick
-    $(document).off(".floatBox");
-
-    // closeOnLeave
-    this.self.off("mouseleave");
+    if (this.opts.closeOnClick === true) $(document).off("click.floatBox");
+    if (this.opts.closeOnScroll === true) $(window).off("scroll.floatBox");
+    if (this.opts.closeOnLeave === true) this.self.off("mouseleave.floatBox");
+    return this;
 };
 
 FloatBox.prototype.open = function () {
     if (this.self.is(":hidden")) {
+        var that = this;
         if (this.opts.hasOverlay === true) {
             scrollbar.setPadding();
             $body.addClass("overlay");
         }
-        this.self.show();
         if (this.boxOpenAction) this.boxOpenAction();
+        this.self.show();
+        setTimeout(function () {
+            that.setListener();
+        }, 50);
         return true;
     }
     return false;
@@ -125,6 +100,7 @@ FloatBox.prototype.close = function () {
         }
         this.self.hide();
         if (this.boxCloseAction) this.boxCloseAction();
+        this.resetListener();
         return true;
     }
     return false;
@@ -156,7 +132,7 @@ FloatBox.prototype.attachTo = function (target) {
 
 module.exports = FloatBox;
 
-},{"./prevent-scroll":3,"./scrollbar":4}],2:[function(require,module,exports){
+},{"./prevent-scroll":4,"./scrollbar":5}],2:[function(require,module,exports){
 var timer = null;
 
 // helper function
@@ -308,6 +284,72 @@ Form.prototype.onSubmit = function (func) {
 module.exports = Form;
 
 },{}],3:[function(require,module,exports){
+// helper functions
+function to$(item) {
+    return (item instanceof jQuery) ? item : $(item);
+}
+
+var Insert = function (template, target, options) {
+    this.$target = to$(target); // target to insert
+    this.template = template; // template file
+    this.$element = null;
+
+    // Options
+    this.opts = $.extend({
+        insertMethod: "append"
+    }, options || {});
+
+    // Actions
+    this.insertAction = null;
+    this.destroyAction = null;
+};
+
+Insert.prototype.insert = function (data) {
+    data = data || {};
+    this.$element = $(this.template(data));
+    if (this.insertAction) this.insertAction(this.$element);
+    this.$target[this.opts.insertMethod](this.$element);
+    return this;
+};
+
+Insert.prototype.destroy = function () {
+    if (this.$element) {
+        if (this.destroyAction) this.destroyAction(this.$element);
+        this.$element.remove();
+        this.$element = null;
+    }
+    return this;
+};
+
+Insert.prototype.reinsert = function (data) {
+    this.destroy();
+    this.insert(data);
+    return this;
+};
+
+Insert.prototype.changeTarget = function (target) {
+    this.$target = to$(target); // target to insert
+    return this;
+};
+
+Insert.prototype.changeTemplate = function (template) {
+    this.template = template;
+    return this;
+};
+
+Insert.prototype.onInsert = function (func) {
+    if ($.isFunction(func)) this.insertAction = func;
+    return this;
+};
+
+Insert.prototype.onDestroy = function (func) {
+    if ($.isFunction(func)) this.destroyAction = func;
+    return this;
+};
+
+module.exports = Insert;
+
+},{}],4:[function(require,module,exports){
 require("../node_modules/jquery-mousewheel/jquery.mousewheel.js")($);
 var PreventScroll = function ($target) {
     $target = ($target instanceof jQuery) ? $target : $($target);
@@ -322,7 +364,7 @@ var PreventScroll = function ($target) {
 };
 module.exports = PreventScroll;
 
-},{"../node_modules/jquery-mousewheel/jquery.mousewheel.js":14}],4:[function(require,module,exports){
+},{"../node_modules/jquery-mousewheel/jquery.mousewheel.js":15}],5:[function(require,module,exports){
 var getScrollbarWidth = function () {
     var scrollDiv = document.createElement('div');
     scrollDiv.className = "scrollbar-measure";
@@ -352,7 +394,7 @@ module.exports = {
     resetPadding: resetPadding
 };
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 module.exports = function (className) {
     className = className || "spin-kit";
     var output = '<div class="' + className + '">';
@@ -372,7 +414,7 @@ module.exports = function (className) {
     return output;
 };
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -433,7 +475,7 @@ inst['default'] = inst;
 
 exports['default'] = inst;
 module.exports = exports['default'];
-},{"./handlebars/base":7,"./handlebars/exception":8,"./handlebars/no-conflict":9,"./handlebars/runtime":10,"./handlebars/safe-string":11,"./handlebars/utils":12}],7:[function(require,module,exports){
+},{"./handlebars/base":8,"./handlebars/exception":9,"./handlebars/no-conflict":10,"./handlebars/runtime":11,"./handlebars/safe-string":12,"./handlebars/utils":13}],8:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -707,7 +749,7 @@ function createFrame(object) {
 }
 
 /* [args, ]options */
-},{"./exception":8,"./utils":12}],8:[function(require,module,exports){
+},{"./exception":9,"./utils":13}],9:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -746,7 +788,7 @@ Exception.prototype = new Error();
 
 exports['default'] = Exception;
 module.exports = exports['default'];
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -767,7 +809,7 @@ exports['default'] = function (Handlebars) {
 
 module.exports = exports['default'];
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -1000,7 +1042,7 @@ function initData(context, data) {
   }
   return data;
 }
-},{"./base":7,"./exception":8,"./utils":12}],11:[function(require,module,exports){
+},{"./base":8,"./exception":9,"./utils":13}],12:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -1015,7 +1057,7 @@ SafeString.prototype.toString = SafeString.prototype.toHTML = function () {
 
 exports['default'] = SafeString;
 module.exports = exports['default'];
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -1130,12 +1172,12 @@ function blockParams(params, ids) {
 function appendContextPath(contextPath, id) {
   return (contextPath ? contextPath + '.' : '') + id;
 }
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 // Create a simple path alias to allow browserify to resolve
 // the runtime on a supported path.
 module.exports = require('./dist/cjs/handlebars.runtime')['default'];
 
-},{"./dist/cjs/handlebars.runtime":6}],14:[function(require,module,exports){
+},{"./dist/cjs/handlebars.runtime":7}],15:[function(require,module,exports){
 /*!
  * jQuery Mousewheel 3.1.13
  *
@@ -1358,7 +1400,7 @@ module.exports = require('./dist/cjs/handlebars.runtime')['default'];
 
 }));
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper;
 
@@ -1366,7 +1408,7 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
     + "\n    </div>\n    <div style=\"height: 100px;overflow: hidden;margin-bottom: 10px\">\n        <div style=\"overflow: auto; height: 100px\" class=\"scroll1\">\n            <div style=\"height: 500px;background: blue\"></div>\n        </div>\n    </div>\n    <div style=\"height: 100px;overflow: hidden\">\n        <div style=\"overflow: auto; height: 100px\" class=\"scroll2\">\n            <div style=\"height: 500px;background: green\"></div>\n        </div>\n    </div>\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":13}],16:[function(require,module,exports){
+},{"handlebars/runtime":14}],17:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper;
 
@@ -1374,12 +1416,13 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
     + "\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":13}],17:[function(require,module,exports){
+},{"handlebars/runtime":14}],18:[function(require,module,exports){
 var FloatBox = require("../../js/float-box");
 var template = require("../../modules/spin-kit/templates/sk-circle.js")("spinner");
 var dropdownHBS = require("../../templates/dropdown.hbs");
 var modalHBS = require("../../templates/modal.hbs");
 var Form = require("../../js/form");
+var Insert = require("../../js/insert");
 
 // spin kit
 var $spinkit = $(".spinkit");
@@ -1390,49 +1433,42 @@ if ($spinkit.length > 0) {
 // float-box.js
 var $floatBox = $(".float-box");
 if ($floatBox.length > 0) {
-    var $target = $(".target");
-    var $button = $floatBox.find("button");
-    $floatBox.find("#float-box-opts").on("change", function () {
-        var text, html, opts, floatbox;
+    var $target = $(".target"); // to show elements
+    var showcase = new Insert(dropdownHBS, $target);
+    var fbox, options;
+    showcase.onInsert(function ($el) {
+        fbox = new FloatBox($el, options);
+    });
 
-        switch ($(this).val()) {
+    var $select = $floatBox.find("#float-box-opts");
+    $select.change(function () {
+        switch ($select.val()) {
             case "dropdown":
-                $button.off();
-                text = {text: "this is a dropdown"};
-                html = dropdownHBS(text);
-                opts = {
+                options = {
                     closeOnClick: true,
-                    preventClose: ["#float-box-opts", $button],
                     preventScroll: [".scroll1", ".scroll2"],
                     closeOnScroll: true
                 };
+                showcase.changeTemplate(dropdownHBS);
+                showcase.reinsert({text: "this is a dropdown"});
                 break;
             case "modal":
-                $floatBox.find("button").off();
-                text = {text: "this is a modal"};
-                html = modalHBS(text);
-                opts = {
+                options = {
                     hasOverlay: true,
-                    closeOnClick: true,
-                    preventClose: $button
+                    closeOnClick: true
                 };
+                showcase.changeTemplate(modalHBS);
+                showcase.reinsert({text: "this is a dropdown"});
                 break;
             default:
-                html = null;
-                break;
-        }
-
-        if (html) {
-            floatbox = new FloatBox(html, opts);
-            floatbox.attachTo($target);
-            //floatbox.resetListener();
-            $floatBox.find("button").on("click", function () {
-                floatbox.toggle();
-            });
+                showcase.destroy();
+                break
         }
     });
+    $floatBox.find("button").click(function () {
+        fbox.toggle();
+    });
 }
-
 // form.js
 var $userForm = $("#usrForm");
 if ($userForm.length > 0) {
@@ -1443,4 +1479,4 @@ if ($userForm.length > 0) {
     });
 }
 
-},{"../../js/float-box":1,"../../js/form":2,"../../modules/spin-kit/templates/sk-circle.js":5,"../../templates/dropdown.hbs":15,"../../templates/modal.hbs":16}]},{},[17]);
+},{"../../js/float-box":1,"../../js/form":2,"../../js/insert":3,"../../modules/spin-kit/templates/sk-circle.js":6,"../../templates/dropdown.hbs":16,"../../templates/modal.hbs":17}]},{},[18]);

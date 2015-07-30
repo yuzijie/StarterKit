@@ -13,7 +13,7 @@ var Form = function (target, options) {
 
     // Options
     this.opts = $.extend({
-        preventSubmit: true
+        preventDefaultSubmit: true
     }, options || {});
 
     // Actions
@@ -33,7 +33,7 @@ Form.prototype.setSubmitListener = function (context) {
 
     // on Submit
     context.$target.on("submit.form", function (event) {
-        if (context.opts.preventSubmit === true) event.preventDefault();
+        if (context.opts.preventDefaultSubmit === true) event.preventDefault();
 
         if (context.allowSubmit === true) {
             context.$submit.prop("disabled", true);

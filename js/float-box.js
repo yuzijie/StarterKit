@@ -70,14 +70,12 @@ FloatBox.prototype.setListener = function () {
     // Close box when clicking outside of it
     if (that.opts.closeOnClick === true) {
         $(document).on("click.floatBox", function (e) {
-            if (that.self.is(":visible")) {
-                var hide = true, i;
-                for (i = 0; i < that.opts.preventClose.length; i++) {
-                    var $element = that.opts.preventClose[i];
-                    if ($element.is(e.target) || $element.has(e.target).length > 0) hide = false;
-                }
-                if (hide === true) that.close();
+            var hide = true, i;
+            for (i = 0; i < that.opts.preventClose.length; i++) {
+                var $element = that.opts.preventClose[i];
+                if ($element.is(e.target) || $element.has(e.target).length > 0) hide = false;
             }
+            if (hide === true) that.close();
         });
     }
 

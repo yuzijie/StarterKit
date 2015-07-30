@@ -48,6 +48,7 @@ if ($floatBox.length > 0) {
         if (html) {
             floatbox = new FloatBox(html, opts);
             floatbox.attachTo($target);
+            //floatbox.resetListener();
             $floatBox.find("button").on("click", function () {
                 floatbox.toggle();
             });

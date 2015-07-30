@@ -1,8 +1,9 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var preventScroll = require("./prevent-scroll");
+var prevent = require("./prevent-scroll");
 var scrollbar = require("./scrollbar");
 var $body = $(document.body);
 
+// helper functions
 function to$(item) {
     return (item instanceof jQuery) ? item : $(item);
 }
@@ -15,6 +16,7 @@ function handle(option, func) {
     } else func(option);
 }
 
+// Float box Class
 var FloatBox = function (box, options) {
     this.self = to$(box);
     var that = this;
@@ -29,19 +31,24 @@ var FloatBox = function (box, options) {
     }, options);
 
     // Prevent closing when clicking
-    this.preventClose = [this.self];
+    this.opts.preventClose = [this.self];
     if (options.preventClose) {
         handle(options.preventClose, function (item) {
-            that.preventClose.push(to$(item));
+            that.opts.preventClose.push(to$(item));
         });
     }
 
     // Elements that need scroll prevention
+    this.opts.preventScroll = [];
     if (options.preventScroll) {
         handle(options.preventScroll, function (item) {
-            preventScroll(that.self.find(item));
+            that.opts.preventScroll.push(that.self.find(item));
+            prevent(that.self.find(item)); // preventScroll
         });
-    } else preventScroll(that.self.children());
+    } else {
+        that.opts.preventScroll.push(that.self.children());
+        prevent(that.self.children()); // preventScroll
+    }
 
     // Custom actions
     this.boxOpenAction = null;
@@ -56,17 +63,17 @@ FloatBox.prototype.setListener = function () {
 
     //Close menu on page scrolling
     if (that.opts.closeOnScroll === true) {
-        $(window).on("scroll", function () {
+        $(window).on("scroll.floatBox", function () {
             that.close();
         });
     }
 
     // Close box when clicking outside of it
     if (that.opts.closeOnClick === true) {
-        $(document).on("click", function (e) {
+        $(document).on("click.floatBox", function (e) {
             var hide = true, i;
-            for (i = 0; i < that.preventClose.length; i++) {
-                var $element = that.preventClose[i];
+            for (i = 0; i < that.opts.preventClose.length; i++) {
+                var $element = that.opts.preventClose[i];
                 if ($element.is(e.target) || $element.has(e.target).length > 0) hide = false;
             }
             if (hide === true) that.close();
@@ -75,10 +82,26 @@ FloatBox.prototype.setListener = function () {
 
     // Close box after mouse left the box area
     if (that.opts.closeOnLeave === true) {
-        that.self.on("mouseleave", function () {
+        that.self.on("mouseleave.floatBox", function () {
             that.close();
         });
     }
+};
+
+FloatBox.prototype.resetListener = function () {
+    // preventScroll
+    $.each(this.opts.preventScroll, function (index, value) {
+        value.off(".preventScroll");
+    });
+
+    // closeOnScroll
+    $(window).off(".floatBox");
+
+    // closeOnClick
+    $(document).off(".floatBox");
+
+    // closeOnLeave
+    this.self.off("mouseleave");
 };
 
 FloatBox.prototype.open = function () {
@@ -122,6 +145,7 @@ FloatBox.prototype.onClose = function (func) {
     return this;
 };
 
+// 把 FloatBox 放在某个元素内
 FloatBox.prototype.attachTo = function (target) {
     if (target) {
         target = to$(target);
@@ -246,6 +270,10 @@ Form.prototype.getData = function () {
     return output;
 };
 
+Form.prototype.serialize = function () {
+    return this.$target.serialize();
+};
+
 Form.prototype.reEnable = function () {
     this.$submit.prop("disabled", false);
     this.allowSubmit = true;
@@ -283,7 +311,7 @@ module.exports = Form;
 require("../node_modules/jquery-mousewheel/jquery.mousewheel.js")($);
 var PreventScroll = function ($target) {
     $target = ($target instanceof jQuery) ? $target : $($target);
-    $target.on("mousewheel", function (e) {
+    $target.on("mousewheel.preventScroll", function (e) {
         //console.log("scrollTop: " + $target.scrollTop() + " scrollHeight: " + $target[0].scrollHeight + " outerHeight: " + $target.outerHeight());
         e.stopPropagation();
         if (($target.scrollTop() >= $target[0].scrollHeight - $target.outerHeight() && e.deltaY < 0) ||
@@ -1334,7 +1362,7 @@ module.exports = require('./dist/cjs/handlebars.runtime')['default'];
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper;
 
-  return "<div class=\"dropdown\">\n    <div>\n        "
+  return "<div class=\"dropdown\">\n    <div style=\"height: 40px;\">\n        "
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
     + "\n    </div>\n    <div style=\"height: 100px;overflow: hidden;margin-bottom: 10px\">\n        <div style=\"overflow: auto; height: 100px\" class=\"scroll1\">\n            <div style=\"height: 500px;background: blue\"></div>\n        </div>\n    </div>\n    <div style=\"height: 100px;overflow: hidden\">\n        <div style=\"overflow: auto; height: 100px\" class=\"scroll2\">\n            <div style=\"height: 500px;background: green\"></div>\n        </div>\n    </div>\n</div>\n";
 },"useData":true});
@@ -1397,6 +1425,7 @@ if ($floatBox.length > 0) {
         if (html) {
             floatbox = new FloatBox(html, opts);
             floatbox.attachTo($target);
+            //floatbox.resetListener();
             $floatBox.find("button").on("click", function () {
                 floatbox.toggle();
             });

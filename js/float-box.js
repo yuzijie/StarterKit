@@ -29,53 +29,33 @@ var FloatBox = function (box, options) {
         hasOverlay: false      // Box has overlay or not
     }, options);
 
-    // Prevent closing when clicking
-    this.opts.preventClose = [this.self];
-    if (options.preventClose) {
-        handle(options.preventClose, function (item) {
-            that.opts.preventClose.push(to$(item));
-        });
-    }
-
     // Elements that need scroll prevention
-    this.opts.preventScroll = [];
     if (options.preventScroll) {
         handle(options.preventScroll, function (item) {
-            that.opts.preventScroll.push(that.self.find(item));
             prevent(that.self.find(item)); // preventScroll
         });
-    } else {
-        that.opts.preventScroll.push(that.self.children());
-        prevent(that.self.children()); // preventScroll
-    }
+    } else prevent(that.self.children()); // preventScroll
 
     // Custom actions
     this.boxOpenAction = null;
     this.boxCloseAction = null;
-
-    // Set Listener
-    this.setListener();
 };
 
 FloatBox.prototype.setListener = function () {
     var that = this;
 
+    // Close box when clicking outside of it
+    if (that.opts.closeOnClick === true) {
+        $(document).on("click.floatBox", function (e) {
+            if (that.self.is(e.target) || that.self.has(e.target).length > 0) {
+                that.close();
+            }
+        });
+    }
     //Close menu on page scrolling
     if (that.opts.closeOnScroll === true) {
         $(window).on("scroll.floatBox", function () {
             that.close();
-        });
-    }
-
-    // Close box when clicking outside of it
-    if (that.opts.closeOnClick === true) {
-        $(document).on("click.floatBox", function (e) {
-            var hide = true, i;
-            for (i = 0; i < that.opts.preventClose.length; i++) {
-                var $element = that.opts.preventClose[i];
-                if ($element.is(e.target) || $element.has(e.target).length > 0) hide = false;
-            }
-            if (hide === true) that.close();
         });
     }
 
@@ -88,19 +68,10 @@ FloatBox.prototype.setListener = function () {
 };
 
 FloatBox.prototype.resetListener = function () {
-    // preventScroll
-    $.each(this.opts.preventScroll, function (index, value) {
-        value.off(".preventScroll");
-    });
-
-    // closeOnScroll
-    $(window).off(".floatBox");
-
-    // closeOnClick
-    $(document).off(".floatBox");
-
-    // closeOnLeave
-    this.self.off("mouseleave");
+    if (this.opts.closeOnClick === true) $(document).off("click.floatBox");
+    if (this.opts.closeOnScroll === true) $(window).off("scroll.floatBox");
+    if (this.opts.closeOnLeave === true) this.self.off("mouseleave.floatBox");
+    return this;
 };
 
 FloatBox.prototype.open = function () {
@@ -109,8 +80,9 @@ FloatBox.prototype.open = function () {
             scrollbar.setPadding();
             $body.addClass("overlay");
         }
-        this.self.show();
         if (this.boxOpenAction) this.boxOpenAction();
+        this.self.show();
+        this.setListener();
         return true;
     }
     return false;
@@ -124,6 +96,7 @@ FloatBox.prototype.close = function () {
         }
         this.self.hide();
         if (this.boxCloseAction) this.boxCloseAction();
+        this.resetListener();
         return true;
     }
     return false;

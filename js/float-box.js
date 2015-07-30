@@ -82,7 +82,9 @@ FloatBox.prototype.open = function () {
         }
         if (this.boxOpenAction) this.boxOpenAction();
         this.self.show();
-        this.setListener();
+        setTimeout(function () {
+            this.setListener();
+        }, 50);
         return true;
     }
     return false;

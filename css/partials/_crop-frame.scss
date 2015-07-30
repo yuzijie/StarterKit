@@ -1,0 +1,32 @@
+%crop-frame {
+    position: relative;
+    background: white;
+    display: inline-block;
+
+    .overlay {
+        display: none;
+        @include position(absolute, 0 0 0 0);
+    }
+}
+
+@mixin crop-frame($conf:()) {
+    $default: (
+            name: "#crop-frame",
+            overlay-opacity: 0.5,
+            overlay-background-color: white,
+            frame-border-radius: $base-border-radius,
+            frame-padding: em(5)
+    );
+    $conf: map-merge($default, $conf);
+
+    #{map-get($conf, name)} {
+        @extend %crop-frame;
+        border-radius: map-get($conf, frame-border-radius);
+        padding: map-get($conf, frame-padding);
+
+        .overlay {
+            opacity: map-get($conf, overlay-opacity);
+            background-color: map-get($conf, overlay-background-color);
+        }
+    }
+}

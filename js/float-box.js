@@ -1,7 +1,8 @@
-var preventScroll = require("./prevent-scroll");
+var prevent = require("./prevent-scroll");
 var scrollbar = require("./scrollbar");
 var $body = $(document.body);
 
+// helper functions
 function to$(item) {
     return (item instanceof jQuery) ? item : $(item);
 }
@@ -14,6 +15,7 @@ function handle(option, func) {
     } else func(option);
 }
 
+// Float box Class
 var FloatBox = function (box, options) {
     this.self = to$(box);
     var that = this;
@@ -28,19 +30,24 @@ var FloatBox = function (box, options) {
     }, options);
 
     // Prevent closing when clicking
-    this.preventClose = [this.self];
+    this.opts.preventClose = [this.self];
     if (options.preventClose) {
         handle(options.preventClose, function (item) {
-            that.preventClose.push(to$(item));
+            that.opts.preventClose.push(to$(item));
         });
     }
 
     // Elements that need scroll prevention
+    this.opts.preventScroll = [];
     if (options.preventScroll) {
         handle(options.preventScroll, function (item) {
-            preventScroll(that.self.find(item));
+            that.opts.preventScroll.push(that.self.find(item));
+            prevent(that.self.find(item)); // preventScroll
         });
-    } else preventScroll(that.self.children());
+    } else {
+        that.opts.preventScroll.push(that.self.children());
+        prevent(that.self.children()); // preventScroll
+    }
 
     // Custom actions
     this.boxOpenAction = null;
@@ -55,17 +62,17 @@ FloatBox.prototype.setListener = function () {
 
     //Close menu on page scrolling
     if (that.opts.closeOnScroll === true) {
-        $(window).on("scroll", function () {
+        $(window).on("scroll.floatBox", function () {
             that.close();
         });
     }
 
     // Close box when clicking outside of it
     if (that.opts.closeOnClick === true) {
-        $(document).on("click", function (e) {
+        $(document).on("click.floatBox", function (e) {
             var hide = true, i;
-            for (i = 0; i < that.preventClose.length; i++) {
-                var $element = that.preventClose[i];
+            for (i = 0; i < that.opts.preventClose.length; i++) {
+                var $element = that.opts.preventClose[i];
                 if ($element.is(e.target) || $element.has(e.target).length > 0) hide = false;
             }
             if (hide === true) that.close();
@@ -74,10 +81,26 @@ FloatBox.prototype.setListener = function () {
 
     // Close box after mouse left the box area
     if (that.opts.closeOnLeave === true) {
-        that.self.on("mouseleave", function () {
+        that.self.on("mouseleave.floatBox", function () {
             that.close();
         });
     }
+};
+
+FloatBox.prototype.resetListener = function () {
+    // preventScroll
+    $.each(this.opts.preventScroll, function (index, value) {
+        value.off(".preventScroll");
+    });
+
+    // closeOnScroll
+    $(window).off(".floatBox");
+
+    // closeOnClick
+    $(document).off(".floatBox");
+
+    // closeOnLeave
+    this.self.off("mouseleave");
 };
 
 FloatBox.prototype.open = function () {
@@ -121,6 +144,7 @@ FloatBox.prototype.onClose = function (func) {
     return this;
 };
 
+// 把 FloatBox 放在某个元素内
 FloatBox.prototype.attachTo = function (target) {
     if (target) {
         target = to$(target);

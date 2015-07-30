@@ -6,7 +6,7 @@
     * window-scroll.js：可以手动停止页面滚动，但是用处不是很大
     * scrollbar.js：当 Body 设置为 `overflow: hidden` 时候，为解决滚动条消失问题，添加 right padding
     * fake-select.js：把 HTML 元素伪装成 HTML select，并提供 select 的所有功能
-    * validation.js：验证表单
+    * validator.js：验证表单
 * 元素
     * float-box.js：定义页面中所有浮动元素的行为
     * form.js：定义页面中 Form 的行为，简化为 Form 编程过程

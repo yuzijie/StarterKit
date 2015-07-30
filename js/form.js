@@ -36,8 +36,7 @@ Form.prototype.setSubmitListener = function (context) {
         if (context.opts.preventDefaultSubmit === true) event.preventDefault();
 
         if (context.allowSubmit === true) {
-            context.$submit.prop("disabled", true);
-            context.allowSubmit = false;
+            context.disableSubmit();
             if (context.submitAction) context.submitAction(this, event);
         }
     });
@@ -115,9 +114,16 @@ Form.prototype.serialize = function () {
     return this.$target.serialize();
 };
 
-Form.prototype.reEnable = function () {
+Form.prototype.enableSubmit = function () {
     this.$submit.prop("disabled", false);
     this.allowSubmit = true;
+    return this;
+};
+
+Form.prototype.disableSubmit = function () {
+    this.$submit.prop("disabled", true);
+    this.allowSubmit = false;
+    return this;
 };
 
 // Functions

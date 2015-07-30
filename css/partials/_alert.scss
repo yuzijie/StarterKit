@@ -12,8 +12,10 @@
     // config
     $default: (
             name: ".alert",
-            background-color: white,
-            padding: em(20)
+            background-color: #FF8AAD,
+            padding: em(20),
+            border-radius: $base-border-radius,
+            color: black
     );
     $conf: map-merge($default, $conf);
 
@@ -26,6 +28,8 @@
             background-color: map-get($conf, background-color);
             @include material-shadow(2);
             padding: map-get($conf, padding);
+            border-radius: map-get($conf, border-radius);
+            color: map-get($conf, color);
         }
     }
 }

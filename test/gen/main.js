@@ -1452,13 +1452,19 @@ var $floatBox = $(".float-box");
 if ($floatBox.length > 0) {
     var $target = $(".target"); // to show elements
     var showcase = new Insert(dropdownHBS, $target);
+    var $button = $floatBox.find("button");
     var fbox, options;
     showcase.onInsert(function ($el) {
         fbox = new FloatBox($el, options);
         fbox.self.find("button").click(function () {
-            console.log("yeah close");
             fbox.close();
         });
+        $button.on("click", function () {
+            fbox.toggle();
+        });
+    });
+    showcase.onDestroy(function () {
+        $button.off("click");
     });
 
     var $select = $floatBox.find("#float-box-opts");
@@ -1482,16 +1488,15 @@ if ($floatBox.length > 0) {
                 showcase.reinsert({text: "this is a dropdown"});
                 break;
             case "alert":
+                options = {};
                 showcase.changeTemplate(alertHBS);
                 showcase.reinsert({text: "这是一个警告！"});
                 break;
             default:
+                options = {};
                 showcase.destroy();
                 break
         }
-    });
-    $floatBox.find("button").click(function () {
-        fbox.toggle();
     });
 }
 // form.js

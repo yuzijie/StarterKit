@@ -620,8 +620,10 @@ body.overlay {
   -ms-transform: translate(-50%, -50%);
   -o-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
-  background-color: white;
+  background-color: #FF8AAD;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
-  padding: 1.25em; }
+  padding: 1.25em;
+  border-radius: 3px;
+  color: black; }
 
 /*# sourceMappingURL=main.css.map */

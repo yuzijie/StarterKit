@@ -1410,11 +1410,19 @@ module.exports = require('./dist/cjs/handlebars.runtime')['default'];
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper;
 
+  return "<div class=\"alert\">\n    <div class=\"overlay\"></div>\n    <div class=\"inner\">\n        "
+    + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
+    + "\n        <button>确定</button>\n    </div>\n</div>\n";
+},"useData":true});
+},{"handlebars/runtime":14}],17:[function(require,module,exports){
+var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+    var helper;
+
   return "<div class=\"dropdown\">\n    <div style=\"height: 40px;\">\n        "
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
     + "\n    </div>\n    <div style=\"height: 100px;overflow: hidden;margin-bottom: 10px\">\n        <div style=\"overflow: auto; height: 100px\" class=\"scroll1\">\n            <div style=\"height: 500px;background: blue\"></div>\n        </div>\n    </div>\n    <div style=\"height: 100px;overflow: hidden\">\n        <div style=\"overflow: auto; height: 100px\" class=\"scroll2\">\n            <div style=\"height: 500px;background: green\"></div>\n        </div>\n    </div>\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":14}],17:[function(require,module,exports){
+},{"handlebars/runtime":14}],18:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper;
 
@@ -1422,13 +1430,16 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
     + "\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":14}],18:[function(require,module,exports){
+},{"handlebars/runtime":14}],19:[function(require,module,exports){
 var FloatBox = require("../../js/float-box");
 var template = require("../../modules/spin-kit/templates/sk-circle.js")("spinner");
-var dropdownHBS = require("../../templates/dropdown.hbs");
-var modalHBS = require("../../templates/modal.hbs");
 var Form = require("../../js/form");
 var Insert = require("../../js/insert");
+
+// templates
+var dropdownHBS = require("../../templates/dropdown.hbs");
+var modalHBS = require("../../templates/modal.hbs");
+var alertHBS = require("../../templates/alert.hbs");
 
 // spin kit
 var $spinkit = $(".spinkit");
@@ -1444,6 +1455,10 @@ if ($floatBox.length > 0) {
     var fbox, options;
     showcase.onInsert(function ($el) {
         fbox = new FloatBox($el, options);
+        fbox.self.find("button").click(function () {
+            console.log("yeah close");
+            fbox.close();
+        });
     });
 
     var $select = $floatBox.find("#float-box-opts");
@@ -1466,6 +1481,10 @@ if ($floatBox.length > 0) {
                 showcase.changeTemplate(modalHBS);
                 showcase.reinsert({text: "this is a dropdown"});
                 break;
+            case "alert":
+                showcase.changeTemplate(alertHBS);
+                showcase.reinsert({text: "这是一个警告！"});
+                break;
             default:
                 showcase.destroy();
                 break
@@ -1485,4 +1504,4 @@ if ($userForm.length > 0) {
     });
 }
 
-},{"../../js/float-box":1,"../../js/form":2,"../../js/insert":3,"../../modules/spin-kit/templates/sk-circle.js":6,"../../templates/dropdown.hbs":16,"../../templates/modal.hbs":17}]},{},[18]);
+},{"../../js/float-box":1,"../../js/form":2,"../../js/insert":3,"../../modules/spin-kit/templates/sk-circle.js":6,"../../templates/alert.hbs":16,"../../templates/dropdown.hbs":17,"../../templates/modal.hbs":18}]},{},[19]);

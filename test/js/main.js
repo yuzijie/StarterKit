@@ -1,9 +1,12 @@
 var FloatBox = require("../../js/float-box");
 var template = require("../../modules/spin-kit/templates/sk-circle.js")("spinner");
-var dropdownHBS = require("../../templates/dropdown.hbs");
-var modalHBS = require("../../templates/modal.hbs");
 var Form = require("../../js/form");
 var Insert = require("../../js/insert");
+
+// templates
+var dropdownHBS = require("../../templates/dropdown.hbs");
+var modalHBS = require("../../templates/modal.hbs");
+var alertHBS = require("../../templates/alert.hbs");
 
 // spin kit
 var $spinkit = $(".spinkit");
@@ -19,6 +22,10 @@ if ($floatBox.length > 0) {
     var fbox, options;
     showcase.onInsert(function ($el) {
         fbox = new FloatBox($el, options);
+        fbox.self.find("button").click(function () {
+            console.log("yeah close");
+            fbox.close();
+        });
     });
 
     var $select = $floatBox.find("#float-box-opts");
@@ -40,6 +47,10 @@ if ($floatBox.length > 0) {
                 };
                 showcase.changeTemplate(modalHBS);
                 showcase.reinsert({text: "this is a dropdown"});
+                break;
+            case "alert":
+                showcase.changeTemplate(alertHBS);
+                showcase.reinsert({text: "这是一个警告！"});
                 break;
             default:
                 showcase.destroy();

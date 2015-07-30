@@ -1,0 +1,31 @@
+%alert {
+    @include position(fixed, 0 0 0 0);
+    display: none;
+    .overlay {
+        @include position(fixed, 0 0 0 0);
+        background-color: black;
+        opacity: 0;
+    }
+}
+
+@mixin alert($conf:()) {
+    // config
+    $default: (
+            name: ".alert",
+            background-color: white,
+            padding: em(20)
+    );
+    $conf: map-merge($default, $conf);
+
+    #{map-get($conf, name)} {
+        @extend %alert;
+
+        .inner {
+            @include position(fixed, 50% null null 50%);
+            @include transform(translate(-50%, -50%));
+            background-color: map-get($conf, background-color);
+            @include material-shadow(2);
+            padding: map-get($conf, padding);
+        }
+    }
+}

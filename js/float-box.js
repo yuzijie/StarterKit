@@ -29,12 +29,12 @@ var FloatBox = function (box, options) {
         hasOverlay: false      // Box has overlay or not
     }, options);
 
-    // Elements that need scroll prevention
+    // Prevent Scroll
     if (options.preventScroll) {
         handle(options.preventScroll, function (item) {
-            prevent(that.self.find(item)); // preventScroll
+            prevent(that.self.find(item));
         });
-    } else prevent(that.self.children()); // preventScroll
+    } else prevent(that.self.children());
 
     // Custom actions
     this.boxOpenAction = null;

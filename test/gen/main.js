@@ -157,15 +157,12 @@ FloatBox.prototype.attachTo = function (target) {
 module.exports = FloatBox;
 
 },{"./prevent-scroll":3,"./scrollbar":4}],2:[function(require,module,exports){
+var timer = null;
+
+// helper function
 function to$(item) {
     return (item instanceof jQuery) ? item : $(item);
 }
-
-//function endsWith(str, suffix) {
-//    return str.indexOf(suffix, str.length - suffix.length) !== -1;
-//}
-
-var timer = null;
 
 var Form = function (target, options) {
     this.$target = to$(target);
@@ -175,7 +172,7 @@ var Form = function (target, options) {
 
     // Options
     this.opts = $.extend({
-        preventSubmit: true
+        preventDefaultSubmit: true
     }, options || {});
 
     // Actions
@@ -194,8 +191,8 @@ Form.prototype.setSubmitListener = function (context) {
     context = context || this;
 
     // on Submit
-    context.$target.on("submit", function (event) {
-        if (context.opts.preventSubmit === true) event.preventDefault();
+    context.$target.on("submit.form", function (event) {
+        if (context.opts.preventDefaultSubmit === true) event.preventDefault();
 
         if (context.allowSubmit === true) {
             context.$submit.prop("disabled", true);
@@ -209,22 +206,22 @@ Form.prototype.setInputListener = function (context) {
     context = context || this;
 
     // on Focus
-    context.$inputs.on("focus", function () {
+    context.$inputs.on("focus.form", function () {
         if (context.inputFocusAction) context.inputFocusAction(this);
     });
 
     // on Blur
-    context.$inputs.on("blur", function () {
+    context.$inputs.on("blur.form", function () {
         if (context.inputBlurAction) context.inputBlurAction(this);
     });
 
     // on Change
-    context.$inputs.on("change", function () {
+    context.$inputs.on("change.form", function () {
         if (context.inputChangeAction) context.inputChangeAction(this);
     });
 
     // on Keyup
-    context.$inputs.on("keyup", function (event) {
+    context.$inputs.on("keyup.form", function (event) {
         if (context.keyupAction) {
             var that = this;
             clearTimeout(timer);
@@ -235,15 +232,18 @@ Form.prototype.setInputListener = function (context) {
     });
 };
 
-Form.prototype.refresh = function () {
-    this.$inputs.off(); // remove all events
+Form.prototype.resetListener = function () {
+    this.$inputs.off(".form");
+    this.$target.off(".form");
+};
 
+Form.prototype.update = function () {
     // get all inputs and submit buttons
     this.$inputs = this.$target.find(":input");
     this.$submit = this.$target.find(":submit");
-
     // set Listeners
     this.setInputListener(this);
+    this.setSubmitListener(this);
 };
 
 Form.prototype.buttonText = function (text) {
@@ -1436,10 +1436,8 @@ if ($floatBox.length > 0) {
 // form.js
 var $userForm = $("#usrForm");
 if ($userForm.length > 0) {
-    var form = new Form($userForm, {
-        preventSubmit: false
-    });
-    form.onSubmit(function(){
+    var form = new Form($userForm);
+    form.onSubmit(function () {
         console.log(this.getData());
         console.log(this.$target.serialize());
     });

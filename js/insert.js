@@ -21,8 +21,8 @@ var Insert = function (template, target, options) {
 Insert.prototype.insert = function (data) {
     data = data || {};
     this.$element = $(this.template(data));
-    if (this.insertAction) this.insertAction(this.$element);
     this.$target[this.opts.insertMethod](this.$element);
+    if (this.insertAction) this.insertAction(this.$element);
     return this;
 };
 

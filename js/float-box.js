@@ -120,13 +120,4 @@ FloatBox.prototype.onClose = function (func) {
     return this;
 };
 
-// 把 FloatBox 放在某个元素内
-FloatBox.prototype.attachTo = function (target) {
-    if (target) {
-        target = to$(target);
-        target.html(this.self);
-    }
-    return this;
-};
-
 module.exports = FloatBox;

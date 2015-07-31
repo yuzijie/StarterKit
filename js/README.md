@@ -14,3 +14,4 @@
     * image-crop.js：提供切割图片的功能
 * 合成
     * insert.js：按需要自动在页面内插入 HTML 元素
+    * alert.js：弹出一个临时的提示框

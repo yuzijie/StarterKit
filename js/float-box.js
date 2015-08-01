@@ -42,6 +42,7 @@ var FloatBox = function (box, options) {
 
     // Listeners
     this.listeners = {};
+    this.eventTargets = [];
 };
 
 FloatBox.prototype.setListener = function () {
@@ -78,7 +79,10 @@ FloatBox.prototype.setListener = function () {
 FloatBox.prototype.resetListener = function () {
     if (this.opts.closeOnClick === true) $(document).off("click.floatBox");
     if (this.opts.closeOnScroll === true) $(window).off("scroll.floatBox");
-    this.self.off(".floatBox");
+    if (this.opts.closeOnLeave === true) this.self.off("mouseleave.floatBox");
+    $.each(this.eventTargets, function (index, target) {
+        target.off(".floatbox");
+    });
     return this;
 };
 
@@ -139,6 +143,7 @@ FloatBox.prototype.addListener = function (target, event, func) {
                     func(e);
                 });
             };
+            this.eventTargets.push($target);
         }
     }
     return this;

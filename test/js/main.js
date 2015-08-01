@@ -31,9 +31,12 @@ if ($floatBox.length > 0) {
         fbox.onOpen(function () {
             console.log(fbox.listeners);
         });
+        $button.on("click", function () {
+            fbox.toggle();
+        });
     });
-    $button.on("click", function () {
-        fbox.toggle();
+    showcase.onDestroy(function () {
+        $button.off("click");
     });
 
     var $select = $floatBox.find("#float-box-opts");

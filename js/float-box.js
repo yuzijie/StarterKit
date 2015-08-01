@@ -39,6 +39,9 @@ var FloatBox = function (box, options) {
     // Custom actions
     this.boxOpenAction = null;
     this.boxCloseAction = null;
+
+    // Listeners
+    this.listeners = [];
 };
 
 FloatBox.prototype.setListener = function () {
@@ -65,12 +68,17 @@ FloatBox.prototype.setListener = function () {
             that.close();
         });
     }
+
+    // custom listeners
+    $.each(this.listeners, function (index, func) {
+        func();
+    });
 };
 
 FloatBox.prototype.resetListener = function () {
     if (this.opts.closeOnClick === true) $(document).off("click.floatBox");
     if (this.opts.closeOnScroll === true) $(window).off("scroll.floatBox");
-    if (this.opts.closeOnLeave === true) this.self.off("mouseleave.floatBox");
+    this.self.off(".floatBox");
     return this;
 };
 
@@ -118,6 +126,25 @@ FloatBox.prototype.onOpen = function (func) {
 FloatBox.prototype.onClose = function (func) {
     if ($.isFunction(func)) this.boxCloseAction = func;
     return this;
+};
+
+FloatBox.prototype.newListener = function (target, event, func) {
+    var $target = this.self.find(target);
+    if ($target.length > 0 && $.isFunction(func)) {
+        this.listeners.push(function () {
+            $target.on(event + ".floatbox", function (e) {
+                e.preventDefault();
+                func(e);
+            });
+        });
+    }
+};
+
+FloatBox.prototype.newCloseButton = function (target) {
+    var that = this;
+    this.newListener(target, "click", function () {
+        that.close();
+    });
 };
 
 module.exports = FloatBox;

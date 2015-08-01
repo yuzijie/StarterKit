@@ -23,9 +23,7 @@ if ($floatBox.length > 0) {
     var fbox, options;
     showcase.onInsert(function ($el) {
         fbox = new FloatBox($el, options);
-        fbox.self.find("button").click(function () {
-            fbox.close();
-        });
+        fbox.newCloseButton("button");
         $button.on("click", function () {
             fbox.toggle();
         });

@@ -40,6 +40,9 @@ var FloatBox = function (box, options) {
     // Custom actions
     this.boxOpenAction = null;
     this.boxCloseAction = null;
+
+    // Listeners
+    this.listeners = [];
 };
 
 FloatBox.prototype.setListener = function () {
@@ -66,12 +69,17 @@ FloatBox.prototype.setListener = function () {
             that.close();
         });
     }
+
+    // custom listeners
+    $.each(this.listeners, function (index, func) {
+        func();
+    });
 };
 
 FloatBox.prototype.resetListener = function () {
     if (this.opts.closeOnClick === true) $(document).off("click.floatBox");
     if (this.opts.closeOnScroll === true) $(window).off("scroll.floatBox");
-    if (this.opts.closeOnLeave === true) this.self.off("mouseleave.floatBox");
+    this.self.off(".floatBox");
     return this;
 };
 
@@ -121,13 +129,23 @@ FloatBox.prototype.onClose = function (func) {
     return this;
 };
 
-// 把 FloatBox 放在某个元素内
-FloatBox.prototype.attachTo = function (target) {
-    if (target) {
-        target = to$(target);
-        target.html(this.self);
+FloatBox.prototype.newListener = function (target, event, func) {
+    var $target = this.self.find(target);
+    if ($target.length > 0 && $.isFunction(func)) {
+        this.listeners.push(function () {
+            $target.on(event + ".floatbox", function (e) {
+                e.preventDefault();
+                func(e);
+            });
+        });
     }
-    return this;
+};
+
+FloatBox.prototype.newCloseButton = function (target) {
+    var that = this;
+    this.newListener(target, "click", function () {
+        that.close();
+    });
 };
 
 module.exports = FloatBox;
@@ -141,9 +159,9 @@ function to$(item) {
 }
 
 var Form = function (target, options) {
-    this.$target = to$(target);
-    this.$inputs = this.$target.find(":input");
-    this.$submit = this.$target.find(":submit");
+    this.self = to$(target);
+    this.$inputs = this.self.find(":input");
+    this.$submit = this.self.find(":submit");
     this.allowSubmit = true;
 
     // Options
@@ -167,12 +185,12 @@ Form.prototype.setSubmitListener = function (context) {
     context = context || this;
 
     // on Submit
-    context.$target.on("submit.form", function (event) {
+    context.self.on("submit.form", function (event) {
         if (context.opts.preventDefaultSubmit === true) event.preventDefault();
 
         if (context.allowSubmit === true) {
             context.disableSubmit();
-            if (context.submitAction) context.submitAction(this, event);
+            if (context.submitAction) context.submitAction(context.getFormUrl(), context.getPostData());
         }
     });
 };
@@ -209,13 +227,13 @@ Form.prototype.setInputListener = function (context) {
 
 Form.prototype.resetListener = function () {
     this.$inputs.off(".form");
-    this.$target.off(".form");
+    this.self.off(".form");
 };
 
-Form.prototype.update = function () {
+Form.prototype.updateElements = function () {
     // get all inputs and submit buttons
-    this.$inputs = this.$target.find(":input");
-    this.$submit = this.$target.find(":submit");
+    this.$inputs = this.self.find(":input");
+    this.$submit = this.self.find(":submit");
     // set Listeners
     this.setInputListener(this);
     this.setSubmitListener(this);
@@ -230,7 +248,7 @@ Form.prototype.buttonText = function (text) {
 };
 
 Form.prototype.getData = function () {
-    var serializeArray = this.$target.serializeArray();
+    var serializeArray = this.self.serializeArray();
     var output = {};
     $.each(serializeArray, function (key, item) {
         var l = item.name.length;
@@ -245,8 +263,12 @@ Form.prototype.getData = function () {
     return output;
 };
 
-Form.prototype.serialize = function () {
-    return this.$target.serialize();
+Form.prototype.getPostData = function () {
+    return this.self.serialize();
+};
+
+Form.prototype.getFormUrl = function () {
+    return this.self.attr("action");
 };
 
 Form.prototype.enableSubmit = function () {
@@ -313,8 +335,8 @@ var Insert = function (template, target, options) {
 Insert.prototype.insert = function (data) {
     data = data || {};
     this.$element = $(this.template(data));
-    if (this.insertAction) this.insertAction(this.$element);
     this.$target[this.opts.insertMethod](this.$element);
+    if (this.insertAction) this.insertAction(this.$element);
     return this;
 };
 
@@ -1412,7 +1434,7 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
 
   return "<div class=\"alert\">\n    <div class=\"overlay\"></div>\n    <div class=\"inner\">\n        "
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
-    + "\n        <button>确定</button>\n    </div>\n</div>\n";
+    + "\n        <button style=\"padding: 5px 8px\">Close</button>\n    </div>\n</div>\n";
 },"useData":true});
 },{"handlebars/runtime":14}],17:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
@@ -1456,9 +1478,7 @@ if ($floatBox.length > 0) {
     var fbox, options;
     showcase.onInsert(function ($el) {
         fbox = new FloatBox($el, options);
-        fbox.self.find("button").click(function () {
-            fbox.close();
-        });
+        fbox.newCloseButton("button");
         $button.on("click", function () {
             fbox.toggle();
         });

@@ -41,7 +41,7 @@ var FloatBox = function (box, options) {
     this.boxCloseAction = null;
 
     // Listeners
-    this.listeners = [];
+    this.listeners = {};
 };
 
 FloatBox.prototype.setListener = function () {
@@ -85,11 +85,11 @@ FloatBox.prototype.resetListener = function () {
 FloatBox.prototype.open = function () {
     if (this.self.is(":hidden")) {
         var that = this;
+        if (this.boxOpenAction) this.boxOpenAction();
         if (this.opts.hasOverlay === true) {
             scrollbar.setPadding();
             $body.addClass("overlay");
         }
-        if (this.boxOpenAction) this.boxOpenAction();
         this.self.show();
         setTimeout(function () {
             that.setListener();
@@ -101,13 +101,13 @@ FloatBox.prototype.open = function () {
 
 FloatBox.prototype.close = function () {
     if (this.self.is(":visible")) {
+        this.self.hide();
         if (this.opts.hasOverlay === true) {
             scrollbar.resetPadding();
             $body.removeClass("overlay");
         }
-        this.self.hide();
-        if (this.boxCloseAction) this.boxCloseAction();
         this.resetListener();
+        if (this.boxCloseAction) this.boxCloseAction();
         return true;
     }
     return false;
@@ -128,23 +128,28 @@ FloatBox.prototype.onClose = function (func) {
     return this;
 };
 
-FloatBox.prototype.newListener = function (target, event, func) {
-    var $target = this.self.find(target);
-    if ($target.length > 0 && $.isFunction(func)) {
-        this.listeners.push(function () {
-            $target.on(event + ".floatbox", function (e) {
-                e.preventDefault();
-                func(e);
-            });
-        });
+FloatBox.prototype.addListener = function (target, event, func) {
+    var key = (typeof target === "string") ? target.replace(/[^\w]/gi, '') + event : event;
+    if (!this.listeners[key] && $.isFunction(func)) {
+        var $target = this.self.find(target);
+        if ($target.length > 0) {
+            this.listeners[key] = function () {
+                $target.on(event + ".floatbox", function (e) {
+                    e.preventDefault();
+                    func(e);
+                });
+            };
+        }
     }
+    return this;
 };
 
-FloatBox.prototype.newCloseButton = function (target) {
+FloatBox.prototype.addCloseButton = function (target) {
     var that = this;
-    this.newListener(target, "click", function () {
+    this.addListener(target, "click", function () {
         that.close();
     });
+    return this;
 };
 
 module.exports = FloatBox;

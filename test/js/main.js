@@ -2,6 +2,7 @@ var FloatBox = require("../../js/float-box");
 var template = require("../../modules/spin-kit/templates/sk-circle.js")("spinner");
 var Form = require("../../js/form");
 var Insert = require("../../js/insert");
+var Alert = require("../../js/alert");
 
 // templates
 var dropdownHBS = require("../../templates/dropdown.hbs");
@@ -23,13 +24,16 @@ if ($floatBox.length > 0) {
     var fbox, options;
     showcase.onInsert(function ($el) {
         fbox = new FloatBox($el, options);
-        fbox.newCloseButton("button");
-        $button.on("click", function () {
-            fbox.toggle();
+        fbox.addCloseButton("button[data-type=close]");
+        fbox.addListener("button[data-type=alert]", "click", function () {
+            alert("yes");
+        });
+        fbox.onOpen(function () {
+            console.log(fbox.listeners);
         });
     });
-    showcase.onDestroy(function () {
-        $button.off("click");
+    $button.on("click", function () {
+        fbox.toggle();
     });
 
     var $select = $floatBox.find("#float-box-opts");
@@ -42,7 +46,7 @@ if ($floatBox.length > 0) {
                     closeOnScroll: true
                 };
                 showcase.changeTemplate(dropdownHBS);
-                showcase.reinsert({text: "this is a dropdown"});
+                showcase.reinsert({text: "this is a Dropdown"});
                 break;
             case "modal":
                 options = {
@@ -50,12 +54,16 @@ if ($floatBox.length > 0) {
                     closeOnClick: true
                 };
                 showcase.changeTemplate(modalHBS);
-                showcase.reinsert({text: "this is a dropdown"});
+                showcase.reinsert({text: "this is a Modal"});
                 break;
             case "alert":
                 options = {};
                 showcase.changeTemplate(alertHBS);
                 showcase.reinsert({text: "这是一个警告！"});
+                break;
+            case "dynamicAlert":
+                var alert = new Alert(alertHBS);
+                alert.show({text: "this is a dynamic alert!"});
                 break;
             default:
                 options = {};

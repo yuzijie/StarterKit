@@ -6,6 +6,10 @@ var Alert = function (template) {
     alert = new Insert(template, $(document.body));
     alert.onInsert(function ($el) {
         float = new Floatbox($el);
+        float.addListener('button[data-type="close"]', "click", function () {
+            alert.destroy();
+            float = null;
+        });
         float.open();
     }).onDestroy(function () {
         float.close();

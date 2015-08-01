@@ -12,15 +12,17 @@
     // config
     $default: (
             name: ".alert",
-            background-color: #FF8AAD,
+            background-color: $light-gray,
             padding: em(20),
             border-radius: $base-border-radius,
-            color: black
+            color: black,
+            base-z-index: 0
     );
     $conf: map-merge($default, $conf);
 
     #{map-get($conf, name)} {
         @extend %alert;
+        z-index: map-get($conf, base-z-index) + 40;
 
         .inner {
             @include position(fixed, 50% null null 50%);

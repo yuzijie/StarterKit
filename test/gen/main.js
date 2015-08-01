@@ -113,13 +113,13 @@ FloatBox.prototype.resetListener = function () {
 
 FloatBox.prototype.open = function () {
     if (this.self.is(":hidden")) {
-        var that = this;
-        if (this.boxOpenAction) this.boxOpenAction();
+        this.self.show();
         if (this.opts.hasOverlay === true) {
             scrollbar.setPadding();
             $body.addClass("overlay");
         }
-        this.self.show();
+        if (this.boxOpenAction) this.boxOpenAction();
+        var that = this;
         setTimeout(function () {
             that.setListener();
         }, 50);
@@ -1473,9 +1473,9 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper;
 
-  return "<div class=\"dropdown\">\n    <div style=\"height: 40px;\">\n        "
+  return "<div class=\"dropdown\">\n    <div style=\"height: 50px;\">\n        "
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
-    + "\n    </div>\n    <div style=\"height: 100px;overflow: hidden;margin-bottom: 10px\">\n        <div style=\"overflow: auto; height: 100px\" class=\"scroll1\">\n            <div style=\"height: 500px;background: blue\"></div>\n        </div>\n    </div>\n    <div style=\"height: 100px;overflow: hidden\">\n        <div style=\"overflow: auto; height: 100px\" class=\"scroll2\">\n            <div style=\"height: 500px;background: green\"></div>\n        </div>\n    </div>\n</div>\n";
+    + "<br>\n        <button data-type=\"alert\" style=\"padding: 0;\">Yes</button>\n    </div>\n    <div style=\"height: 100px;overflow: hidden;margin-bottom: 10px\">\n        <div style=\"overflow: auto; height: 100px\" class=\"scroll1\">\n            <div style=\"height: 500px;background: blue\"></div>\n        </div>\n    </div>\n    <div style=\"height: 100px;overflow: hidden\">\n        <div style=\"overflow: auto; height: 100px\" class=\"scroll2\">\n            <div style=\"height: 500px;background: green\"></div>\n        </div>\n    </div>\n</div>\n";
 },"useData":true});
 },{"handlebars/runtime":15}],19:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
@@ -1483,7 +1483,7 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
 
   return "<div style=\"padding: 50px;\" class=\"modal\">\n    "
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
-    + "\n</div>\n";
+    + "<br>\n    <button data-type=\"alert\">Yes</button>\n</div>\n";
 },"useData":true});
 },{"handlebars/runtime":15}],20:[function(require,module,exports){
 var FloatBox = require("../../js/float-box");
@@ -1529,7 +1529,6 @@ if ($floatBox.length > 0) {
         switch ($select.val()) {
             case "dropdown":
                 options = {
-                    closeOnClick: true,
                     preventScroll: [".scroll1", ".scroll2"],
                     closeOnScroll: true
                 };

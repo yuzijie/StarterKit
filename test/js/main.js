@@ -41,7 +41,6 @@ if ($floatBox.length > 0) {
         switch ($select.val()) {
             case "dropdown":
                 options = {
-                    closeOnClick: true,
                     preventScroll: [".scroll1", ".scroll2"],
                     closeOnScroll: true
                 };

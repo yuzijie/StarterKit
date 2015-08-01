@@ -84,13 +84,13 @@ FloatBox.prototype.resetListener = function () {
 
 FloatBox.prototype.open = function () {
     if (this.self.is(":hidden")) {
-        var that = this;
-        if (this.boxOpenAction) this.boxOpenAction();
+        this.self.show();
         if (this.opts.hasOverlay === true) {
             scrollbar.setPadding();
             $body.addClass("overlay");
         }
-        this.self.show();
+        if (this.boxOpenAction) this.boxOpenAction();
+        var that = this;
         setTimeout(function () {
             that.setListener();
         }, 50);

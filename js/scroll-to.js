@@ -3,12 +3,12 @@ function to$(item) {
     return (item instanceof jQuery) ? item : $(item);
 }
 
-var scrollTo = function (target, container, options) {
+var scrollTo = function (target, options) {
     target = to$(target);
     options = options || {};
 
-    if (container) {
-        container = to$(container);
+    if (options["container"]) {
+        var container = to$(options["container"]);
         container.stop().animate({
             scrollTop: target.offset().top - container.offset().top + container.scrollTop()
         }, options.duration || '1000', function () {

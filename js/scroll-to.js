@@ -12,13 +12,13 @@ var scrollTo = function (target, options) {
         container.stop().animate({
             scrollTop: target.offset().top - container.offset().top + container.scrollTop()
         }, options.duration || '1000', function () {
-            if (options["onFinish"]) options["onFinish"]();
+            if (options["onFinish"]) options["onFinish"](target[0]);
         });
     } else {
         $(document.body).stop().animate({
             scrollTop: target.offset().top
         }, options.duration || '1000', function () {
-            if (options["onFinish"]) options["onFinish"]();
+            if (options["onFinish"]) options["onFinish"](target[0]);
         });
     }
 };

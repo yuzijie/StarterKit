@@ -302,6 +302,11 @@ Form.prototype.setInputListener = function (context) {
             }, 500);
         }
     });
+
+    // fix number input problem
+    that.$inputs.filter("[type=number]").on("keypress.form", function (event) {
+        if (event.which < 48 || event.which > 57) event.preventDefault();
+    });
 };
 
 Form.prototype.resetListener = function () {
@@ -570,6 +575,17 @@ var errorObject = function (type, $element, msg) {
     };
 };
 
+// input type check
+var checkers = {
+    email: function ($input, content) {
+        // Validate Email http://stackoverflow.com/questions/46155/validate-email-address-in-javascript
+        var re = /^(([^<>()[\]\.,;:\s@"]+(\.[^<>()[\]\.,;:\s@"]+)*)|(".+"))@(([^<>()[\]\.,;:\s@"]+\.)+[^<>()[\]\.,;:\s@"]{2,})$/i;
+        var result = re.test(content);
+        if (!result) return errorObject("email", $input, "邮箱格式不正确");
+        return null;
+    }
+};
+
 // Check required field
 var checkInputRequire = function ($input, content) {
     if (content.length > 0) return null;
@@ -582,7 +598,7 @@ var checkGroup = function ($field) {
 
     if ($field.data("required") === true) {
         if (checked === null) checked = $field.find(":checked").length;
-        if (checked === 0) return errorObject("required", $field, "该项目为必填");
+        if (checked === 0) return errorObject("required", $field, "请给出选择");
     }
     if (min = $field.data("min-check")) {
         if (checked === null) checked = $field.find(":checked").length;
@@ -597,12 +613,19 @@ var checkGroup = function ($field) {
 
 var checkInput = function ($input) {
     var content = $input.val().trim(),
+        type = $input.prop("type"),
         validationError;
 
     if ($input.prop("required")) {
         validationError = checkInputRequire($input, content);
         if (validationError) return validationError;
     }
+
+    if (content && type in checkers) {
+        validationError = checkers[type]($input, content);
+        if (validationError) return validationError;
+    }
+
     return null;
 };
 

@@ -64,7 +64,7 @@ var checkInput = function ($input) {
         if (validationError) return validationError;
     }
 
-    if (type in checkers) {
+    if (content && type in checkers) {
         validationError = checkers[type]($input, content);
         if (validationError) return validationError;
     }

@@ -24,13 +24,13 @@
 
 <form method="post" id="usrForm" novalidate>
     <label for="name">Name</label>
-    <input type="text" id="name" name="name" required>
+    <input type="text" id="name" name="name">
 
     <label for="email">email</label>
-    <input type="email" id="email" name="email" required>
+    <input type="email" id="email" name="email">
 
     <label for="password">password</label>
-    <input type="password" id="password" name="password" required title="密码不能为空">
+    <input type="password" id="password" name="password" required data-validity="密码不能为空">
 
     <label>Gender</label>
 
@@ -43,7 +43,7 @@
 
     <label>multiple choices</label>
 
-    <div class="checkbox-group" data-checkbox-group data-required="true">
+    <div class="checkbox-group" data-checkbox-group data-max-check="2">
         <input type="checkbox" id="c1" name="checkbox[]" value="c1">
         <label for="c1">Check Box 1</label>
         <input type="checkbox" id="c2" name="checkbox[]" value="c2">

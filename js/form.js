@@ -20,19 +20,21 @@ function to$(item) {
 }
 
 var Form = function (target, options) {
-    // Objects
-    this.self = to$(target);                                  // form
-    this.$inputs = this.self.find(":input");                  // all inputs
-    this.$submit = this.self.find(":submit");                 // submit button
-    this.$fields = this.self.find(validationList.join(","));  // all fields need validation
-
-    // Status
-    this.allowSubmit = true;
-
     // Options
     this.opts = $.extend({
         validate: false
     }, options || {});
+
+    // Objects
+    this.self = to$(target);                   // form
+    this.$inputs = this.self.find(":input");   // all inputs
+    this.$submit = this.self.find(":submit");  // submit button
+    if (this.opts.validate === true) {
+        this.$fields = this.self.find(validationList.join(","));  // all fields need validation
+    }
+
+    // Status
+    this.allowSubmit = true;
 
     // Actions
     this.inputFocusAction = null;
@@ -48,31 +50,30 @@ var Form = function (target, options) {
 };
 
 Form.prototype.setSubmitListener = function (context) {
-    context = context || this;
+    var that = context || this;
 
     // on Submit
-    context.self.on("submit.form", function (event) {
+    that.self.on("submit.form", function (event) {
         var notPass = [];
         event.preventDefault();
 
-        if (context.allowSubmit === true) {
+        if (that.allowSubmit === true) {
 
-            // validate form before submit
-            if (context.opts.validate === true) {
-                context.$fields.each(function () {
-                    var error = context.validateForm(this);
+            if (that.opts.validate === true) { // validate form
+                that.$fields.each(function () {
+                    var error = that.validateForm(this);
                     if (error) notPass.push(error);
                 });
             }
 
-            // test form is valid or not
+            // test whether form is valid or not
             if (notPass.length === 0) {
-                context.disableSubmit();
-                if (context.submitAction) context.submitAction(context.getFormUrl(), context.getPostData());
+                that.disableSubmit();
+                if (that.submitAction) that.submitAction(that.getFormUrl(), that.getPostData());
             } else {
                 scrollTo(notPass[0].element.prev("label"), {
                     onFinish: function () {
-                        if (context.validateErrorAction) context.validateErrorAction(notPass[0]);
+                        if (that.validateErrorAction) that.validateErrorAction(notPass[0]);
                     }
                 });
             }
@@ -81,33 +82,32 @@ Form.prototype.setSubmitListener = function (context) {
 };
 
 Form.prototype.setInputListener = function (context) {
-    context = context || this;
+    var that = context || this;
 
     // on Focus
-    context.$inputs.on("focus.form", function () {
-        if (context.inputFocusAction) context.inputFocusAction(this);
+    that.$inputs.on("focus.form", function () {
+        if (that.inputFocusAction) that.inputFocusAction(this);
     });
 
     // on Blur
-    context.$inputs.on("blur.form", function () {
+    that.$inputs.on("blur.form", function () {
         var validationError;
-        if (context.opts.validate === true) validationError = context.validateForm(this);
-        if (context.inputBlurAction) context.inputBlurAction(this, validationError);
+        if (that.opts.validate === true) validationError = that.validateForm(this);
+        if (that.inputBlurAction) that.inputBlurAction(this, validationError);
     });
 
     // on Change
-    context.$inputs.on("change.form", function () {
-        if (context.inputChangeAction) context.inputChangeAction(this);
+    that.$inputs.on("change.form", function () {
+        if (that.inputChangeAction) that.inputChangeAction(this);
     });
 
     // on Keyup
-    context.$inputs.on("keyup.form", function (event) {
-        context.validateForm(this);
-        if (context.keyupAction) {
-            var that = this;
+    that.$inputs.on("keyup.form", function (event) {
+        if (that.keyupAction) {
+            var input = this;
             clearTimeout(timer);
             timer = setTimeout(function () {
-                context.keyupAction(that, event);
+                that.keyupAction(input, event);
             }, 500);
         }
     });

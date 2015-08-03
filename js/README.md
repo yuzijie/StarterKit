@@ -7,9 +7,11 @@
     * scrollbar.js：当 Body 设置为 `overflow: hidden` 时候，为解决滚动条消失问题，添加 right padding
     * filter.js：根据关键词隐藏不相关的内容
     * geo.js：操作 HTML5 geolocation API
+    * validator.js：验证表单
+    * scroll-to.js：滚动页面元素的对应位置
 * 零件
     * float-box.js：定义页面中所有浮动元素的行为
-    * form.js：定义页面中 Form 的行为，简化 Form 编程过程，同时提供验证功能。
+    * form.js：定义页面中 Form 的行为，简化 Form 编程过程
     * slide-box.js：定义页面中所有嵌入页面并可以切换内容或自伸缩的元素的行为
     * insert.js：按需要自动在页面内插入 HTML 元素
     * fake-select.js：把 HTML select 替换成 checkbox，同时提供 select 的所有功能

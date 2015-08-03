@@ -11,14 +11,18 @@
 
     <style>
         form {
-            width: 400px;
-            margin: 20px auto;
+            width: 500px;
+            margin: 1000px auto;
+        }
+
+        .radio-group label, .checkbox-group label {
+            margin-right: 10px;
         }
     </style>
 </head>
 <body>
 
-<form method="post" id="usrForm">
+<form method="post" id="usrForm" novalidate>
     <label for="name">Name</label>
     <input type="text" id="name" name="name" required>
 
@@ -26,10 +30,20 @@
     <input type="email" id="email" name="email" required>
 
     <label for="password">password</label>
-    <input type="password" id="password" name="password" required>
+    <input type="password" id="password" name="password" required title="密码不能为空">
+
+    <label>Gender</label>
+
+    <div class="radio-group" data-radio-group data-required="true">
+        <input type="radio" id="r1" name="radio" value="r1">
+        <label for="r1">M</label>
+        <input type="radio" id="r2" name="radio" value="r2">
+        <label for="r2">F</label>
+    </div>
 
     <label>multiple choices</label>
-    <div class="checkbox">
+
+    <div class="checkbox-group" data-checkbox-group data-required="true">
         <input type="checkbox" id="c1" name="checkbox[]" value="c1">
         <label for="c1">Check Box 1</label>
         <input type="checkbox" id="c2" name="checkbox[]" value="c2">
@@ -37,9 +51,10 @@
         <input type="checkbox" id="c3" name="checkbox[]" value="c3">
         <label for="c3">Check Box 3</label>
     </div>
+
     <label for="textarea">text area</label>
     <textarea id="textarea" cols="30" rows="10" name="text"></textarea>
-    <input type="submit" value="send">
+    <input type="submit" value="send" style="margin-top: 500px">
 </form>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>

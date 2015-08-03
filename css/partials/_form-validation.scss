@@ -1,0 +1,27 @@
+%invalid-input-field {
+    $light-red: lighten(red, 40%);
+    background-color: $light-red;
+}
+
+%invalid-group-field {
+    $light-red: lighten(red, 40%);
+    background-color: $light-red;
+}
+
+@mixin form-validation($conf:()) {
+    $default: (
+    );
+    $conf: map-merge($default, $conf);
+
+    #{$all-text-inputs} {
+        &.invalid-field {
+            @extend %invalid-input-field;
+        }
+    }
+    [data-checkbox-group], [data-radio-group] {
+        &.invalid-field {
+            @extend %invalid-group-field;
+        }
+    }
+
+}

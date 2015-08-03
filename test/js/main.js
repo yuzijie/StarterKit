@@ -8,6 +8,7 @@ var Alert = require("../../js/alert");
 var dropdownHBS = require("../../templates/dropdown.hbs");
 var modalHBS = require("../../templates/modal.hbs");
 var alertHBS = require("../../templates/alert.hbs");
+var textHBS = require("../../templates/text.hbs");
 
 // spin kit
 var $spinkit = $(".spinkit");
@@ -77,9 +78,36 @@ if ($floatBox.length > 0) {
 // form.js
 var $userForm = $("#usrForm");
 if ($userForm.length > 0) {
-    var form = new Form($userForm);
+    var form = new Form($userForm, {
+        validate: true
+    });
     form.onSubmit(function () {
         console.log(this.getData());
-        console.log(this.$target.serialize());
+    }).onBlur(function (input, validation) {
+        console.log(validation);
+    }).onValidateError(function (validation) {
+        console.log(validation.msg);
+    });
+}
+
+// insert.js
+var $insert = $("#insert-test");
+if ($insert.length > 0) {
+    var insertButton = $insert.find("button.insert");
+    var deleteButton = $insert.find("button.delete");
+    var deleteAllButton = $insert.find("button.delete-all");
+    var insertTarget = $insert.find(".insert-target");
+    var insertion = new Insert(textHBS, insertTarget);
+    insertButton.click(function () {
+        insertion.insert({text: Math.random()});
+    });
+    deleteButton.click(function () {
+        insertion.destroy();
+    });
+    deleteAllButton.click(function () {
+        insertion.destroyAll();
+    });
+    insertion.onDestroy(function (el) {
+        console.log(el);
     });
 }

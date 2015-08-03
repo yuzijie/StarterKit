@@ -1,4 +1,18 @@
+var validator = require("./validator");
+var scrollTo = require("./scroll-to");
+
 var timer = null;
+var validationList = [
+    '[type=text]',
+    '[type=email]',
+    '[type=number]',
+    '[type=url]',
+    '[type=email]',
+    '[type=password]',
+    '[data-checkbox-group]',
+    '[data-radio-group]',
+    'textarea'
+];
 
 // helper function
 function to$(item) {
@@ -6,14 +20,18 @@ function to$(item) {
 }
 
 var Form = function (target, options) {
-    this.self = to$(target);
-    this.$inputs = this.self.find(":input");
-    this.$submit = this.self.find(":submit");
+    // Objects
+    this.self = to$(target);                                  // form
+    this.$inputs = this.self.find(":input");                  // all inputs
+    this.$submit = this.self.find(":submit");                 // submit button
+    this.$fields = this.self.find(validationList.join(","));  // all fields need validation
+
+    // Status
     this.allowSubmit = true;
 
     // Options
     this.opts = $.extend({
-        preventDefaultSubmit: true
+        validate: false
     }, options || {});
 
     // Actions
@@ -22,6 +40,7 @@ var Form = function (target, options) {
     this.inputChangeAction = null;
     this.keyupAction = null;
     this.submitAction = null;
+    this.validateErrorAction = null;
 
     // set Listener
     this.setInputListener(this);
@@ -33,11 +52,30 @@ Form.prototype.setSubmitListener = function (context) {
 
     // on Submit
     context.self.on("submit.form", function (event) {
-        if (context.opts.preventDefaultSubmit === true) event.preventDefault();
+        var notPass = [];
+        event.preventDefault();
 
         if (context.allowSubmit === true) {
-            context.disableSubmit();
-            if (context.submitAction) context.submitAction(context.getFormUrl(), context.getPostData());
+
+            // validate form before submit
+            if (context.opts.validate === true) {
+                context.$fields.each(function () {
+                    var error = context.validateForm(this);
+                    if (error) notPass.push(error);
+                });
+            }
+
+            // test form is valid or not
+            if (notPass.length === 0) {
+                context.disableSubmit();
+                if (context.submitAction) context.submitAction(context.getFormUrl(), context.getPostData());
+            } else {
+                scrollTo(notPass[0].element.prev("label"), {
+                    onFinish: function () {
+                        if (context.validateErrorAction) context.validateErrorAction(notPass[0]);
+                    }
+                });
+            }
         }
     });
 };
@@ -52,7 +90,9 @@ Form.prototype.setInputListener = function (context) {
 
     // on Blur
     context.$inputs.on("blur.form", function () {
-        if (context.inputBlurAction) context.inputBlurAction(this);
+        var validationError;
+        if (context.opts.validate === true) validationError = context.validateForm(this);
+        if (context.inputBlurAction) context.inputBlurAction(this, validationError);
     });
 
     // on Change
@@ -62,6 +102,7 @@ Form.prototype.setInputListener = function (context) {
 
     // on Keyup
     context.$inputs.on("keyup.form", function (event) {
+        context.validateForm(this);
         if (context.keyupAction) {
             var that = this;
             clearTimeout(timer);
@@ -77,13 +118,16 @@ Form.prototype.resetListener = function () {
     this.self.off(".form");
 };
 
-Form.prototype.updateElements = function () {
-    // get all inputs and submit buttons
-    this.$inputs = this.self.find(":input");
-    this.$submit = this.self.find(":submit");
-    // set Listeners
-    this.setInputListener(this);
-    this.setSubmitListener(this);
+// return error if invalid
+Form.prototype.validateForm = function (input) {
+    var $input = to$(input);
+    var validationError = validator.check($input);
+    if (validationError) {
+        $input.addClass("invalid-field");
+    } else {
+        if ($input.is(".invalid-field")) $input.removeClass("invalid-field");
+    }
+    return validationError;
 };
 
 Form.prototype.buttonText = function (text) {
@@ -92,30 +136,6 @@ Form.prototype.buttonText = function (text) {
     } else {
         this.$submit.val(text);
     }
-};
-
-Form.prototype.getData = function () {
-    var serializeArray = this.self.serializeArray();
-    var output = {};
-    $.each(serializeArray, function (key, item) {
-        var l = item.name.length;
-        if (item.name.indexOf("[]", l - 2) !== -1) {
-            var name = item.name.substring(0, l - 2);
-            if (!output[name]) output[name] = [];
-            output[name].push(item.value);
-        } else {
-            output[item.name] = item.value;
-        }
-    });
-    return output;
-};
-
-Form.prototype.getPostData = function () {
-    return this.self.serialize();
-};
-
-Form.prototype.getFormUrl = function () {
-    return this.self.attr("action");
 };
 
 Form.prototype.enableSubmit = function () {
@@ -154,6 +174,35 @@ Form.prototype.onKeyup = function (func) {
 Form.prototype.onSubmit = function (func) {
     if ($.isFunction(func)) this.submitAction = func;
     return this;
+};
+
+Form.prototype.onValidateError = function (func) {
+    if ($.isFunction(func)) this.validateErrorAction = func;
+    return this;
+};
+
+Form.prototype.getData = function () {
+    var serializeArray = this.self.serializeArray();
+    var output = {};
+    $.each(serializeArray, function (key, item) {
+        var l = item.name.length;
+        if (item.name.indexOf("[]", l - 2) !== -1) {
+            var name = item.name.substring(0, l - 2);
+            if (!output[name]) output[name] = [];
+            output[name].push(item.value);
+        } else {
+            output[item.name] = item.value;
+        }
+    });
+    return output;
+};
+
+Form.prototype.getPostData = function () {
+    return this.self.serialize();
+};
+
+Form.prototype.getFormUrl = function () {
+    return this.self.attr("action");
 };
 
 module.exports = Form;

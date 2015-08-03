@@ -188,8 +188,22 @@ FloatBox.prototype.addCloseButton = function (target) {
 
 module.exports = FloatBox;
 
-},{"./prevent-scroll":5,"./scrollbar":6}],3:[function(require,module,exports){
+},{"./prevent-scroll":5,"./scrollbar":7}],3:[function(require,module,exports){
+var validator = require("./validator");
+var scrollTo = require("./scroll-to");
+
 var timer = null;
+var validationList = [
+    '[type=text]',
+    '[type=email]',
+    '[type=number]',
+    '[type=url]',
+    '[type=email]',
+    '[type=password]',
+    '[data-checkbox-group]',
+    '[data-radio-group]',
+    'textarea'
+];
 
 // helper function
 function to$(item) {
@@ -197,14 +211,18 @@ function to$(item) {
 }
 
 var Form = function (target, options) {
-    this.self = to$(target);
-    this.$inputs = this.self.find(":input");
-    this.$submit = this.self.find(":submit");
+    // Objects
+    this.self = to$(target);                                  // form
+    this.$inputs = this.self.find(":input");                  // all inputs
+    this.$submit = this.self.find(":submit");                 // submit button
+    this.$fields = this.self.find(validationList.join(","));  // all fields need validation
+
+    // Status
     this.allowSubmit = true;
 
     // Options
     this.opts = $.extend({
-        preventDefaultSubmit: true
+        validate: false
     }, options || {});
 
     // Actions
@@ -213,6 +231,7 @@ var Form = function (target, options) {
     this.inputChangeAction = null;
     this.keyupAction = null;
     this.submitAction = null;
+    this.validateErrorAction = null;
 
     // set Listener
     this.setInputListener(this);
@@ -224,11 +243,30 @@ Form.prototype.setSubmitListener = function (context) {
 
     // on Submit
     context.self.on("submit.form", function (event) {
-        if (context.opts.preventDefaultSubmit === true) event.preventDefault();
+        var notPass = [];
+        event.preventDefault();
 
         if (context.allowSubmit === true) {
-            context.disableSubmit();
-            if (context.submitAction) context.submitAction(context.getFormUrl(), context.getPostData());
+
+            // validate form before submit
+            if (context.opts.validate === true) {
+                context.$fields.each(function () {
+                    var error = context.validateForm(this);
+                    if (error) notPass.push(error);
+                });
+            }
+
+            // test form is valid or not
+            if (notPass.length === 0) {
+                context.disableSubmit();
+                if (context.submitAction) context.submitAction(context.getFormUrl(), context.getPostData());
+            } else {
+                scrollTo(notPass[0].element.prev("label"), {
+                    onFinish: function () {
+                        if (context.validateErrorAction) context.validateErrorAction(notPass[0]);
+                    }
+                });
+            }
         }
     });
 };
@@ -243,7 +281,9 @@ Form.prototype.setInputListener = function (context) {
 
     // on Blur
     context.$inputs.on("blur.form", function () {
-        if (context.inputBlurAction) context.inputBlurAction(this);
+        var validationError;
+        if (context.opts.validate === true) validationError = context.validateForm(this);
+        if (context.inputBlurAction) context.inputBlurAction(this, validationError);
     });
 
     // on Change
@@ -253,6 +293,7 @@ Form.prototype.setInputListener = function (context) {
 
     // on Keyup
     context.$inputs.on("keyup.form", function (event) {
+        context.validateForm(this);
         if (context.keyupAction) {
             var that = this;
             clearTimeout(timer);
@@ -268,13 +309,16 @@ Form.prototype.resetListener = function () {
     this.self.off(".form");
 };
 
-Form.prototype.updateElements = function () {
-    // get all inputs and submit buttons
-    this.$inputs = this.self.find(":input");
-    this.$submit = this.self.find(":submit");
-    // set Listeners
-    this.setInputListener(this);
-    this.setSubmitListener(this);
+// return error if invalid
+Form.prototype.validateForm = function (input) {
+    var $input = to$(input);
+    var validationError = validator.check($input);
+    if (validationError) {
+        $input.addClass("invalid-field");
+    } else {
+        if ($input.is(".invalid-field")) $input.removeClass("invalid-field");
+    }
+    return validationError;
 };
 
 Form.prototype.buttonText = function (text) {
@@ -283,30 +327,6 @@ Form.prototype.buttonText = function (text) {
     } else {
         this.$submit.val(text);
     }
-};
-
-Form.prototype.getData = function () {
-    var serializeArray = this.self.serializeArray();
-    var output = {};
-    $.each(serializeArray, function (key, item) {
-        var l = item.name.length;
-        if (item.name.indexOf("[]", l - 2) !== -1) {
-            var name = item.name.substring(0, l - 2);
-            if (!output[name]) output[name] = [];
-            output[name].push(item.value);
-        } else {
-            output[item.name] = item.value;
-        }
-    });
-    return output;
-};
-
-Form.prototype.getPostData = function () {
-    return this.self.serialize();
-};
-
-Form.prototype.getFormUrl = function () {
-    return this.self.attr("action");
 };
 
 Form.prototype.enableSubmit = function () {
@@ -347,9 +367,38 @@ Form.prototype.onSubmit = function (func) {
     return this;
 };
 
+Form.prototype.onValidateError = function (func) {
+    if ($.isFunction(func)) this.validateErrorAction = func;
+    return this;
+};
+
+Form.prototype.getData = function () {
+    var serializeArray = this.self.serializeArray();
+    var output = {};
+    $.each(serializeArray, function (key, item) {
+        var l = item.name.length;
+        if (item.name.indexOf("[]", l - 2) !== -1) {
+            var name = item.name.substring(0, l - 2);
+            if (!output[name]) output[name] = [];
+            output[name].push(item.value);
+        } else {
+            output[item.name] = item.value;
+        }
+    });
+    return output;
+};
+
+Form.prototype.getPostData = function () {
+    return this.self.serialize();
+};
+
+Form.prototype.getFormUrl = function () {
+    return this.self.attr("action");
+};
+
 module.exports = Form;
 
-},{}],4:[function(require,module,exports){
+},{"./scroll-to":6,"./validator":8}],4:[function(require,module,exports){
 // helper functions
 function to$(item) {
     return (item instanceof jQuery) ? item : $(item);
@@ -358,7 +407,7 @@ function to$(item) {
 var Insert = function (template, target, options) {
     this.$target = to$(target); // target to insert
     this.template = template; // template file
-    this.$element = null;
+    this.$elements = [];
 
     // Options
     this.opts = $.extend({
@@ -372,17 +421,29 @@ var Insert = function (template, target, options) {
 
 Insert.prototype.insert = function (data) {
     data = data || {};
-    this.$element = $(this.template(data));
-    this.$target[this.opts.insertMethod](this.$element);
-    if (this.insertAction) this.insertAction(this.$element);
+    var $element = $(this.template(data));
+    this.$target[this.opts.insertMethod]($element);
+    if (this.insertAction) this.insertAction($element);
+    this.$elements.push($element);
     return this;
 };
 
 Insert.prototype.destroy = function () {
-    if (this.$element) {
-        if (this.destroyAction) this.destroyAction(this.$element);
-        this.$element.remove();
-        this.$element = null;
+    if (this.$elements.length > 0) {
+        var $element = this.$elements.pop();
+        if (this.destroyAction) this.destroyAction($element);
+        $element.remove();
+    }
+    return this;
+};
+
+Insert.prototype.destroyAll = function () {
+    if (this.$elements.length > 0) {
+        if (this.destroyAction) this.destroyAction(this.$elements);
+        $.each(this.$elements, function (index, $element) {
+            $element.remove();
+        });
+        this.$elements = [];
     }
     return this;
 };
@@ -430,7 +491,35 @@ var PreventScroll = function ($target) {
 };
 module.exports = PreventScroll;
 
-},{"../node_modules/jquery-mousewheel/jquery.mousewheel.js":16}],6:[function(require,module,exports){
+},{"../node_modules/jquery-mousewheel/jquery.mousewheel.js":18}],6:[function(require,module,exports){
+// helper function
+function to$(item) {
+    return (item instanceof jQuery) ? item : $(item);
+}
+
+var scrollTo = function (target, options) {
+    target = to$(target);
+    options = options || {};
+
+    if (options["container"]) {
+        var container = to$(options["container"]);
+        container.stop().animate({
+            scrollTop: target.offset().top - container.offset().top + container.scrollTop()
+        }, options.duration || '1000', function () {
+            if (options["onFinish"]) options["onFinish"](target[0]);
+        });
+    } else {
+        $(document.body).stop().animate({
+            scrollTop: target.offset().top
+        }, options.duration || '1000', function () {
+            if (options["onFinish"]) options["onFinish"](target[0]);
+        });
+    }
+};
+
+module.exports = scrollTo;
+
+},{}],7:[function(require,module,exports){
 var getScrollbarWidth = function () {
     var scrollDiv = document.createElement('div');
     scrollDiv.className = "scrollbar-measure";
@@ -460,7 +549,66 @@ module.exports = {
     resetPadding: resetPadding
 };
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
+// helper function
+function to$(item) {
+    return (item instanceof jQuery) ? item : $(item);
+}
+
+// output
+var errorObject = function (type, $element, msg) {
+    // Example:
+    // {error: "required", msg: "该项目为必填", element: "jQuery Object"}
+
+    var customMsg = $element.prop("title");
+    if (customMsg) msg = customMsg;
+
+    return {
+        error: type,
+        element: $element,
+        msg: msg
+    };
+};
+
+// Check required field
+var checkInputRequire = function ($input, content) {
+    if (content.length > 0) return null;
+    return errorObject("required", $input, "该项目为必填");
+};
+
+var checkGroup = function ($field) {
+    if ($field.data("required") === true) {
+        if ($field.has(":checked").length === 0) return errorObject("required", $field, "该项目为必填")
+    }
+    return null;
+};
+
+var checkInput = function ($input) {
+    var content = $input.val().trim(),
+        validationError;
+
+    if ($input.prop("required")) {
+        validationError = checkInputRequire($input, content);
+        if (validationError) return validationError;
+    }
+    return null;
+};
+
+var Validator = {};
+
+Validator.check = function (field) {
+    var $field = to$(field);
+
+    if ($field.is("[data-checkbox-group],[data-radio-group]")) {
+        return checkGroup($field);
+    } else {
+        return checkInput($field);
+    }
+};
+
+module.exports = Validator;
+
+},{}],9:[function(require,module,exports){
 module.exports = function (className) {
     className = className || "spin-kit";
     var output = '<div class="' + className + '">';
@@ -480,7 +628,7 @@ module.exports = function (className) {
     return output;
 };
 
-},{}],8:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -541,7 +689,7 @@ inst['default'] = inst;
 
 exports['default'] = inst;
 module.exports = exports['default'];
-},{"./handlebars/base":9,"./handlebars/exception":10,"./handlebars/no-conflict":11,"./handlebars/runtime":12,"./handlebars/safe-string":13,"./handlebars/utils":14}],9:[function(require,module,exports){
+},{"./handlebars/base":11,"./handlebars/exception":12,"./handlebars/no-conflict":13,"./handlebars/runtime":14,"./handlebars/safe-string":15,"./handlebars/utils":16}],11:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -815,7 +963,7 @@ function createFrame(object) {
 }
 
 /* [args, ]options */
-},{"./exception":10,"./utils":14}],10:[function(require,module,exports){
+},{"./exception":12,"./utils":16}],12:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -854,7 +1002,7 @@ Exception.prototype = new Error();
 
 exports['default'] = Exception;
 module.exports = exports['default'];
-},{}],11:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -875,7 +1023,7 @@ exports['default'] = function (Handlebars) {
 
 module.exports = exports['default'];
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],12:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -1108,7 +1256,7 @@ function initData(context, data) {
   }
   return data;
 }
-},{"./base":9,"./exception":10,"./utils":14}],13:[function(require,module,exports){
+},{"./base":11,"./exception":12,"./utils":16}],15:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -1123,7 +1271,7 @@ SafeString.prototype.toString = SafeString.prototype.toHTML = function () {
 
 exports['default'] = SafeString;
 module.exports = exports['default'];
-},{}],14:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -1238,12 +1386,12 @@ function blockParams(params, ids) {
 function appendContextPath(contextPath, id) {
   return (contextPath ? contextPath + '.' : '') + id;
 }
-},{}],15:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 // Create a simple path alias to allow browserify to resolve
 // the runtime on a supported path.
 module.exports = require('./dist/cjs/handlebars.runtime')['default'];
 
-},{"./dist/cjs/handlebars.runtime":8}],16:[function(require,module,exports){
+},{"./dist/cjs/handlebars.runtime":10}],18:[function(require,module,exports){
 /*!
  * jQuery Mousewheel 3.1.13
  *
@@ -1466,7 +1614,7 @@ module.exports = require('./dist/cjs/handlebars.runtime')['default'];
 
 }));
 
-},{}],17:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper;
 
@@ -1474,7 +1622,7 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
     + "\n        <button style=\"padding: 5px 8px; margin-left: 15px\" data-type=\"close\">Close</button>\n        <button style=\"padding: 5px 8px; margin-left: 15px\" data-type=\"alert\">Yes</button>\n    </div>\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":15}],18:[function(require,module,exports){
+},{"handlebars/runtime":17}],20:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper;
 
@@ -1482,7 +1630,7 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
     + "<br>\n        <button data-type=\"alert\" style=\"padding: 0;\">Yes</button>\n    </div>\n    <div style=\"height: 100px;overflow: hidden;margin-bottom: 10px\">\n        <div style=\"overflow: auto; height: 100px\" class=\"scroll1\">\n            <div style=\"height: 500px;background: blue\"></div>\n        </div>\n    </div>\n    <div style=\"height: 100px;overflow: hidden\">\n        <div style=\"overflow: auto; height: 100px\" class=\"scroll2\">\n            <div style=\"height: 500px;background: green\"></div>\n        </div>\n    </div>\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":15}],19:[function(require,module,exports){
+},{"handlebars/runtime":17}],21:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper;
 
@@ -1490,7 +1638,15 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
     + "<br>\n    <button data-type=\"alert\">Yes</button>\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":15}],20:[function(require,module,exports){
+},{"handlebars/runtime":17}],22:[function(require,module,exports){
+var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+    var helper;
+
+  return "<div>"
+    + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
+    + "</div>\n";
+},"useData":true});
+},{"handlebars/runtime":17}],23:[function(require,module,exports){
 var FloatBox = require("../../js/float-box");
 var template = require("../../modules/spin-kit/templates/sk-circle.js")("spinner");
 var Form = require("../../js/form");
@@ -1501,6 +1657,7 @@ var Alert = require("../../js/alert");
 var dropdownHBS = require("../../templates/dropdown.hbs");
 var modalHBS = require("../../templates/modal.hbs");
 var alertHBS = require("../../templates/alert.hbs");
+var textHBS = require("../../templates/text.hbs");
 
 // spin kit
 var $spinkit = $(".spinkit");
@@ -1570,11 +1727,37 @@ if ($floatBox.length > 0) {
 // form.js
 var $userForm = $("#usrForm");
 if ($userForm.length > 0) {
-    var form = new Form($userForm);
+    var form = new Form($userForm, {
+        validate: true
+    });
     form.onSubmit(function () {
         console.log(this.getData());
-        console.log(this.$target.serialize());
+    }).onBlur(function (input, validation) {
+        console.log(validation);
+    }).onValidateError(function (validation) {
+        console.log(validation.msg);
     });
 }
 
-},{"../../js/alert":1,"../../js/float-box":2,"../../js/form":3,"../../js/insert":4,"../../modules/spin-kit/templates/sk-circle.js":7,"../../templates/alert.hbs":17,"../../templates/dropdown.hbs":18,"../../templates/modal.hbs":19}]},{},[20]);
+// insert.js
+var $insert = $("#insert-test");
+if ($insert.length > 0) {
+    var insertButton = $insert.find("button.insert");
+    var deleteButton = $insert.find("button.delete");
+    var deleteAllButton = $insert.find("button.delete-all");
+    var insertTarget = $insert.find(".insert-target");
+    var insertion = new Insert(textHBS, insertTarget);
+    insertButton.click(function () {
+        insertion.insert({text: Math.random()});
+    });
+    deleteButton.click(function () {
+        insertion.destroy();
+    });
+    deleteAllButton.click(function () {
+        insertion.destroyAll();
+    });
+    insertion.onDestroy(function (el) {
+        console.log(el);
+    });
+}
+},{"../../js/alert":1,"../../js/float-box":2,"../../js/form":3,"../../js/insert":4,"../../modules/spin-kit/templates/sk-circle.js":9,"../../templates/alert.hbs":19,"../../templates/dropdown.hbs":20,"../../templates/modal.hbs":21,"../../templates/text.hbs":22}]},{},[23]);

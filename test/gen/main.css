@@ -554,6 +554,12 @@ body.overlay {
     background-color: black;
     opacity: 0; }
 
+input[type="color"].invalid-field, input[type="date"].invalid-field, input[type="datetime"].invalid-field, input[type="datetime-local"].invalid-field, input[type="email"].invalid-field, input[type="month"].invalid-field, input[type="number"].invalid-field, input[type="password"].invalid-field, input[type="search"].invalid-field, input[type="tel"].invalid-field, input[type="text"].invalid-field, input[type="time"].invalid-field, input[type="url"].invalid-field, input[type="week"].invalid-field, textarea.invalid-field {
+  background-color: #ffcccc; }
+
+[data-checkbox-group].invalid-field, [data-radio-group].invalid-field {
+  background-color: #ffcccc; }
+
 @-webkit-keyframes sk-circleBounceDelay {
   0%, 80%, 100% {
     -webkit-transform: scale(0); }
@@ -611,20 +617,22 @@ body.overlay {
     opacity: 0.5;
     background-color: white; }
 
-.alert .inner {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  -webkit-transform: translate(-50%, -50%);
-  -moz-transform: translate(-50%, -50%);
-  -ms-transform: translate(-50%, -50%);
-  -o-transform: translate(-50%, -50%);
-  transform: translate(-50%, -50%);
-  background-color: #FF8AAD;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
-  padding: 1.25em;
-  border-radius: 3px;
-  color: black; }
+.alert {
+  z-index: 40; }
+  .alert .inner {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    -o-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    background-color: #ddd;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+    padding: 1.25em;
+    border-radius: 3px;
+    color: black; }
 
 .accordion-tabs {
   line-height: 1.5;

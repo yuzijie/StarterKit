@@ -6,7 +6,7 @@ function to$(item) {
 var Insert = function (template, target, options) {
     this.$target = to$(target); // target to insert
     this.template = template; // template file
-    this.$element = null;
+    this.$elements = [];
 
     // Options
     this.opts = $.extend({
@@ -20,17 +20,29 @@ var Insert = function (template, target, options) {
 
 Insert.prototype.insert = function (data) {
     data = data || {};
-    this.$element = $(this.template(data));
-    this.$target[this.opts.insertMethod](this.$element);
-    if (this.insertAction) this.insertAction(this.$element);
+    var $element = $(this.template(data));
+    this.$target[this.opts.insertMethod]($element);
+    if (this.insertAction) this.insertAction($element);
+    this.$elements.push($element);
     return this;
 };
 
 Insert.prototype.destroy = function () {
-    if (this.$element) {
-        if (this.destroyAction) this.destroyAction(this.$element);
-        this.$element.remove();
-        this.$element = null;
+    if (this.$elements.length > 0) {
+        var $element = this.$elements.pop();
+        if (this.destroyAction) this.destroyAction($element);
+        $element.remove();
+    }
+    return this;
+};
+
+Insert.prototype.destroyAll = function () {
+    if (this.$elements.length > 0) {
+        if (this.destroyAction) this.destroyAction(this.$elements);
+        $.each(this.$elements, function (index, $element) {
+            $element.remove();
+        });
+        this.$elements = [];
     }
     return this;
 };

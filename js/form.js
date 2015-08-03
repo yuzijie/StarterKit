@@ -111,6 +111,11 @@ Form.prototype.setInputListener = function (context) {
             }, 500);
         }
     });
+
+    // fix number input problem
+    that.$inputs.filter("[type=number]").on("keypress.form", function (event) {
+        if (event.which < 48 || event.which > 57) event.preventDefault();
+    });
 };
 
 Form.prototype.resetListener = function () {

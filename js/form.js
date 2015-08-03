@@ -9,8 +9,7 @@ var validationList = [
     '[type=url]',
     '[type=email]',
     '[type=password]',
-    '[data-checkbox-group]',
-    '[data-radio-group]',
+    '[data-input-group]',
     'textarea'
 ];
 
@@ -91,13 +90,19 @@ Form.prototype.setInputListener = function (context) {
 
     // on Blur
     that.$inputs.on("blur.form", function () {
-        var validationError;
-        if (that.opts.validate === true) validationError = that.validateForm(this);
-        if (that.inputBlurAction) that.inputBlurAction(this, validationError);
+        if (that.inputBlurAction) that.inputBlurAction(this);
     });
 
     // on Change
     that.$inputs.on("change.form", function () {
+        // if validate
+        if (that.opts.validate === true) {
+            var $target = $(this);
+            if ($target.is(":checkbox,:radio")) $target = $target.closest("[data-input-group]");
+            var validationError = that.validateForm($target);
+            if (validationError && that.validateErrorAction) that.validateErrorAction(validationError);
+        }
+
         if (that.inputChangeAction) that.inputChangeAction(this);
     });
 

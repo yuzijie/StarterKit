@@ -77,7 +77,7 @@ var Validator = {};
 Validator.check = function (field) {
     var $field = to$(field);
 
-    if ($field.is("[data-checkbox-group],[data-radio-group]")) {
+    if ($field.is("[data-input-group]")) {
         return checkGroup($field);
     } else {
         return checkInput($field);

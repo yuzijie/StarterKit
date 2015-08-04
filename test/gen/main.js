@@ -465,6 +465,11 @@ Insert.prototype.changeTemplate = function (template) {
     return this;
 };
 
+Insert.prototype.changeMethod = function (method) {
+    if (typeof method === "string") this.insertMethod = method;
+    return this;
+};
+
 Insert.prototype.onInsert = function (func) {
     if ($.isFunction(func)) this.insertAction = func;
     return this;
@@ -1737,6 +1742,7 @@ var Form = require("../../js/form");
 var Insert = require("../../js/insert");
 var Alert = require("../../js/alert");
 var Listener = require("../../js/listener");
+var Scroll = require("../../js/scroll-to");
 
 // templates
 var dropdownHBS = require("../../templates/dropdown.hbs");
@@ -1877,7 +1883,18 @@ if ($insert.length > 0) {
         console.log(el);
     });
 }
-},{"../../js/alert":1,"../../js/float-box":2,"../../js/form":3,"../../js/insert":4,"../../js/listener":5,"../../modules/spin-kit/templates/sk-circle.js":10,"../../templates/alert.hbs":20,"../../templates/dropdown.hbs":21,"../../templates/modal.hbs":22,"../../templates/text.hbs":23,"../templates/alert1.hbs":25,"../templates/alert2.hbs":26,"../templates/alert3.hbs":27}],25:[function(require,module,exports){
+
+// scroll-to.js
+var $scrollTo = $(".scroll");
+if ($scrollTo.length > 0) {
+    $("button").click(function () {
+        Scroll(".target", {
+            container: ".inner"
+        });
+    });
+}
+
+},{"../../js/alert":1,"../../js/float-box":2,"../../js/form":3,"../../js/insert":4,"../../js/listener":5,"../../js/scroll-to":7,"../../modules/spin-kit/templates/sk-circle.js":10,"../../templates/alert.hbs":20,"../../templates/dropdown.hbs":21,"../../templates/modal.hbs":22,"../../templates/text.hbs":23,"../templates/alert1.hbs":25,"../templates/alert2.hbs":26,"../templates/alert3.hbs":27}],25:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     return "<div>\n    <button data-msg=\"alert1\">alert1</button>\n</div>\n";
 },"useData":true});

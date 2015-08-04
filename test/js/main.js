@@ -4,6 +4,7 @@ var Form = require("../../js/form");
 var Insert = require("../../js/insert");
 var Alert = require("../../js/alert");
 var Listener = require("../../js/listener");
+var Scroll = require("../../js/scroll-to");
 
 // templates
 var dropdownHBS = require("../../templates/dropdown.hbs");
@@ -142,5 +143,15 @@ if ($insert.length > 0) {
     });
     insertion.onDestroy(function (el) {
         console.log(el);
+    });
+}
+
+// scroll-to.js
+var $scrollTo = $(".scroll");
+if ($scrollTo.length > 0) {
+    $("button").click(function () {
+        Scroll(".target", {
+            container: ".inner"
+        });
     });
 }

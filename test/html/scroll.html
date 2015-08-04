@@ -1,0 +1,58 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Starter Kit</title>
+    <meta name="description" content="YU's starter kit">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../gen/main.css">
+    <script src="../gen/modernizr-2.8.3.min.js"></script>
+
+    <style>
+        .outer {
+            overflow: hidden;
+            height: 400px;
+            width: 400px;
+            border: 1px dashed black;
+            margin: 50px auto;
+        }
+
+        .inner {
+            background: blue;
+            overflow: auto;
+            height: 400px;
+            width: 415px;
+        }
+
+        .target {
+            margin: 800px 0;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        button {
+            display: block;
+            margin: 10px auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="scroll">
+    <div class="outer">
+        <div class="inner">
+            <div class="target">
+                The target!
+            </div>
+        </div>
+    </div>
+    <button>scroll!</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="../gen/jquery-2.1.4.min.js"><\/script>')</script>
+<script src="../gen/main.js"></script>
+</body>
+</html>

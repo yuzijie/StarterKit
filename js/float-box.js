@@ -78,7 +78,7 @@ FloatBox.prototype.resetListener = function () {
     if (this.opts.closeOnClick === true) $(document).off("click.floatBox");
     if (this.opts.closeOnScroll === true) $(window).off("scroll.floatBox");
     if (this.opts.closeOnLeave === true) this.self.off("mouseleave.floatBox");
-    this.listeners.off();
+    this.customListener.off();
     return this;
 };
 

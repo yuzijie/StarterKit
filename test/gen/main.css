@@ -557,7 +557,7 @@ body.overlay {
 input[type="color"].invalid-field, input[type="date"].invalid-field, input[type="datetime"].invalid-field, input[type="datetime-local"].invalid-field, input[type="email"].invalid-field, input[type="month"].invalid-field, input[type="number"].invalid-field, input[type="password"].invalid-field, input[type="search"].invalid-field, input[type="tel"].invalid-field, input[type="text"].invalid-field, input[type="time"].invalid-field, input[type="url"].invalid-field, input[type="week"].invalid-field, textarea.invalid-field {
   background-color: #ffcccc; }
 
-[data-checkbox-group].invalid-field, [data-radio-group].invalid-field {
+[data-input-group].invalid-field {
   background-color: #ffcccc; }
 
 @-webkit-keyframes sk-circleBounceDelay {

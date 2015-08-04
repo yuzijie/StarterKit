@@ -84,7 +84,7 @@ if ($userForm.length > 0) {
     form.onSubmit(function () {
         console.log(this.getData());
     }).onBlur(function (input, validation) {
-        //console.log(validation);
+        if (validation) console.log(validation.msg);
     }).onValidateError(function (validation) {
         console.log(validation.msg);
     });

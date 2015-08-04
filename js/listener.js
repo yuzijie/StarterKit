@@ -3,14 +3,21 @@ function to$(item) {
     return (item instanceof jQuery) ? item : $(item);
 }
 
-var Listener = function (namespace) {
+var Listener = function (namespace, parent) {
+    this.parent = (parent) ? to$(parent) : null;
     this.namespace = namespace || "";
     this.listeners = [];
 };
 
 Listener.prototype.add = function (target, event, func) {
-    target = to$(target);
-    event = event + "." + this.namespace;
+
+    if (this.parent) {
+        target = this.parent.find(target);
+    } else {
+        target = to$(target);
+    }
+
+    event += (this.namespace) ? "." + this.namespace : "";
 
     if (target.length > 0 && $.isFunction(func)) {
         var listener = {target: target, event: event, execute: func};
@@ -30,7 +37,7 @@ Listener.prototype.on = function () {
 };
 
 Listener.prototype.off = function () {
-    $.each(this.listeners, function(index, item){
+    $.each(this.listeners, function (index, item) {
         item.target.off(item.event);
     });
     return this;

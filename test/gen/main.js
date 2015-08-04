@@ -71,7 +71,7 @@ var FloatBox = function (box, options) {
     this.boxCloseAction = null;
 
     // add custom Listeners
-    this.customListener = new Listener("floatBox");
+    this.customListener = new Listener("floatBox", this.self);
 };
 
 FloatBox.prototype.setListener = function () {
@@ -158,8 +158,7 @@ FloatBox.prototype.onClose = function (func) {
 };
 
 FloatBox.prototype.addListener = function (target, event, func) {
-    var $target = this.self.find(target);
-    this.customListener.add($target, event, func);
+    this.customListener.add(target, event, func);
     return this;
 };
 
@@ -399,15 +398,11 @@ function to$(item) {
     return (item instanceof jQuery) ? item : $(item);
 }
 
-var Insert = function (template, target, options) {
-    this.$target = to$(target); // target to insert
-    this.template = template; // template file
+var Insert = function (template, target, insertMethod) {
+    this.$target = to$(target);                   // target to insert
+    this.template = template;                     // template file
+    this.insertMethod = insertMethod || "append"; // insert method
     this.$elements = [];
-
-    // Options
-    this.opts = $.extend({
-        insertMethod: "append"
-    }, options || {});
 
     // Actions
     this.insertAction = null;
@@ -417,16 +412,24 @@ var Insert = function (template, target, options) {
 Insert.prototype.insert = function (data) {
     data = data || {};
     var $element = $(this.template(data));
-    this.$target[this.opts.insertMethod]($element);
-    if (this.insertAction) this.insertAction($element);
+
+    // add to DOM
+    this.$target[this.insertMethod]($element);
     this.$elements.push($element);
+
+    // custom action
+    if (this.insertAction) this.insertAction($element);
     return this;
 };
 
 Insert.prototype.destroy = function () {
     if (this.$elements.length > 0) {
         var $element = this.$elements.pop();
+
+        // custom action
         if (this.destroyAction) this.destroyAction($element);
+
+        // remove from DOM
         $element.remove();
     }
     return this;
@@ -434,7 +437,11 @@ Insert.prototype.destroy = function () {
 
 Insert.prototype.destroyAll = function () {
     if (this.$elements.length > 0) {
+
+        // custom action
         if (this.destroyAction) this.destroyAction(this.$elements);
+
+        // remove all
         $.each(this.$elements, function (index, $element) {
             $element.remove();
         });
@@ -476,14 +483,21 @@ function to$(item) {
     return (item instanceof jQuery) ? item : $(item);
 }
 
-var Listener = function (namespace) {
+var Listener = function (namespace, parent) {
+    this.parent = (parent) ? to$(parent) : null;
     this.namespace = namespace || "";
     this.listeners = [];
 };
 
 Listener.prototype.add = function (target, event, func) {
-    target = to$(target);
-    event = event + "." + this.namespace;
+
+    if (this.parent) {
+        target = this.parent.find(target);
+    } else {
+        target = to$(target);
+    }
+
+    event += (this.namespace) ? "." + this.namespace : "";
 
     if (target.length > 0 && $.isFunction(func)) {
         var listener = {target: target, event: event, execute: func};
@@ -503,7 +517,7 @@ Listener.prototype.on = function () {
 };
 
 Listener.prototype.off = function () {
-    $.each(this.listeners, function(index, item){
+    $.each(this.listeners, function (index, item) {
         item.target.off(item.event);
     });
     return this;
@@ -1752,9 +1766,6 @@ if ($floatBox.length > 0) {
         fbox.addListener("button[data-type=alert]", "click", function () {
             alert("yes");
         });
-        fbox.onOpen(function () {
-            console.log(fbox.listeners);
-        });
         $button.on("click", function () {
             fbox.toggle();
         });
@@ -1829,27 +1840,30 @@ if ($insert.length > 0) {
     insertButton1.click(function () {
         insertion.changeTemplate(alert1HBS);
         insertion.onInsert(function ($el) {
-            $el.find("button").click(function () {
-                alert("this is button 1");
-            });
+            var listener = new Listener("insert", $el);
+            listener.add("button", "click", function () {
+                alert("this is button 1 by Listener");
+            }).on();
         });
         insertion.insert();
     });
     insertButton2.click(function () {
         insertion.changeTemplate(alert2HBS);
         insertion.onInsert(function ($el) {
-            $el.find("button").click(function () {
-                alert("this is button 2");
-            });
+            var listener = new Listener("insert", $el);
+            listener.add("button", "click", function () {
+                alert("this is button 2 by Listener");
+            }).on();
         });
         insertion.insert();
     });
     insertButton3.click(function () {
         insertion.changeTemplate(alert3HBS);
         insertion.onInsert(function ($el) {
-            $el.find("button").click(function () {
-                alert("this is button 3");
-            });
+            var listener = new Listener("insert", $el);
+            listener.add("button", "click", function () {
+                alert("this is button 3 by Listener");
+            }).on();
         });
         insertion.insert();
     });

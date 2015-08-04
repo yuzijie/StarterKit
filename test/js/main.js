@@ -33,9 +33,6 @@ if ($floatBox.length > 0) {
         fbox.addListener("button[data-type=alert]", "click", function () {
             alert("yes");
         });
-        fbox.onOpen(function () {
-            console.log(fbox.listeners);
-        });
         $button.on("click", function () {
             fbox.toggle();
         });
@@ -110,27 +107,30 @@ if ($insert.length > 0) {
     insertButton1.click(function () {
         insertion.changeTemplate(alert1HBS);
         insertion.onInsert(function ($el) {
-            $el.find("button").click(function () {
-                alert("this is button 1");
-            });
+            var listener = new Listener("insert", $el);
+            listener.add("button", "click", function () {
+                alert("this is button 1 by Listener");
+            }).on();
         });
         insertion.insert();
     });
     insertButton2.click(function () {
         insertion.changeTemplate(alert2HBS);
         insertion.onInsert(function ($el) {
-            $el.find("button").click(function () {
-                alert("this is button 2");
-            });
+            var listener = new Listener("insert", $el);
+            listener.add("button", "click", function () {
+                alert("this is button 2 by Listener");
+            }).on();
         });
         insertion.insert();
     });
     insertButton3.click(function () {
         insertion.changeTemplate(alert3HBS);
         insertion.onInsert(function ($el) {
-            $el.find("button").click(function () {
-                alert("this is button 3");
-            });
+            var listener = new Listener("insert", $el);
+            listener.add("button", "click", function () {
+                alert("this is button 3 by Listener");
+            }).on();
         });
         insertion.insert();
     });

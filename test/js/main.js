@@ -107,10 +107,10 @@ if ($insert.length > 0) {
     insertButton1.click(function () {
         insertion.changeTemplate(alert1HBS);
         insertion.onInsert(function ($el) {
-            var listener = new Listener("insert", $el);
-            listener.add("button", "click", function () {
+            $el.data("listener", new Listener("insert", $el));
+            $el.data("listener").add("button", "click", function () {
                 alert("this is button 1 by Listener");
-            }).on();
+            }).on().off();
         });
         insertion.insert();
     });

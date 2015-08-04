@@ -42,7 +42,7 @@ var FloatBox = function (box, options) {
     this.boxCloseAction = null;
 
     // add custom Listeners
-    this.customListener = new Listener("floatBox");
+    this.customListener = new Listener("floatBox", this.self);
 };
 
 FloatBox.prototype.setListener = function () {
@@ -129,8 +129,7 @@ FloatBox.prototype.onClose = function (func) {
 };
 
 FloatBox.prototype.addListener = function (target, event, func) {
-    var $target = this.self.find(target);
-    this.customListener.add($target, event, func);
+    this.customListener.add(target, event, func);
     return this;
 };
 

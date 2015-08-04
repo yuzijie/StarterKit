@@ -70,6 +70,11 @@ Insert.prototype.changeTemplate = function (template) {
     return this;
 };
 
+Insert.prototype.changeMethod = function (method) {
+    if (typeof method === "string") this.insertMethod = method;
+    return this;
+};
+
 Insert.prototype.onInsert = function (func) {
     if ($.isFunction(func)) this.insertAction = func;
     return this;

@@ -107,7 +107,7 @@ FloatBox.prototype.resetListener = function () {
     if (this.opts.closeOnClick === true) $(document).off("click.floatBox");
     if (this.opts.closeOnScroll === true) $(window).off("scroll.floatBox");
     if (this.opts.closeOnLeave === true) this.self.off("mouseleave.floatBox");
-    this.listeners.off();
+    this.customListener.off();
     return this;
 };
 
@@ -444,8 +444,7 @@ Insert.prototype.destroyAll = function () {
 };
 
 Insert.prototype.reinsert = function (data) {
-    this.destroy();
-    this.insert(data);
+    this.destroy().insert(data);
     return this;
 };
 
@@ -1723,12 +1722,16 @@ var template = require("../../modules/spin-kit/templates/sk-circle.js")("spinner
 var Form = require("../../js/form");
 var Insert = require("../../js/insert");
 var Alert = require("../../js/alert");
+var Listener = require("../../js/listener");
 
 // templates
 var dropdownHBS = require("../../templates/dropdown.hbs");
 var modalHBS = require("../../templates/modal.hbs");
 var alertHBS = require("../../templates/alert.hbs");
 var textHBS = require("../../templates/text.hbs");
+var alert1HBS = require("../templates/alert1.hbs");
+var alert2HBS = require("../templates/alert2.hbs");
+var alert3HBS = require("../templates/alert3.hbs");
 
 // spin kit
 var $spinkit = $(".spinkit");
@@ -1813,13 +1816,42 @@ if ($userForm.length > 0) {
 // insert.js
 var $insert = $("#insert-test");
 if ($insert.length > 0) {
-    var insertButton = $insert.find("button.insert");
+
+    var insertButton1 = $insert.find("button.insert1");
+    var insertButton2 = $insert.find("button.insert2");
+    var insertButton3 = $insert.find("button.insert3");
+
     var deleteButton = $insert.find("button.delete");
     var deleteAllButton = $insert.find("button.delete-all");
     var insertTarget = $insert.find(".insert-target");
     var insertion = new Insert(textHBS, insertTarget);
-    insertButton.click(function () {
-        insertion.insert({text: Math.random()});
+
+    insertButton1.click(function () {
+        insertion.changeTemplate(alert1HBS);
+        insertion.onInsert(function ($el) {
+            $el.find("button").click(function () {
+                alert("this is button 1");
+            });
+        });
+        insertion.insert();
+    });
+    insertButton2.click(function () {
+        insertion.changeTemplate(alert2HBS);
+        insertion.onInsert(function ($el) {
+            $el.find("button").click(function () {
+                alert("this is button 2");
+            });
+        });
+        insertion.insert();
+    });
+    insertButton3.click(function () {
+        insertion.changeTemplate(alert3HBS);
+        insertion.onInsert(function ($el) {
+            $el.find("button").click(function () {
+                alert("this is button 3");
+            });
+        });
+        insertion.insert();
     });
     deleteButton.click(function () {
         insertion.destroy();
@@ -1831,4 +1863,16 @@ if ($insert.length > 0) {
         console.log(el);
     });
 }
-},{"../../js/alert":1,"../../js/float-box":2,"../../js/form":3,"../../js/insert":4,"../../modules/spin-kit/templates/sk-circle.js":10,"../../templates/alert.hbs":20,"../../templates/dropdown.hbs":21,"../../templates/modal.hbs":22,"../../templates/text.hbs":23}]},{},[24]);
+},{"../../js/alert":1,"../../js/float-box":2,"../../js/form":3,"../../js/insert":4,"../../js/listener":5,"../../modules/spin-kit/templates/sk-circle.js":10,"../../templates/alert.hbs":20,"../../templates/dropdown.hbs":21,"../../templates/modal.hbs":22,"../../templates/text.hbs":23,"../templates/alert1.hbs":25,"../templates/alert2.hbs":26,"../templates/alert3.hbs":27}],25:[function(require,module,exports){
+var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+    return "<div>\n    <button data-msg=\"alert1\">alert1</button>\n</div>\n";
+},"useData":true});
+},{"handlebars/runtime":18}],26:[function(require,module,exports){
+var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+    return "<div>\n    <button data-msg=\"alert2\">alert2</button>\n</div>";
+},"useData":true});
+},{"handlebars/runtime":18}],27:[function(require,module,exports){
+var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+    return "<div>\n    <button data-msg=\"alert3\">alert3</button>\n</div>";
+},"useData":true});
+},{"handlebars/runtime":18}]},{},[24]);

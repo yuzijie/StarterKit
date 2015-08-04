@@ -3,12 +3,16 @@ var template = require("../../modules/spin-kit/templates/sk-circle.js")("spinner
 var Form = require("../../js/form");
 var Insert = require("../../js/insert");
 var Alert = require("../../js/alert");
+var Listener = require("../../js/listener");
 
 // templates
 var dropdownHBS = require("../../templates/dropdown.hbs");
 var modalHBS = require("../../templates/modal.hbs");
 var alertHBS = require("../../templates/alert.hbs");
 var textHBS = require("../../templates/text.hbs");
+var alert1HBS = require("../templates/alert1.hbs");
+var alert2HBS = require("../templates/alert2.hbs");
+var alert3HBS = require("../templates/alert3.hbs");
 
 // spin kit
 var $spinkit = $(".spinkit");
@@ -93,13 +97,42 @@ if ($userForm.length > 0) {
 // insert.js
 var $insert = $("#insert-test");
 if ($insert.length > 0) {
-    var insertButton = $insert.find("button.insert");
+
+    var insertButton1 = $insert.find("button.insert1");
+    var insertButton2 = $insert.find("button.insert2");
+    var insertButton3 = $insert.find("button.insert3");
+
     var deleteButton = $insert.find("button.delete");
     var deleteAllButton = $insert.find("button.delete-all");
     var insertTarget = $insert.find(".insert-target");
     var insertion = new Insert(textHBS, insertTarget);
-    insertButton.click(function () {
-        insertion.insert({text: Math.random()});
+
+    insertButton1.click(function () {
+        insertion.changeTemplate(alert1HBS);
+        insertion.onInsert(function ($el) {
+            $el.find("button").click(function () {
+                alert("this is button 1");
+            });
+        });
+        insertion.insert();
+    });
+    insertButton2.click(function () {
+        insertion.changeTemplate(alert2HBS);
+        insertion.onInsert(function ($el) {
+            $el.find("button").click(function () {
+                alert("this is button 2");
+            });
+        });
+        insertion.insert();
+    });
+    insertButton3.click(function () {
+        insertion.changeTemplate(alert3HBS);
+        insertion.onInsert(function ($el) {
+            $el.find("button").click(function () {
+                alert("this is button 3");
+            });
+        });
+        insertion.insert();
     });
     deleteButton.click(function () {
         insertion.destroy();

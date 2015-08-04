@@ -1,5 +1,6 @@
 var prevent = require("./prevent-scroll");
 var scrollbar = require("./scrollbar");
+var Listener = require("./listener");
 var $body = $(document.body);
 
 // helper functions
@@ -40,9 +41,8 @@ var FloatBox = function (box, options) {
     this.boxOpenAction = null;
     this.boxCloseAction = null;
 
-    // Listeners
-    this.listeners = {};
-    this.eventTargets = [];
+    // add custom Listeners
+    this.customListener = new Listener("floatBox");
 };
 
 FloatBox.prototype.setListener = function () {
@@ -71,18 +71,14 @@ FloatBox.prototype.setListener = function () {
     }
 
     // custom listeners
-    $.each(this.listeners, function (index, func) {
-        func();
-    });
+    this.customListener.on();
 };
 
 FloatBox.prototype.resetListener = function () {
     if (this.opts.closeOnClick === true) $(document).off("click.floatBox");
     if (this.opts.closeOnScroll === true) $(window).off("scroll.floatBox");
     if (this.opts.closeOnLeave === true) this.self.off("mouseleave.floatBox");
-    $.each(this.eventTargets, function (index, target) {
-        target.off(".floatbox");
-    });
+    this.listeners.off();
     return this;
 };
 
@@ -133,19 +129,8 @@ FloatBox.prototype.onClose = function (func) {
 };
 
 FloatBox.prototype.addListener = function (target, event, func) {
-    var key = (typeof target === "string") ? target.replace(/[^\w]/gi, '') + event : event;
-    if (!this.listeners[key] && $.isFunction(func)) {
-        var $target = this.self.find(target);
-        if ($target.length > 0) {
-            this.listeners[key] = function () {
-                $target.on(event + ".floatbox", function (e) {
-                    e.preventDefault();
-                    func(e);
-                });
-            };
-            this.eventTargets.push($target);
-        }
-    }
+    var $target = this.self.find(target);
+    this.customListener.add($target, event, func);
     return this;
 };
 

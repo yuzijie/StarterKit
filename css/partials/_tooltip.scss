@@ -1,0 +1,44 @@
+%tooltip {
+    display: none;
+    padding: em(5) em(10);
+    box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.4);
+    box-sizing: border-box;
+
+    &:after {
+        content: "";
+        position: absolute;
+        box-sizing: border-box;
+        @include size(0);
+        margin-left: -11px;
+        bottom: -15px;
+        left: 50%;
+        border: 8px solid;
+        @include transform-origin(0 0);
+        @include transform(rotate(-45deg));
+        box-shadow: -3px 3px 3px 0 rgba(0, 0, 0, 0.4);
+    }
+}
+
+@mixin tooltip($conf:()) {
+    // config
+    $default: (
+            name: ".tooltip",
+            position: 0 null null 0,
+            background-color: #FCFCFC,
+            color: black,
+            border-radius: $base-border-radius
+    );
+    $conf: map-merge($default, $conf);
+
+    #{map-get($conf, name)} {
+        @extend %tooltip;
+        @include position(absolute, map-get($conf, position));
+        background-color: map-get($conf, background-color);
+        border-radius: map-get($conf, border-radius);
+        color: map-get($conf, color);
+
+        &:after {
+            border-color: transparent transparent map-get($conf, background-color) map-get($conf, background-color);
+        }
+    }
+}

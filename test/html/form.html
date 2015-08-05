@@ -24,15 +24,18 @@
 
 <form method="post" id="usrForm" novalidate>
     <label for="name">Name</label>
-    <input type="number" id="name" name="name">
+    <input type="text" id="name" name="name" required>
 
     <label for="email">email</label>
-    <input type="email" id="email" name="email">
+    <input type="email" id="email" name="email" required>
 
     <label for="password">password</label>
-    <input type="password" id="password" name="password" required data-validity="密码不能为空">
+    <input type="password" id="password" name="password" required>
 
-    <label>Gender</label>
+    <label for="age">age</label>
+    <input type="number" id="age" name="name">
+
+    <label>gender</label>
 
     <div class="radio-group" data-input-group data-required="true">
         <input type="radio" id="r1" name="radio" value="r1">

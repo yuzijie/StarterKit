@@ -3,9 +3,15 @@ var Insert = require("./insert.js");
 var Floatbox = require("./float-box.js");
 var float, alert;
 
-var Alert = function (template) {
-    alert = new Insert(template, $(document.body));
+var Alert = function (template, target) {
+    target = target || $(document.body);
+    alert = new Insert(template, target);
+
+    var that = this;
+    this.showAction = null;
+
     alert.onInsert(function ($el) {
+        if (that.showAction) that.showAction($el);
         float = new Floatbox($el);
         float.addListener('button[data-type="close"]', "click", function () {
             alert.destroy();
@@ -19,14 +25,26 @@ var Alert = function (template) {
 
 Alert.prototype.show = function (data) {
     alert.insert(data);
+    return this;
 };
 Alert.prototype.hide = function () {
     alert.destroy();
+    return this;
+};
+
+Alert.prototype.changeTarget = function (target) {
+    alert.changeTarget(target);
+    return this;
+};
+
+Alert.prototype.onShowAction = function (func) {
+    if ($.isFunction(func)) this.showAction = func;
+    return this;
 };
 
 module.exports = Alert;
 
-},{"./float-box.js":2,"./insert.js":4}],2:[function(require,module,exports){
+},{"./float-box.js":2,"./insert.js":5}],2:[function(require,module,exports){
 var prevent = require("./prevent-scroll");
 var scrollbar = require("./scrollbar");
 var Listener = require("./listener");
@@ -172,9 +190,20 @@ FloatBox.prototype.addCloseButton = function (target) {
 
 module.exports = FloatBox;
 
-},{"./listener":5,"./prevent-scroll":6,"./scrollbar":8}],3:[function(require,module,exports){
+},{"./listener":6,"./prevent-scroll":7,"./scrollbar":9}],3:[function(require,module,exports){
+var Form = require("./form");
+
+var BetterForm = function (target) {
+    this.form = new Form(target, {
+        validate: true
+    });
+};
+
+module.exports = BetterForm;
+
+},{"./form":4}],4:[function(require,module,exports){
 var validator = require("./validator");
-var scrollTo = require("./scroll-to");
+var Listener = require("./listener");
 
 var timer = null;
 var validationList = [
@@ -193,14 +222,16 @@ function to$(item) {
     return (item instanceof jQuery) ? item : $(item);
 }
 
+// Form.js
 var Form = function (target, options) {
+
     // Options
     this.opts = $.extend({
         validate: false
     }, options || {});
 
     // Objects
-    this.self = to$(target);                   // form
+    this.self = to$(target);                   // the form
     this.$inputs = this.self.find(":input");   // all inputs
     this.$submit = this.self.find(":submit");  // submit button
     if (this.opts.validate === true) {
@@ -219,100 +250,108 @@ var Form = function (target, options) {
     this.validateErrorAction = null;
 
     // set Listener
-    this.setInputListener(this);
-    this.setSubmitListener(this);
+    this.listeners = new Listener("form");
+    this.setListeners();
 };
 
-Form.prototype.setSubmitListener = function (context) {
-    var that = context || this;
+Form.prototype.addSubmitListener = function () {
+    var that = this;
 
-    // on Submit
-    that.self.on("submit.form", function (event) {
-        var notPass = [];
-        event.preventDefault();
+    this.listeners.add(this.self, "submit", function (e) {
+        e.preventDefault();
+        var invalidElement = null;
 
+        // if allow submit
         if (that.allowSubmit === true) {
 
-            if (that.opts.validate === true) { // validate form
+            // validate
+            if (that.opts.validate === true) {
                 that.$fields.each(function () {
-                    var error = that.validateForm(this);
-                    if (error) notPass.push(error);
+                    var errorMessage = that.validateForm(this);
+                    if (errorMessage && !invalidElement) invalidElement = this;
                 });
             }
 
-            // test whether form is valid or not
-            if (notPass.length === 0) {
+            // test whether to submit
+            if (invalidElement) {
+                if (that.validateErrorAction) that.validateErrorAction(invalidElement);
+            } else {
                 that.disableSubmit();
                 if (that.submitAction) that.submitAction(that.getFormUrl(), that.getPostData());
-            } else {
-                scrollTo(notPass[0].element.prev("label"), {
-                    onFinish: function () {
-                        if (that.validateErrorAction) that.validateErrorAction(notPass[0]);
-                    }
-                });
             }
         }
     });
+
+    return this;
 };
 
-Form.prototype.setInputListener = function (context) {
-    var that = context || this;
+Form.prototype.addInputListener = function () {
+    var that = this;
 
     // on Focus
-    that.$inputs.on("focus.form", function () {
-        if (that.inputFocusAction) that.inputFocusAction(this);
+    this.listeners.add(this.$inputs, "focus", function (e) {
+        if (that.inputFocusAction) that.inputFocusAction(e);
     });
 
     // on Blur
-    that.$inputs.on("blur.form", function () {
-        if (that.inputBlurAction) that.inputBlurAction(this);
+    this.listeners.add(this.$inputs, "blur", function (e) {
+        if (that.inputBlurAction) that.inputBlurAction(e);
     });
 
     // on Change
-    that.$inputs.on("change.form", function () {
-        // if validate
+    this.listeners.add(this.$inputs, "change", function (e) {
+        var errorMessage;
+
         if (that.opts.validate === true) {
-            var $target = $(this);
-            if ($target.is(":checkbox,:radio")) $target = $target.closest("[data-input-group]");
-            var validationError = that.validateForm($target);
-            if (validationError && that.validateErrorAction) that.validateErrorAction(validationError);
+            var $target = $(e.target);
+            if ($target.is(":checkbox, :radio")) $target = $target.closest("[data-input-group]");
+            errorMessage = that.validateForm($target);
         }
 
-        if (that.inputChangeAction) that.inputChangeAction(this);
+        if (that.inputChangeAction) that.inputChangeAction(e, errorMessage);
     });
 
     // on Keyup
-    that.$inputs.on("keyup.form", function (event) {
+    this.listeners.add(this.$inputs, "keyup", function (e) {
         if (that.keyupAction) {
-            var input = this;
+            var context = this;
             clearTimeout(timer);
             timer = setTimeout(function () {
-                that.keyupAction(input, event);
+                that.keyupAction.call(context, e);
             }, 500);
         }
     });
 
     // fix number input problem
-    that.$inputs.filter("[type=number]").on("keypress.form", function (event) {
-        if (event.which < 48 || event.which > 57) event.preventDefault();
+    this.listeners.add(this.$inputs.filter("[type=number]"), "keypress", function (e) {
+        if (e.which < 48 || e.which > 57) e.preventDefault();
     });
+
+    return this;
 };
 
-Form.prototype.resetListener = function () {
-    this.$inputs.off(".form");
-    this.self.off(".form");
+Form.prototype.setListeners = function () {
+    this.addSubmitListener().addInputListener();
+    this.listeners.on();
+    return this;
+};
+
+Form.prototype.resetListeners = function () {
+    this.listeners.remove();
+    return this;
 };
 
 // return error if invalid
 Form.prototype.validateForm = function (input) {
     var $input = to$(input);
-    var validationError = validator.check($input);
-    if (validationError) {
+    var errorMessage = validator.check($input);
+    $input.data("validation-error", errorMessage);
+    if (errorMessage) {
         $input.addClass("invalid-field");
     } else {
         if ($input.is(".invalid-field")) $input.removeClass("invalid-field");
     }
-    return validationError;
+    return errorMessage;
 };
 
 Form.prototype.buttonText = function (text) {
@@ -392,7 +431,7 @@ Form.prototype.getFormUrl = function () {
 
 module.exports = Form;
 
-},{"./scroll-to":7,"./validator":9}],4:[function(require,module,exports){
+},{"./listener":6,"./validator":10}],5:[function(require,module,exports){
 // helper functions
 function to$(item) {
     return (item instanceof jQuery) ? item : $(item);
@@ -482,7 +521,10 @@ Insert.prototype.onDestroy = function (func) {
 
 module.exports = Insert;
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
+// 注明：只有在需要频繁开启和关闭 listeners 的时候才需要这个库
+// 否则直接使用 jQuery 的 on 即可
+
 // helper functions
 function to$(item) {
     return (item instanceof jQuery) ? item : $(item);
@@ -490,21 +532,34 @@ function to$(item) {
 
 var Listener = function (namespace, parent) {
     this.parent = (parent) ? to$(parent) : null;
-    this.namespace = namespace || "";
+    this.namespace = (namespace) ? "." + namespace : "";
     this.listeners = [];
 };
 
-Listener.prototype.add = function (target, event, func) {
+// 1: target, event, func
+// 2: event, func
+Listener.prototype.add = function () {
+    var target, event, func;
 
-    if (this.parent) {
-        target = this.parent.find(target);
-    } else {
-        target = to$(target);
+    switch (arguments.length) {
+        case 2:
+            if (!this.parent) throw "no target element for listener!";
+            target = this.parent;
+            event = arguments[0] + this.namespace;
+            func = arguments[1];
+            break;
+        case 3:
+            if (this.parent) {
+                target = this.parent.find(arguments[0]);
+            } else {
+                target = to$(arguments[0]);
+            }
+            event = arguments[1] + this.namespace;
+            func = arguments[2];
+            break;
     }
 
-    event += (this.namespace) ? "." + this.namespace : "";
-
-    if (target.length > 0 && $.isFunction(func)) {
+    if (target.length > 0) {
         var listener = {target: target, event: event, execute: func};
         this.listeners.push(listener);
     }
@@ -514,8 +569,7 @@ Listener.prototype.add = function (target, event, func) {
 Listener.prototype.on = function () {
     $.each(this.listeners, function (index, item) {
         item.target.on(item.event, function (e) {
-            e.preventDefault();
-            item.execute(e);
+            item.execute.call(this, e);
         });
     });
     return this;
@@ -535,7 +589,7 @@ Listener.prototype.remove = function () {
 
 module.exports = Listener;
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 require("../node_modules/jquery-mousewheel/jquery.mousewheel.js")($);
 var PreventScroll = function ($target) {
     $target = ($target instanceof jQuery) ? $target : $($target);
@@ -550,7 +604,7 @@ var PreventScroll = function ($target) {
 };
 module.exports = PreventScroll;
 
-},{"../node_modules/jquery-mousewheel/jquery.mousewheel.js":19}],7:[function(require,module,exports){
+},{"../node_modules/jquery-mousewheel/jquery.mousewheel.js":20}],8:[function(require,module,exports){
 // helper function
 function to$(item) {
     return (item instanceof jQuery) ? item : $(item);
@@ -578,7 +632,7 @@ var scrollTo = function (target, options) {
 
 module.exports = scrollTo;
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 var getScrollbarWidth = function () {
     var scrollDiv = document.createElement('div');
     scrollDiv.className = "scrollbar-measure";
@@ -608,25 +662,30 @@ module.exports = {
     resetPadding: resetPadding
 };
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 // helper function
 function to$(item) {
     return (item instanceof jQuery) ? item : $(item);
 }
 
-// output
-var errorObject = function (type, $element, msg) {
-    // Example:
-    // {error: "required", msg: "该项目为必填", element: "jQuery Object"}
+//// Input check //////
 
-    var customMsg = $element.data("validity");
-    if (customMsg) msg = customMsg;
+var checkInput = function ($input) {
+    var content = $input.val().trim(),
+        type = $input.prop("type"),
+        errorMessage;
 
-    return {
-        error: type,
-        element: $element,
-        msg: msg
-    };
+    if ($input.prop("required")) {
+        errorMessage = checkInputRequire($input, content);
+        if (errorMessage) return errorMessage;
+    }
+
+    if (content && type in checkers) {
+        errorMessage = checkers[type]($input, content);
+        if (errorMessage) return errorMessage;
+    }
+
+    return "";
 };
 
 // input type check
@@ -635,7 +694,7 @@ var checkers = {
         // Validate Email http://stackoverflow.com/questions/46155/validate-email-address-in-javascript
         var re = /^(([^<>()[\]\.,;:\s@"]+(\.[^<>()[\]\.,;:\s@"]+)*)|(".+"))@(([^<>()[\]\.,;:\s@"]+\.)+[^<>()[\]\.,;:\s@"]{2,})$/i;
         var result = re.test(content);
-        if (!result) return errorObject("email", $input, "邮箱格式不正确");
+        if (!result) return "您的邮箱格式不正确";
         return null;
     }
 };
@@ -643,8 +702,11 @@ var checkers = {
 // Check required field
 var checkInputRequire = function ($input, content) {
     if (content.length > 0) return null;
-    return errorObject("required", $input, "该项目为必填");
+    return "请填写有效内容";
 };
+
+
+//////// Group check ///////
 
 var checkGroup = function ($field) {
     var checked = null,
@@ -652,35 +714,18 @@ var checkGroup = function ($field) {
 
     if ($field.data("required") === true) {
         if (checked === null) checked = $field.find(":checked").length;
-        if (checked === 0) return errorObject("required", $field, "请给出选择");
+        if (checked === 0) return "该项目必填";
     }
     if (min = $field.data("min-check")) {
         if (checked === null) checked = $field.find(":checked").length;
-        if (checked < min) return errorObject("min", $field, "选择不得小于" + min + "个");
+        if (checked < min) return "您的选择不得小于" + min + "个";
     }
     if (max = $field.data("max-check")) {
         if (checked === null) checked = $field.find(":checked").length;
-        if (checked > max) return errorObject("max", $field, "选择不得大于" + max + "个");
-    }
-    return null;
-};
-
-var checkInput = function ($input) {
-    var content = $input.val().trim(),
-        type = $input.prop("type"),
-        validationError;
-
-    if ($input.prop("required")) {
-        validationError = checkInputRequire($input, content);
-        if (validationError) return validationError;
+        if (checked > max) return "您的选择不得大于" + max + "个";
     }
 
-    if (content && type in checkers) {
-        validationError = checkers[type]($input, content);
-        if (validationError) return validationError;
-    }
-
-    return null;
+    return "";
 };
 
 var Validator = {};
@@ -697,7 +742,7 @@ Validator.check = function (field) {
 
 module.exports = Validator;
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 module.exports = function (className) {
     className = className || "spin-kit";
     var output = '<div class="' + className + '">';
@@ -717,7 +762,7 @@ module.exports = function (className) {
     return output;
 };
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -778,7 +823,7 @@ inst['default'] = inst;
 
 exports['default'] = inst;
 module.exports = exports['default'];
-},{"./handlebars/base":12,"./handlebars/exception":13,"./handlebars/no-conflict":14,"./handlebars/runtime":15,"./handlebars/safe-string":16,"./handlebars/utils":17}],12:[function(require,module,exports){
+},{"./handlebars/base":13,"./handlebars/exception":14,"./handlebars/no-conflict":15,"./handlebars/runtime":16,"./handlebars/safe-string":17,"./handlebars/utils":18}],13:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -1052,7 +1097,7 @@ function createFrame(object) {
 }
 
 /* [args, ]options */
-},{"./exception":13,"./utils":17}],13:[function(require,module,exports){
+},{"./exception":14,"./utils":18}],14:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -1091,7 +1136,7 @@ Exception.prototype = new Error();
 
 exports['default'] = Exception;
 module.exports = exports['default'];
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1112,7 +1157,7 @@ exports['default'] = function (Handlebars) {
 
 module.exports = exports['default'];
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -1345,7 +1390,7 @@ function initData(context, data) {
   }
   return data;
 }
-},{"./base":12,"./exception":13,"./utils":17}],16:[function(require,module,exports){
+},{"./base":13,"./exception":14,"./utils":18}],17:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -1360,7 +1405,7 @@ SafeString.prototype.toString = SafeString.prototype.toHTML = function () {
 
 exports['default'] = SafeString;
 module.exports = exports['default'];
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -1475,12 +1520,12 @@ function blockParams(params, ids) {
 function appendContextPath(contextPath, id) {
   return (contextPath ? contextPath + '.' : '') + id;
 }
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 // Create a simple path alias to allow browserify to resolve
 // the runtime on a supported path.
 module.exports = require('./dist/cjs/handlebars.runtime')['default'];
 
-},{"./dist/cjs/handlebars.runtime":11}],19:[function(require,module,exports){
+},{"./dist/cjs/handlebars.runtime":12}],20:[function(require,module,exports){
 /*!
  * jQuery Mousewheel 3.1.13
  *
@@ -1703,7 +1748,7 @@ module.exports = require('./dist/cjs/handlebars.runtime')['default'];
 
 }));
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper;
 
@@ -1711,7 +1756,7 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
     + "\n        <button style=\"padding: 5px 8px; margin-left: 15px\" data-type=\"close\">Close</button>\n        <button style=\"padding: 5px 8px; margin-left: 15px\" data-type=\"alert\">Yes</button>\n    </div>\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":18}],21:[function(require,module,exports){
+},{"handlebars/runtime":19}],22:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper;
 
@@ -1719,7 +1764,7 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
     + "<br>\n        <button data-type=\"alert\" style=\"padding: 0;\">Yes</button>\n    </div>\n    <div style=\"height: 100px;overflow: hidden;margin-bottom: 10px\">\n        <div style=\"overflow: auto; height: 100px\" class=\"scroll1\">\n            <div style=\"height: 500px;background: blue\"></div>\n        </div>\n    </div>\n    <div style=\"height: 100px;overflow: hidden\">\n        <div style=\"overflow: auto; height: 100px\" class=\"scroll2\">\n            <div style=\"height: 500px;background: green\"></div>\n        </div>\n    </div>\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":18}],22:[function(require,module,exports){
+},{"handlebars/runtime":19}],23:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper;
 
@@ -1727,7 +1772,7 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
     + "<br>\n    <button data-type=\"alert\">Yes</button>\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":18}],23:[function(require,module,exports){
+},{"handlebars/runtime":19}],24:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper;
 
@@ -1735,10 +1780,18 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
     + "</div>\n";
 },"useData":true});
-},{"handlebars/runtime":18}],24:[function(require,module,exports){
+},{"handlebars/runtime":19}],25:[function(require,module,exports){
+var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+    var helper;
+
+  return "<div class=\"tooltip\">"
+    + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
+    + "</div>";
+},"useData":true});
+},{"handlebars/runtime":19}],26:[function(require,module,exports){
 var FloatBox = require("../../js/float-box");
 var template = require("../../modules/spin-kit/templates/sk-circle.js")("spinner");
-var Form = require("../../js/form");
+var Form = require("../../js/form-with-validation");
 var Insert = require("../../js/insert");
 var Alert = require("../../js/alert");
 var Listener = require("../../js/listener");
@@ -1752,6 +1805,7 @@ var textHBS = require("../../templates/text.hbs");
 var alert1HBS = require("../templates/alert1.hbs");
 var alert2HBS = require("../templates/alert2.hbs");
 var alert3HBS = require("../templates/alert3.hbs");
+var tooltipHBS = require("../../templates/tooltip.hbs");
 
 // spin kit
 var $spinkit = $(".spinkit");
@@ -1808,6 +1862,14 @@ if ($floatBox.length > 0) {
                 var alert = new Alert(alertHBS);
                 alert.show({text: "this is a dynamic alert!"});
                 break;
+            case "tooltips":
+                var tooltip = new Alert(tooltipHBS);
+                tooltip.changeTarget(".target");
+                tooltip.onShowAction(function ($el) {
+                    $el.addClass("reverse");
+                });
+                tooltip.show({text: "this is a tooltip"});
+                break;
             default:
                 options = {};
                 showcase.destroy();
@@ -1815,19 +1877,11 @@ if ($floatBox.length > 0) {
         }
     });
 }
-// form.js
+
+// BetterForm.js
 var $userForm = $("#usrForm");
 if ($userForm.length > 0) {
-    var form = new Form($userForm, {
-        validate: true
-    });
-    form.onSubmit(function () {
-        console.log(this.getData());
-    }).onBlur(function (input, validation) {
-        if (validation) console.log(validation.msg);
-    }).onValidateError(function (validation) {
-        console.log(validation.msg);
-    });
+    new Form($userForm);
 }
 
 // insert.js
@@ -1849,7 +1903,7 @@ if ($insert.length > 0) {
             $el.data("listener", new Listener("insert", $el));
             $el.data("listener").add("button", "click", function () {
                 alert("this is button 1 by Listener");
-            }).on().off();
+            }).on();
         });
         insertion.insert();
     });
@@ -1894,16 +1948,16 @@ if ($scrollTo.length > 0) {
     });
 }
 
-},{"../../js/alert":1,"../../js/float-box":2,"../../js/form":3,"../../js/insert":4,"../../js/listener":5,"../../js/scroll-to":7,"../../modules/spin-kit/templates/sk-circle.js":10,"../../templates/alert.hbs":20,"../../templates/dropdown.hbs":21,"../../templates/modal.hbs":22,"../../templates/text.hbs":23,"../templates/alert1.hbs":25,"../templates/alert2.hbs":26,"../templates/alert3.hbs":27}],25:[function(require,module,exports){
+},{"../../js/alert":1,"../../js/float-box":2,"../../js/form-with-validation":3,"../../js/insert":5,"../../js/listener":6,"../../js/scroll-to":8,"../../modules/spin-kit/templates/sk-circle.js":11,"../../templates/alert.hbs":21,"../../templates/dropdown.hbs":22,"../../templates/modal.hbs":23,"../../templates/text.hbs":24,"../../templates/tooltip.hbs":25,"../templates/alert1.hbs":27,"../templates/alert2.hbs":28,"../templates/alert3.hbs":29}],27:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     return "<div>\n    <button data-msg=\"alert1\">alert1</button>\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":18}],26:[function(require,module,exports){
+},{"handlebars/runtime":19}],28:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     return "<div>\n    <button data-msg=\"alert2\">alert2</button>\n</div>";
 },"useData":true});
-},{"handlebars/runtime":18}],27:[function(require,module,exports){
+},{"handlebars/runtime":19}],29:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     return "<div>\n    <button data-msg=\"alert3\">alert3</button>\n</div>";
 },"useData":true});
-},{"handlebars/runtime":18}]},{},[24]);
+},{"handlebars/runtime":19}]},{},[26]);

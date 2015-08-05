@@ -1,6 +1,6 @@
 var FloatBox = require("../../js/float-box");
 var template = require("../../modules/spin-kit/templates/sk-circle.js")("spinner");
-var Form = require("../../js/form");
+var Form = require("../../js/form-with-validation");
 var Insert = require("../../js/insert");
 var Alert = require("../../js/alert");
 var Listener = require("../../js/listener");
@@ -14,6 +14,7 @@ var textHBS = require("../../templates/text.hbs");
 var alert1HBS = require("../templates/alert1.hbs");
 var alert2HBS = require("../templates/alert2.hbs");
 var alert3HBS = require("../templates/alert3.hbs");
+var tooltipHBS = require("../../templates/tooltip.hbs");
 
 // spin kit
 var $spinkit = $(".spinkit");
@@ -70,6 +71,14 @@ if ($floatBox.length > 0) {
                 var alert = new Alert(alertHBS);
                 alert.show({text: "this is a dynamic alert!"});
                 break;
+            case "tooltips":
+                var tooltip = new Alert(tooltipHBS);
+                tooltip.changeTarget(".target");
+                tooltip.onShowAction(function ($el) {
+                    $el.addClass("reverse");
+                });
+                tooltip.show({text: "this is a tooltip"});
+                break;
             default:
                 options = {};
                 showcase.destroy();
@@ -77,19 +86,11 @@ if ($floatBox.length > 0) {
         }
     });
 }
-// form.js
+
+// BetterForm.js
 var $userForm = $("#usrForm");
 if ($userForm.length > 0) {
-    var form = new Form($userForm, {
-        validate: true
-    });
-    form.onSubmit(function () {
-        console.log(this.getData());
-    }).onBlur(function (input, validation) {
-        if (validation) console.log(validation.msg);
-    }).onValidateError(function (validation) {
-        console.log(validation.msg);
-    });
+    new Form($userForm);
 }
 
 // insert.js
@@ -111,7 +112,7 @@ if ($insert.length > 0) {
             $el.data("listener", new Listener("insert", $el));
             $el.data("listener").add("button", "click", function () {
                 alert("this is button 1 by Listener");
-            }).on().off();
+            }).on();
         });
         insertion.insert();
     });

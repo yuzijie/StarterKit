@@ -560,6 +560,37 @@ input[type="color"].invalid-field, input[type="date"].invalid-field, input[type=
 [data-input-group].invalid-field {
   background-color: #ffcccc; }
 
+.tooltip {
+  display: none;
+  padding: 0.3125em 0.625em;
+  box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.4);
+  box-sizing: border-box; }
+  .tooltip:after {
+    content: "";
+    position: absolute;
+    box-sizing: border-box;
+    height: 0;
+    width: 0;
+    margin-left: -11px;
+    bottom: -15px;
+    left: 50%;
+    border: 8px solid;
+    -webkit-transform-origin: 0 0;
+    -moz-transform-origin: 0 0;
+    -ms-transform-origin: 0 0;
+    -o-transform-origin: 0 0;
+    transform-origin: 0 0;
+    -webkit-transform: rotate(-45deg);
+    -moz-transform: rotate(-45deg);
+    -ms-transform: rotate(-45deg);
+    -o-transform: rotate(-45deg);
+    transform: rotate(-45deg);
+    box-shadow: -3px 3px 3px 0 rgba(0, 0, 0, 0.4); }
+  .reverse.tooltip:after {
+    bottom: 0;
+    top: 0;
+    box-shadow: none; }
+
 @-webkit-keyframes sk-circleBounceDelay {
   0%, 80%, 100% {
     -webkit-transform: scale(0); }
@@ -633,6 +664,18 @@ input[type="color"].invalid-field, input[type="date"].invalid-field, input[type=
     padding: 1.25em;
     border-radius: 3px;
     color: black; }
+
+.tooltip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #333;
+  border-radius: 3px;
+  color: white; }
+  .tooltip:after {
+    border-color: transparent transparent #333 #333; }
+  .tooltip.reverse:after {
+    border-color: #333 #333 transparent transparent; }
 
 .accordion-tabs {
   line-height: 1.5;

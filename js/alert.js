@@ -6,7 +6,11 @@ var Alert = function (template, target) {
     target = target || $(document.body);
     alert = new Insert(template, target);
 
+    var that = this;
+    this.showAction = null;
+
     alert.onInsert(function ($el) {
+        if (that.showAction) that.showAction($el);
         float = new Floatbox($el);
         float.addListener('button[data-type="close"]', "click", function () {
             alert.destroy();
@@ -29,6 +33,11 @@ Alert.prototype.hide = function () {
 
 Alert.prototype.changeTarget = function (target) {
     alert.changeTarget(target);
+    return this;
+};
+
+Alert.prototype.onShowAction = function (func) {
+    if ($.isFunction(func)) this.showAction = func;
     return this;
 };
 

@@ -1,8 +1,10 @@
 %tooltip {
     display: none;
+    position: absolute;
     padding: em(5) em(10);
     box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.4);
     box-sizing: border-box;
+    white-space: nowrap;
 
     &:after {
         content: "";
@@ -38,7 +40,7 @@
 
     #{map-get($conf, name)} {
         @extend %tooltip;
-        @include position(absolute, map-get($conf, position));
+        @include position(null, map-get($conf, position));
         background-color: map-get($conf, background-color);
         border-radius: map-get($conf, border-radius);
         color: map-get($conf, color);

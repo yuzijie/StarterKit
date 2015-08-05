@@ -17,6 +17,12 @@
         @include transform(rotate(-45deg));
         box-shadow: -3px 3px 3px 0 rgba(0, 0, 0, 0.4);
     }
+
+    &.reverse:after {
+        bottom: 0;
+        top: 0;
+        box-shadow: none;
+    }
 }
 
 @mixin tooltip($conf:()) {
@@ -24,8 +30,8 @@
     $default: (
             name: ".tooltip",
             position: 0 null null 0,
-            background-color: #FCFCFC,
-            color: black,
+            background-color: $dark-gray,
+            color: white,
             border-radius: $base-border-radius
     );
     $conf: map-merge($default, $conf);
@@ -36,9 +42,11 @@
         background-color: map-get($conf, background-color);
         border-radius: map-get($conf, border-radius);
         color: map-get($conf, color);
-
         &:after {
             border-color: transparent transparent map-get($conf, background-color) map-get($conf, background-color);
+        }
+        &.reverse:after {
+            border-color: map-get($conf, background-color) map-get($conf, background-color) transparent transparent;
         }
     }
 }

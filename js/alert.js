@@ -20,9 +20,16 @@ var Alert = function (template, target) {
 
 Alert.prototype.show = function (data) {
     alert.insert(data);
+    return this;
 };
 Alert.prototype.hide = function () {
     alert.destroy();
+    return this;
+};
+
+Alert.prototype.changeTarget = function (target) {
+    alert.changeTarget(target);
+    return this;
 };
 
 module.exports = Alert;

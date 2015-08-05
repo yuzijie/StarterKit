@@ -62,7 +62,7 @@ Form.prototype.addSubmitListener = function () {
 
             // validate
             if (that.opts.validate === true) {
-                that.$fields.each(function (index) {
+                that.$fields.each(function () {
                     var errorMessage = that.validateForm(this);
                     if (errorMessage && !invalidElement) invalidElement = this;
                 });

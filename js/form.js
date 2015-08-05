@@ -1,5 +1,5 @@
 var validator = require("./validator");
-var scrollTo = require("./scroll-to");
+var Listener = require("./listener");
 
 var timer = null;
 var validationList = [
@@ -18,14 +18,16 @@ function to$(item) {
     return (item instanceof jQuery) ? item : $(item);
 }
 
+// Form.js
 var Form = function (target, options) {
+
     // Options
     this.opts = $.extend({
         validate: false
     }, options || {});
 
     // Objects
-    this.self = to$(target);                   // form
+    this.self = to$(target);                   // the form
     this.$inputs = this.self.find(":input");   // all inputs
     this.$submit = this.self.find(":submit");  // submit button
     if (this.opts.validate === true) {
@@ -44,100 +46,108 @@ var Form = function (target, options) {
     this.validateErrorAction = null;
 
     // set Listener
-    this.setInputListener(this);
-    this.setSubmitListener(this);
+    this.listeners = new Listener("form");
+    this.setListeners();
 };
 
-Form.prototype.setSubmitListener = function (context) {
-    var that = context || this;
+Form.prototype.addSubmitListener = function () {
+    var that = this;
 
-    // on Submit
-    that.self.on("submit.form", function (event) {
-        var notPass = [];
-        event.preventDefault();
+    this.listeners.add(this.self, "submit", function (e) {
+        e.preventDefault();
+        var invalidElement = null;
 
+        // if allow submit
         if (that.allowSubmit === true) {
 
-            if (that.opts.validate === true) { // validate form
-                that.$fields.each(function () {
-                    var error = that.validateForm(this);
-                    if (error) notPass.push(error);
+            // validate
+            if (that.opts.validate === true) {
+                that.$fields.each(function (index) {
+                    var errorMessage = that.validateForm(this);
+                    if (errorMessage && !invalidElement) invalidElement = this;
                 });
             }
 
-            // test whether form is valid or not
-            if (notPass.length === 0) {
+            // test whether to submit
+            if (invalidElement) {
+                if (that.validateErrorAction) that.validateErrorAction(invalidElement);
+            } else {
                 that.disableSubmit();
                 if (that.submitAction) that.submitAction(that.getFormUrl(), that.getPostData());
-            } else {
-                scrollTo(notPass[0].element.prev("label"), {
-                    onFinish: function () {
-                        if (that.validateErrorAction) that.validateErrorAction(notPass[0]);
-                    }
-                });
             }
         }
     });
+
+    return this;
 };
 
-Form.prototype.setInputListener = function (context) {
-    var that = context || this;
+Form.prototype.addInputListener = function () {
+    var that = this;
 
     // on Focus
-    that.$inputs.on("focus.form", function () {
-        if (that.inputFocusAction) that.inputFocusAction(this);
+    this.listeners.add(this.$inputs, "focus", function (e) {
+        if (that.inputFocusAction) that.inputFocusAction(e);
     });
 
     // on Blur
-    that.$inputs.on("blur.form", function () {
-        if (that.inputBlurAction) that.inputBlurAction(this);
+    this.listeners.add(this.$inputs, "blur", function (e) {
+        if (that.inputBlurAction) that.inputBlurAction(e);
     });
 
     // on Change
-    that.$inputs.on("change.form", function () {
-        // if validate
+    this.listeners.add(this.$inputs, "change", function (e) {
+        var errorMessage;
+
         if (that.opts.validate === true) {
-            var $target = $(this);
-            if ($target.is(":checkbox,:radio")) $target = $target.closest("[data-input-group]");
-            var validationError = that.validateForm($target);
-            if (validationError && that.validateErrorAction) that.validateErrorAction(validationError);
+            var $target = $(e.target);
+            if ($target.is(":checkbox, :radio")) $target = $target.closest("[data-input-group]");
+            errorMessage = that.validateForm($target);
         }
 
-        if (that.inputChangeAction) that.inputChangeAction(this);
+        if (that.inputChangeAction) that.inputChangeAction(e, errorMessage);
     });
 
     // on Keyup
-    that.$inputs.on("keyup.form", function (event) {
+    this.listeners.add(this.$inputs, "keyup", function (e) {
         if (that.keyupAction) {
-            var input = this;
+            var context = this;
             clearTimeout(timer);
             timer = setTimeout(function () {
-                that.keyupAction(input, event);
+                that.keyupAction.call(context, e);
             }, 500);
         }
     });
 
     // fix number input problem
-    that.$inputs.filter("[type=number]").on("keypress.form", function (event) {
-        if (event.which < 48 || event.which > 57) event.preventDefault();
+    this.listeners.add(this.$inputs.filter("[type=number]"), "keypress", function (e) {
+        if (e.which < 48 || e.which > 57) e.preventDefault();
     });
+
+    return this;
 };
 
-Form.prototype.resetListener = function () {
-    this.$inputs.off(".form");
-    this.self.off(".form");
+Form.prototype.setListeners = function () {
+    this.addSubmitListener().addInputListener();
+    this.listeners.on();
+    return this;
+};
+
+Form.prototype.resetListeners = function () {
+    this.listeners.remove();
+    return this;
 };
 
 // return error if invalid
 Form.prototype.validateForm = function (input) {
     var $input = to$(input);
-    var validationError = validator.check($input);
-    if (validationError) {
+    var errorMessage = validator.check($input);
+    $input.data("validation-error", errorMessage);
+    if (errorMessage) {
         $input.addClass("invalid-field");
     } else {
         if ($input.is(".invalid-field")) $input.removeClass("invalid-field");
     }
-    return validationError;
+    return errorMessage;
 };
 
 Form.prototype.buttonText = function (text) {

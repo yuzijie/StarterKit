@@ -3,19 +3,24 @@ function to$(item) {
     return (item instanceof jQuery) ? item : $(item);
 }
 
-// output
-var errorObject = function (type, $element, msg) {
-    // Example:
-    // {error: "required", msg: "该项目为必填", element: "jQuery Object"}
+//// Input check //////
 
-    var customMsg = $element.data("validity");
-    if (customMsg) msg = customMsg;
+var checkInput = function ($input) {
+    var content = $input.val().trim(),
+        type = $input.prop("type"),
+        errorMessage;
 
-    return {
-        error: type,
-        element: $element,
-        msg: msg
-    };
+    if ($input.prop("required")) {
+        errorMessage = checkInputRequire($input, content);
+        if (errorMessage) return errorMessage;
+    }
+
+    if (content && type in checkers) {
+        errorMessage = checkers[type]($input, content);
+        if (errorMessage) return errorMessage;
+    }
+
+    return "";
 };
 
 // input type check
@@ -24,7 +29,7 @@ var checkers = {
         // Validate Email http://stackoverflow.com/questions/46155/validate-email-address-in-javascript
         var re = /^(([^<>()[\]\.,;:\s@"]+(\.[^<>()[\]\.,;:\s@"]+)*)|(".+"))@(([^<>()[\]\.,;:\s@"]+\.)+[^<>()[\]\.,;:\s@"]{2,})$/i;
         var result = re.test(content);
-        if (!result) return errorObject("email", $input, "邮箱格式不正确");
+        if (!result) return "您的邮箱格式不正确";
         return null;
     }
 };
@@ -32,8 +37,11 @@ var checkers = {
 // Check required field
 var checkInputRequire = function ($input, content) {
     if (content.length > 0) return null;
-    return errorObject("required", $input, "该项目为必填");
+    return "请填写有效内容";
 };
+
+
+//////// Group check ///////
 
 var checkGroup = function ($field) {
     var checked = null,
@@ -41,35 +49,18 @@ var checkGroup = function ($field) {
 
     if ($field.data("required") === true) {
         if (checked === null) checked = $field.find(":checked").length;
-        if (checked === 0) return errorObject("required", $field, "请给出选择");
+        if (checked === 0) return "该项目必填";
     }
     if (min = $field.data("min-check")) {
         if (checked === null) checked = $field.find(":checked").length;
-        if (checked < min) return errorObject("min", $field, "选择不得小于" + min + "个");
+        if (checked < min) return "您的选择不得小于" + min + "个";
     }
     if (max = $field.data("max-check")) {
         if (checked === null) checked = $field.find(":checked").length;
-        if (checked > max) return errorObject("max", $field, "选择不得大于" + max + "个");
-    }
-    return null;
-};
-
-var checkInput = function ($input) {
-    var content = $input.val().trim(),
-        type = $input.prop("type"),
-        validationError;
-
-    if ($input.prop("required")) {
-        validationError = checkInputRequire($input, content);
-        if (validationError) return validationError;
+        if (checked > max) return "您的选择不得大于" + max + "个";
     }
 
-    if (content && type in checkers) {
-        validationError = checkers[type]($input, content);
-        if (validationError) return validationError;
-    }
-
-    return null;
+    return "";
 };
 
 var Validator = {};

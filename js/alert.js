@@ -30,18 +30,22 @@ var Alert = function (template, target) {
 };
 
 Alert.prototype.show = function (data) {
-    alert.$target.data("alert-id", alert.insert(data));
+    var aid = alert.$target.data("alert-id");
+    if (!aid && aid !== 0) {
+        alert.$target.data("alert-id", alert.insert(data));
+    }
     return this;
 };
 
 Alert.prototype.hide = function (target) {
-    if (target) {
-        var id = to$(target).data("alert-id");
-        if (id) alert.destroy(id);
+    target = target || alert.$target;
+
+    var id = to$(target).data("alert-id");
+    if (id || id === 0) {
+        alert.destroy(id);
         target.data("alert-id", "");
-    } else {
-        alert.destroy();
     }
+
     return this;
 };
 

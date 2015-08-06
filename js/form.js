@@ -96,15 +96,12 @@ Form.prototype.addInputListener = function () {
 
     // on Change
     this.listeners.add(this.$inputs, "change", function (e) {
-        var errorMessage;
-
         if (that.opts.validate === true) {
             var $target = $(e.target);
             if ($target.is(":checkbox, :radio")) $target = $target.closest("[data-input-group]");
-            errorMessage = that.validateForm($target);
+            that.validateForm($target);
         }
-
-        if (that.inputChangeAction) that.inputChangeAction(e, errorMessage);
+        if (that.inputChangeAction) that.inputChangeAction(e);
     });
 
     // on Keyup

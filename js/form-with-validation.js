@@ -17,17 +17,29 @@ var BetterForm = function (target) {
 
     this.tooltip = new Alert(tooltipTemplate, target);
 
-    this.form.onFocus(function (e) {
-        var $el = $(e.target);
+    // add error message
+    this.form.onChange(function (e, context) {
+        var $el = $(context);
+        that.tooltip.changeTarget($el.prev("label"));
         if ($el.data("validation-error")) {
-            that.tooltip.changeTarget($el.prev("label"));
+            that.tooltip.onShow(function ($tt) {
+                if ($el.offset().top - $(window).scrollTop() <= $tt.outerHeight()) {
+                    $tt.css({
+                        bottom: ($el.outerHeight() + $tt.outerHeight() + 20) * -1 + "px",
+                        left: ($el.width() - $tt.width()) / 2 + "px"
+                    }).addClass("reverse");
+                } else {
+                    $tt.css({
+                        bottom: "8px",
+                        left: ($el.width() - $tt.width()) / 2 + "px"
+                    });
+                }
+            });
             that.tooltip.show({text: $el.data("validation-error")});
+        } else {
+            that.tooltip.hide();
         }
     });
-
-    //this.form.onBlur(function () {
-    //    that.tooltip.hide();
-    //});
 };
 
 module.exports = BetterForm;

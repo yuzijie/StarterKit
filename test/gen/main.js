@@ -192,16 +192,40 @@ module.exports = FloatBox;
 
 },{"./listener":6,"./prevent-scroll":7,"./scrollbar":9}],3:[function(require,module,exports){
 var Form = require("./form");
+var Alert = require("./alert");
+var tooltipTemplate = require("../templates/tooltip.hbs");
+
+// helper function
+function to$(item) {
+    return (item instanceof jQuery) ? item : $(item);
+}
 
 var BetterForm = function (target) {
+    var that = this;
+    this.self = to$(target);
+
     this.form = new Form(target, {
         validate: true
     });
+
+    this.tooltip = new Alert(tooltipTemplate, target);
+
+    this.form.onFocus(function (e) {
+        var $el = $(e.target);
+        if ($el.data("validation-error")) {
+            that.tooltip.changeTarget($el.prev("label"));
+            that.tooltip.show({text: $el.data("validation-error")});
+        }
+    });
+
+    //this.form.onBlur(function () {
+    //    that.tooltip.hide();
+    //});
 };
 
 module.exports = BetterForm;
 
-},{"./form":4}],4:[function(require,module,exports){
+},{"../templates/tooltip.hbs":25,"./alert":1,"./form":4}],4:[function(require,module,exports){
 var validator = require("./validator");
 var Listener = require("./listener");
 

@@ -1,3 +1,5 @@
+// Insert.js 唯一用到的场合，是当一系列 DOM 元素需要频繁添加或删除的时候
+
 // helper functions
 function to$(item) {
     return (item instanceof jQuery) ? item : $(item);

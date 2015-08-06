@@ -562,9 +562,11 @@ input[type="color"].invalid-field, input[type="date"].invalid-field, input[type=
 
 .tooltip {
   display: none;
+  position: absolute;
   padding: 0.3125em 0.625em;
   box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.4);
-  box-sizing: border-box; }
+  box-sizing: border-box;
+  white-space: nowrap; }
   .tooltip:after {
     content: "";
     position: absolute;
@@ -666,7 +668,6 @@ input[type="color"].invalid-field, input[type="date"].invalid-field, input[type=
     color: black; }
 
 .tooltip {
-  position: absolute;
   top: 0;
   left: 0;
   background-color: #333;

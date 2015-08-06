@@ -37,11 +37,11 @@ Insert.prototype.insert = function (data) {
 };
 
 Insert.prototype.destroy = function (index) {
-    if (this.$elements.length > 0) {
-        var $element;
+    var length = this.$elements.length;
+    if (length > 0) {
+        var $element = null;
 
-        // remove form array
-        if ((index || index === 0) && index !== this.$elements.length - 1) {
+        if ($.isNumeric(index) && index !== length - 1) {
             $element = this.$elements[index];
             this.$elements[index] = null;
         } else {
@@ -49,15 +49,17 @@ Insert.prototype.destroy = function (index) {
             index = this.$elements.length;
         }
 
-        if ($element.length > 0) {
+        if ($element !== null) {
             // custom action
             if (this.destroyAction) this.destroyAction($element);
 
             // remove from DOM
             $element.remove();
+
+            return index;
         }
     }
-    return index;
+    return null;
 };
 
 Insert.prototype.destroyAll = function () {

@@ -22,16 +22,32 @@ Insert.prototype.insert = function (data) {
 
     // add to DOM
     this.$target[this.insertMethod]($element);
-    this.$elements.push($element);
+
+    // add to Array
+    var index = this.$elements.indexOf(null);
+    if (index > -1) {
+        this.$elements[index] = $element;
+    } else {
+        index = this.$elements.push($element) - 1;
+    }
 
     // custom action
     if (this.insertAction) this.insertAction($element);
-    return this;
+    return index;
 };
 
-Insert.prototype.destroy = function () {
+Insert.prototype.destroy = function (index) {
     if (this.$elements.length > 0) {
-        var $element = this.$elements.pop();
+        var $element;
+
+        // remove form array
+        if (index && index !== this.$elements.length - 1) {
+            $element = this.$elements[index];
+            this.$elements[index] = null;
+        } else {
+            $element = this.$elements.pop();
+            index = this.$elements.length;
+        }
 
         // custom action
         if (this.destroyAction) this.destroyAction($element);
@@ -39,12 +55,13 @@ Insert.prototype.destroy = function () {
         // remove from DOM
         $element.remove();
     }
-    return this;
+    return index;
 };
 
 Insert.prototype.destroyAll = function () {
-    if (this.$elements.length > 0) {
+    var length;
 
+    if ((length = this.$elements.length) > 0) {
         // custom action
         if (this.destroyAction) this.destroyAction(this.$elements);
 
@@ -52,9 +69,11 @@ Insert.prototype.destroyAll = function () {
         $.each(this.$elements, function (index, $element) {
             $element.remove();
         });
+
+        // clear array
         this.$elements = [];
     }
-    return this;
+    return length;
 };
 
 Insert.prototype.reinsert = function (data) {

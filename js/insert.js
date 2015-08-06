@@ -41,7 +41,7 @@ Insert.prototype.destroy = function (index) {
         var $element;
 
         // remove form array
-        if (index && index !== this.$elements.length - 1) {
+        if ((index || index === 0) && index !== this.$elements.length - 1) {
             $element = this.$elements[index];
             this.$elements[index] = null;
         } else {

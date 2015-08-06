@@ -36,7 +36,7 @@ Alert.prototype.changeTarget = function (target) {
     return this;
 };
 
-Alert.prototype.onShowAction = function (func) {
+Alert.prototype.onShow = function (func) {
     if ($.isFunction(func)) this.showAction = func;
     return this;
 };

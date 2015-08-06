@@ -31,7 +31,7 @@ var Alert = function (template, target) {
 
 Alert.prototype.show = function (data) {
     var aid = alert.$target.data("alert-id");
-    if (!aid && aid !== 0) {
+    if (!$.isNumeric(aid)) {
         alert.$target.data("alert-id", alert.insert(data));
     }
     return this;
@@ -41,7 +41,7 @@ Alert.prototype.hide = function (target) {
     target = target || alert.$target;
 
     var id = to$(target).data("alert-id");
-    if (id || id === 0) {
+    if ($.isNumeric(id)) {
         alert.destroy(id);
         target.data("alert-id", "");
     }

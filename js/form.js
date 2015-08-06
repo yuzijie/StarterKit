@@ -86,22 +86,26 @@ Form.prototype.addInputListener = function () {
 
     // on Focus
     this.listeners.add(this.$inputs, "focus", function (e) {
-        if (that.inputFocusAction) that.inputFocusAction(e);
+        if (that.inputFocusAction) that.inputFocusAction(e, this);
     });
 
     // on Blur
     this.listeners.add(this.$inputs, "blur", function (e) {
-        if (that.inputBlurAction) that.inputBlurAction(e);
+        if (that.inputBlurAction) that.inputBlurAction(e, this);
     });
 
     // on Change
     this.listeners.add(this.$inputs, "change", function (e) {
+        var context = this;
         if (that.opts.validate === true) {
             var $target = $(e.target);
-            if ($target.is(":checkbox, :radio")) $target = $target.closest("[data-input-group]");
+            if ($target.is(":checkbox, :radio")) {
+                $target = $target.closest("[data-input-group]");
+                context = $target[0];
+            }
             that.validateForm($target);
         }
-        if (that.inputChangeAction) that.inputChangeAction(e);
+        if (that.inputChangeAction) that.inputChangeAction(e, context);
     });
 
     // on Keyup
@@ -110,7 +114,7 @@ Form.prototype.addInputListener = function () {
             var context = this;
             clearTimeout(timer);
             timer = setTimeout(function () {
-                that.keyupAction.call(context, e);
+                that.keyupAction.call(context, e, context);
             }, 500);
         }
     });

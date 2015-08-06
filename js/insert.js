@@ -49,11 +49,13 @@ Insert.prototype.destroy = function (index) {
             index = this.$elements.length;
         }
 
-        // custom action
-        if (this.destroyAction) this.destroyAction($element);
+        if ($element.length > 0) {
+            // custom action
+            if (this.destroyAction) this.destroyAction($element);
 
-        // remove from DOM
-        $element.remove();
+            // remove from DOM
+            $element.remove();
+        }
     }
     return index;
 };

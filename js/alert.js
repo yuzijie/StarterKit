@@ -1,6 +1,6 @@
 var Insert = require("./insert.js");
 var Floatbox = require("./float-box.js");
-var float, alert;
+var alert;
 
 // helper functions
 function to$(item) {
@@ -17,15 +17,14 @@ var Alert = function (template, target) {
     alert.onInsert(function ($el) {
         if (that.showAction) that.showAction($el);
 
-        float = new Floatbox($el);
-        float.addListener('button[data-type="close"]', "click", function () {
+        $el.data("float", new Floatbox($el));
+        $el.data("float").addListener('button[data-type="close"]', "click", function () {
             alert.destroyAll();
-            float = null;
         });
-        float.open();
+        $el.data("float").open();
 
-    }).onDestroy(function () {
-        float.close();
+    }).onDestroy(function ($el) {
+        $el.data("float").close();
     });
 };
 

@@ -566,7 +566,8 @@ input[type="color"].invalid-field, input[type="date"].invalid-field, input[type=
   padding: 0.3125em 0.625em;
   box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.4);
   box-sizing: border-box;
-  white-space: nowrap; }
+  white-space: nowrap;
+  text-align: center; }
   .tooltip:after {
     content: "";
     position: absolute;
@@ -668,8 +669,7 @@ input[type="color"].invalid-field, input[type="date"].invalid-field, input[type=
     color: black; }
 
 .tooltip {
-  top: 0;
-  left: 0;
+  bottom: 0.75em;
   background-color: #333;
   border-radius: 3px;
   color: white; }

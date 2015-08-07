@@ -74,7 +74,7 @@ if ($floatBox.length > 0) {
             case "tooltips":
                 var tooltip = new Alert(tooltipHBS);
                 tooltip.changeTarget(".target");
-                tooltip.onShowAction(function ($el) {
+                tooltip.onShow(function ($el) {
                     $el.addClass("reverse");
                 });
                 tooltip.show({text: "this is a tooltip"});

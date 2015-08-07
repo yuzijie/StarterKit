@@ -1,34 +1,55 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var Insert = require("./insert.js");
 var Floatbox = require("./float-box.js");
-var float, alert;
+
+// helper functions
+function to$(item) {
+    return (item instanceof jQuery) ? item : $(item);
+}
+
+var alert;
 
 var Alert = function (template, target) {
-    target = target || $(document.body);
-    alert = new Insert(template, target);
-
     var that = this;
+    target = target || $(document.body);
+
+    // custom action
     this.showAction = null;
+
+    // new Insert Object
+    alert = new Insert(template, target);
 
     alert.onInsert(function ($el) {
         if (that.showAction) that.showAction($el);
-        float = new Floatbox($el);
-        float.addListener('button[data-type="close"]', "click", function () {
-            alert.destroy();
-            float = null;
+
+        $el.data("float", new Floatbox($el));
+        $el.data("float").addListener('button[data-type="close"]', "click", function () {
+            alert.destroyAll();
         });
-        float.open();
-    }).onDestroy(function () {
-        float.close();
+
+        $el.data("float").open();
+    }).onDestroy(function ($el) {
+        $el.data("float").close();
     });
 };
 
 Alert.prototype.show = function (data) {
-    alert.insert(data);
-    return this;
+    var aid = alert.$target.data("alert-id");
+    if (!$.isNumeric(aid)) {
+        aid = alert.insert(data);
+        alert.$target.data("alert-id", aid);
+        return alert.$elements[aid];
+    }
+    return null;
 };
-Alert.prototype.hide = function () {
-    alert.destroy();
+
+Alert.prototype.hide = function (target) {
+    target = target || alert.$target;
+    var id = to$(target).data("alert-id");
+    if ($.isNumeric(id)) {
+        alert.destroy(id);
+        target.data("alert-id", "");
+    }
     return this;
 };
 
@@ -37,7 +58,26 @@ Alert.prototype.changeTarget = function (target) {
     return this;
 };
 
-Alert.prototype.onShowAction = function (func) {
+Alert.prototype.changeContent = function (data, target) {
+    target = target || alert.$target;
+
+    var $target = to$(target);
+    var id = $target.data("alert-id");
+
+    if ($.isNumeric(id)) {
+        id = alert.reinsert(data, id);
+        $target.data("alert-id", id);
+    }
+    return alert.$elements[id];
+};
+
+Alert.prototype.getByTarget = function (target) {
+    target = target || alert.$target;
+    var id = to$(target).data("alert-id");
+    return alert.$elements[id];
+};
+
+Alert.prototype.onShow = function (func) {
     if ($.isFunction(func)) this.showAction = func;
     return this;
 };
@@ -200,6 +240,21 @@ function to$(item) {
     return (item instanceof jQuery) ? item : $(item);
 }
 
+function getInfo($element) {
+    var output = [];
+
+    // get text
+    var suggestion = $element.data("suggestion");
+    var error = $element.data("validation-error");
+
+    // error output
+    if (error && error !== "required") output.push(error);
+    if (suggestion) output.push(suggestion);
+
+    // return string
+    return output.join("<br>");
+}
+
 var BetterForm = function (target) {
     var that = this;
     this.self = to$(target);
@@ -210,17 +265,44 @@ var BetterForm = function (target) {
 
     this.tooltip = new Alert(tooltipTemplate, target);
 
-    this.form.onFocus(function (e) {
-        var $el = $(e.target);
-        if ($el.data("validation-error")) {
-            that.tooltip.changeTarget($el.prev("label"));
-            that.tooltip.show({text: $el.data("validation-error")});
+    // add error message
+    this.form.onBlur(function (e, context) {
+        var $el = $(context);
+        that.tooltip.changeTarget($el.prev("label"));
+        that.tooltip.hide();
+    });
+
+    this.form.onKeyup(function (e, context) {
+        var $el = $(context);
+        that.tooltip.changeTarget($el.prev("label"));
+        var info = getInfo($el);
+        if (info) {
+            var tooltip = that.tooltip.getByTarget();
+            if (tooltip) tooltip.html(info);
         }
     });
 
-    //this.form.onBlur(function () {
-    //    that.tooltip.hide();
-    //});
+    this.form.onChange(function (e, context) {
+        var $el = $(context);
+        that.tooltip.changeTarget($el.prev("label"));
+        var info = getInfo($el);
+        if (info) {
+            var tooltip = that.tooltip.show({text: info});
+            if (tooltip) tooltip.css("left", ($el.width() - tooltip.width()) / 2 + "px");
+        } else {
+            that.tooltip.hide();
+        }
+    });
+
+    this.form.onFocus(function (e, context) {
+        var $el = $(context);
+        that.tooltip.changeTarget($el.prev("label"));
+        var info = getInfo($el);
+        if (info) {
+            var tooltip = that.tooltip.show({text: info});
+            if (tooltip) tooltip.css("left", ($el.width() - tooltip.width()) / 2 + "px");
+        }
+    });
 };
 
 module.exports = BetterForm;
@@ -314,34 +396,41 @@ Form.prototype.addInputListener = function () {
 
     // on Focus
     this.listeners.add(this.$inputs, "focus", function (e) {
-        if (that.inputFocusAction) that.inputFocusAction(e);
+        if (that.inputFocusAction) that.inputFocusAction(e, this);
     });
 
     // on Blur
     this.listeners.add(this.$inputs, "blur", function (e) {
-        if (that.inputBlurAction) that.inputBlurAction(e);
+        if (that.inputBlurAction) that.inputBlurAction(e, this);
     });
 
     // on Change
     this.listeners.add(this.$inputs, "change", function (e) {
-        var errorMessage;
+        // get context ($target[0])
+        var $target = $(e.target);
+        if ($target.is(":checkbox, :radio")) $target = $target.closest("[data-input-group]");
 
-        if (that.opts.validate === true) {
-            var $target = $(e.target);
-            if ($target.is(":checkbox, :radio")) $target = $target.closest("[data-input-group]");
-            errorMessage = that.validateForm($target);
-        }
+        // validate form
+        if (that.opts.validate === true) that.validateForm($target);
 
-        if (that.inputChangeAction) that.inputChangeAction(e, errorMessage);
+        // custom action
+        if (that.inputChangeAction) that.inputChangeAction(e, $target[0]);
     });
 
     // on Keyup
     this.listeners.add(this.$inputs, "keyup", function (e) {
         if (that.keyupAction) {
-            var context = this;
             clearTimeout(timer);
             timer = setTimeout(function () {
-                that.keyupAction.call(context, e);
+                // get context ($target[0])
+                var $target = $(e.target);
+                if ($target.is(":checkbox, :radio")) $target = $target.closest("[data-input-group]");
+
+                // validate
+                if (that.opts.validate === true) that.validateForm($target);
+
+                // custom action
+                that.keyupAction(e, $target[0]);
             }, 500);
         }
     });
@@ -369,12 +458,15 @@ Form.prototype.resetListeners = function () {
 Form.prototype.validateForm = function (input) {
     var $input = to$(input);
     var errorMessage = validator.check($input);
+
+    // adding class and data
     $input.data("validation-error", errorMessage);
     if (errorMessage) {
         $input.addClass("invalid-field");
     } else {
         if ($input.is(".invalid-field")) $input.removeClass("invalid-field");
     }
+
     return errorMessage;
 };
 
@@ -389,6 +481,8 @@ Form.prototype.buttonText = function (text) {
 Form.prototype.enableSubmit = function () {
     this.$submit.prop("disabled", false);
     this.allowSubmit = true;
+    // reset the form
+    this.self[0].reset();
     return this;
 };
 
@@ -453,9 +547,16 @@ Form.prototype.getFormUrl = function () {
     return this.self.attr("action");
 };
 
+Form.prototype.submit = function () {
+    this.self[0].submit();
+    return this;
+};
+
 module.exports = Form;
 
 },{"./listener":6,"./validator":10}],5:[function(require,module,exports){
+// Insert.js 唯一用到的场合，是当一系列 DOM 元素需要频繁添加或删除的时候
+
 // helper functions
 function to$(item) {
     return (item instanceof jQuery) ? item : $(item);
@@ -478,44 +579,72 @@ Insert.prototype.insert = function (data) {
 
     // add to DOM
     this.$target[this.insertMethod]($element);
-    this.$elements.push($element);
+
+    // add to Array
+    var index = this.$elements.indexOf(null);
+    if (index > -1) {
+        this.$elements[index] = $element;
+    } else {
+        index = this.$elements.push($element) - 1;
+    }
 
     // custom action
     if (this.insertAction) this.insertAction($element);
-    return this;
+    return index;
 };
 
-Insert.prototype.destroy = function () {
-    if (this.$elements.length > 0) {
-        var $element = this.$elements.pop();
+Insert.prototype.destroy = function (index) {
+    var length = this.$elements.length;
 
-        // custom action
-        if (this.destroyAction) this.destroyAction($element);
+    if (length > 0) {
+        var $element = null;
 
-        // remove from DOM
-        $element.remove();
+        if ($.isNumeric(index) && index < length - 1) {
+            $element = this.$elements[index];
+            this.$elements[index] = null;
+        } else {
+            $element = this.$elements.pop();
+        }
+
+        if ($element !== null) {
+            if (this.destroyAction) this.destroyAction($element);
+            $element.remove();
+            return true;
+        } else {
+            return false;
+        }
     }
-    return this;
+    return false;
 };
 
 Insert.prototype.destroyAll = function () {
-    if (this.$elements.length > 0) {
+    var length = this.$elements.length;
+
+    if (length > 0) {
+
+        length = 0;
 
         // custom action
         if (this.destroyAction) this.destroyAction(this.$elements);
 
         // remove all
         $.each(this.$elements, function (index, $element) {
-            $element.remove();
+            if ($element) {
+                $element.remove();
+                length += 1;
+            }
         });
+
+        // clear array
         this.$elements = [];
     }
-    return this;
+
+    return length;
 };
 
-Insert.prototype.reinsert = function (data) {
-    this.destroy().insert(data);
-    return this;
+Insert.prototype.reinsert = function (data, id) {
+    if (this.destroy(id)) return this.insert(data);
+    return null;
 };
 
 Insert.prototype.changeTarget = function (target) {
@@ -726,7 +855,7 @@ var checkers = {
 // Check required field
 var checkInputRequire = function ($input, content) {
     if (content.length > 0) return null;
-    return "请填写有效内容";
+    return "required";
 };
 
 
@@ -738,7 +867,7 @@ var checkGroup = function ($field) {
 
     if ($field.data("required") === true) {
         if (checked === null) checked = $field.find(":checked").length;
-        if (checked === 0) return "该项目必填";
+        if (checked === 0) return "required";
     }
     if (min = $field.data("min-check")) {
         if (checked === null) checked = $field.find(":checked").length;
@@ -1806,10 +1935,10 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
 },"useData":true});
 },{"handlebars/runtime":19}],25:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-    var helper;
+    var stack1, helper;
 
   return "<div class=\"tooltip\">"
-    + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
+    + ((stack1 = ((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper))) != null ? stack1 : "")
     + "</div>";
 },"useData":true});
 },{"handlebars/runtime":19}],26:[function(require,module,exports){
@@ -1889,7 +2018,7 @@ if ($floatBox.length > 0) {
             case "tooltips":
                 var tooltip = new Alert(tooltipHBS);
                 tooltip.changeTarget(".target");
-                tooltip.onShowAction(function ($el) {
+                tooltip.onShow(function ($el) {
                     $el.addClass("reverse");
                 });
                 tooltip.show({text: "this is a tooltip"});

@@ -14,6 +14,7 @@ var Insert = function (template, target, insertMethod) {
     // Actions
     this.insertAction = null;
     this.destroyAction = null;
+    this.replaceAction = this.insertAction;
 };
 
 Insert.prototype.insert = function (data) {
@@ -82,6 +83,16 @@ Insert.prototype.destroyAll = function () {
 
 Insert.prototype.reinsert = function (data) {
     this.destroy().insert(data);
+    return this;
+};
+
+Insert.prototype.changeContent = function (data, id) {
+    if (this.$elements[id]) {
+        var $element = $(this.template(data));
+        this.$elements[id].replaceWith($element);
+        this.$elements[id] = $element;
+        if (this.replaceAction) this.replaceAction($element);
+    }
     return this;
 };
 

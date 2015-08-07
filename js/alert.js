@@ -37,7 +37,7 @@ Alert.prototype.show = function (data) {
     if (!$.isNumeric(aid)) {
         aid = alert.insert(data);
         alert.$target.data("alert-id", aid);
-        return alert.getById[aid];
+        return alert.$elements[aid];
     }
     return null;
 };
@@ -67,13 +67,13 @@ Alert.prototype.changeContent = function (data, target) {
         id = alert.reinsert(data, id);
         $target.data("alert-id", id);
     }
-    return alert.getById(id);
+    return alert.$elements[id];
 };
 
 Alert.prototype.getByTarget = function (target) {
     target = target || alert.$target;
     var id = to$(target).data("alert-id");
-    return alert.getById(id);
+    return alert.$elements[id];
 };
 
 Alert.prototype.onShow = function (func) {

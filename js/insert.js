@@ -9,7 +9,7 @@ var Insert = function (template, target, insertMethod) {
     this.$target = to$(target);                   // target to insert
     this.template = template;                     // template file
     this.insertMethod = insertMethod || "append"; // insert method
-    this.$elements = [];
+    this.$elements = [];                          // inserted elements
 
     // Actions
     this.insertAction = null;

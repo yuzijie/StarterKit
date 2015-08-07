@@ -44,12 +44,12 @@ Insert.prototype.destroy = function (index) {
 
         if ($.isNumeric(index) && index < length - 1) {
             $element = this.$elements[index];
-            this.$elements[index] = null;
+            if ($element) this.$elements[index] = null;
         } else {
             $element = this.$elements.pop();
         }
 
-        if ($element !== null) {
+        if ($element) {
             if (this.destroyAction) this.destroyAction($element);
             $element.remove();
             return true;

@@ -10,7 +10,8 @@ var validationList = [
     '[type=email]',
     '[type=password]',
     '[data-input-group]',
-    'textarea'
+    'textarea',
+    'select'
 ];
 
 // helper function

@@ -35,9 +35,11 @@ var Alert = function (template, target) {
 Alert.prototype.show = function (data) {
     var aid = alert.$target.data("alert-id");
     if (!$.isNumeric(aid)) {
-        alert.$target.data("alert-id", alert.insert(data));
+        aid =  alert.insert(data);
+        alert.$target.data("alert-id", aid);
+        return alert.$elements[aid];
     }
-    return this;
+    return null;
 };
 
 Alert.prototype.hide = function (target) {

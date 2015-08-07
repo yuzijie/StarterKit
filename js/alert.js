@@ -35,7 +35,7 @@ var Alert = function (template, target) {
 Alert.prototype.show = function (data) {
     var aid = alert.$target.data("alert-id");
     if (!$.isNumeric(aid)) {
-        aid =  alert.insert(data);
+        aid = alert.insert(data);
         alert.$target.data("alert-id", aid);
         return alert.$elements[aid];
     }
@@ -44,13 +44,11 @@ Alert.prototype.show = function (data) {
 
 Alert.prototype.hide = function (target) {
     target = target || alert.$target;
-
     var id = to$(target).data("alert-id");
     if ($.isNumeric(id)) {
         alert.destroy(id);
         target.data("alert-id", "");
     }
-
     return this;
 };
 
@@ -61,9 +59,15 @@ Alert.prototype.changeTarget = function (target) {
 
 Alert.prototype.changeContent = function (data, target) {
     target = target || alert.$target;
-    var id = to$(target).data("alert-id");
-    if ($.isNumeric(id)) alert.changeContent(data, id);
-    return this;
+
+    var $target = to$(target);
+    var id = $target.data("alert-id");
+
+    if ($.isNumeric(id)) {
+        id = alert.reinsert(data, id);
+        $target.data("alert-id", id);
+    }
+    return alert.$elements[id];
 };
 
 Alert.prototype.onShow = function (func) {

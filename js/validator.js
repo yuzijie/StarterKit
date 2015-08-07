@@ -37,7 +37,7 @@ var checkers = {
 // Check required field
 var checkInputRequire = function ($input, content) {
     if (content.length > 0) return null;
-    return "请填写有效内容";
+    return "required";
 };
 
 
@@ -49,7 +49,7 @@ var checkGroup = function ($field) {
 
     if ($field.data("required") === true) {
         if (checked === null) checked = $field.find(":checked").length;
-        if (checked === 0) return "该项目必填";
+        if (checked === 0) return "required";
     }
     if (min = $field.data("min-check")) {
         if (checked === null) checked = $field.find(":checked").length;

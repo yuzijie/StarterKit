@@ -81,9 +81,9 @@ Insert.prototype.destroyAll = function () {
     return length;
 };
 
-Insert.prototype.reinsert = function (data) {
-    this.destroy().insert(data);
-    return this;
+Insert.prototype.reinsert = function (data, id) {
+    this.destroy(id);
+    return this.insert(data);
 };
 
 Insert.prototype.changeTarget = function (target) {

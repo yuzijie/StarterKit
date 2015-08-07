@@ -70,6 +70,12 @@ Alert.prototype.changeContent = function (data, target) {
     return alert.getById(id);
 };
 
+Alert.prototype.getByTarget = function (target) {
+    target = target || alert.$target;
+    var id = to$(target).data("alert-id");
+    return alert.getById(id);
+};
+
 Alert.prototype.onShow = function (func) {
     if ($.isFunction(func)) this.showAction = func;
     return this;

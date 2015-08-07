@@ -115,7 +115,7 @@ Insert.prototype.onDestroy = function (func) {
     return this;
 };
 
-Insert.prototype.getElementById = function (id) {
+Insert.prototype.getById = function (id) {
     if (this.$elements[id]) return this.$elements[id];
     return null;
 };

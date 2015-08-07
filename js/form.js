@@ -96,25 +96,31 @@ Form.prototype.addInputListener = function () {
 
     // on Change
     this.listeners.add(this.$inputs, "change", function (e) {
-        var context = this;
-        if (that.opts.validate === true) {
-            var $target = $(e.target);
-            if ($target.is(":checkbox, :radio")) {
-                $target = $target.closest("[data-input-group]");
-                context = $target[0];
-            }
-            that.validateForm($target);
-        }
-        if (that.inputChangeAction) that.inputChangeAction(e, context);
+        // get context ($target[0])
+        var $target = $(e.target);
+        if ($target.is(":checkbox, :radio")) $target = $target.closest("[data-input-group]");
+
+        // validate form
+        if (that.opts.validate === true) that.validateForm($target);
+
+        // custom action
+        if (that.inputChangeAction) that.inputChangeAction(e, $target[0]);
     });
 
     // on Keyup
     this.listeners.add(this.$inputs, "keyup", function (e) {
         if (that.keyupAction) {
-            var context = this;
             clearTimeout(timer);
             timer = setTimeout(function () {
-                that.keyupAction.call(context, e, context);
+                // get context ($target[0])
+                var $target = $(e.target);
+                if ($target.is(":checkbox, :radio")) $target = $target.closest("[data-input-group]");
+
+                // validate
+                if (that.opts.validate === true) that.validateForm($target);
+
+                // custom action
+                that.keyupAction(e, $target[0]);
             }, 500);
         }
     });
@@ -142,12 +148,15 @@ Form.prototype.resetListeners = function () {
 Form.prototype.validateForm = function (input) {
     var $input = to$(input);
     var errorMessage = validator.check($input);
+
+    // adding class and data
     $input.data("validation-error", errorMessage);
     if (errorMessage) {
         $input.addClass("invalid-field");
     } else {
         if ($input.is(".invalid-field")) $input.removeClass("invalid-field");
     }
+
     return errorMessage;
 };
 
@@ -162,6 +171,8 @@ Form.prototype.buttonText = function (text) {
 Form.prototype.enableSubmit = function () {
     this.$submit.prop("disabled", false);
     this.allowSubmit = true;
+    // reset the form
+    this.self[0].reset();
     return this;
 };
 
@@ -224,6 +235,11 @@ Form.prototype.getPostData = function () {
 
 Form.prototype.getFormUrl = function () {
     return this.self.attr("action");
+};
+
+Form.prototype.submit = function () {
+    this.self[0].submit();
+    return this;
 };
 
 module.exports = Form;

@@ -115,9 +115,4 @@ Insert.prototype.onDestroy = function (func) {
     return this;
 };
 
-Insert.prototype.getById = function (id) {
-    if (this.$elements[id]) return this.$elements[id];
-    return null;
-};
-
 module.exports = Insert;

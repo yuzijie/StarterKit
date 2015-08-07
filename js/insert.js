@@ -38,52 +38,56 @@ Insert.prototype.insert = function (data) {
 
 Insert.prototype.destroy = function (index) {
     var length = this.$elements.length;
+
     if (length > 0) {
         var $element = null;
 
-        if ($.isNumeric(index) && index !== length - 1) {
+        if ($.isNumeric(index) && index < length - 1) {
             $element = this.$elements[index];
             this.$elements[index] = null;
         } else {
             $element = this.$elements.pop();
-            index = this.$elements.length;
         }
 
         if ($element !== null) {
-
-            // custom action
             if (this.destroyAction) this.destroyAction($element);
-
-            // remove from DOM
             $element.remove();
-
-            return index;
+            return true;
+        } else {
+            return false;
         }
     }
-    return null;
+    return false;
 };
 
 Insert.prototype.destroyAll = function () {
-    var length;
+    var length = this.$elements.length;
 
-    if ((length = this.$elements.length) > 0) {
+    if (length > 0) {
+
+        length = 0;
+
         // custom action
         if (this.destroyAction) this.destroyAction(this.$elements);
 
         // remove all
         $.each(this.$elements, function (index, $element) {
-            $element.remove();
+            if ($element) {
+                $element.remove();
+                length += 1;
+            }
         });
 
         // clear array
         this.$elements = [];
     }
+
     return length;
 };
 
 Insert.prototype.reinsert = function (data, id) {
-    this.destroy(id);
-    return this.insert(data);
+    if (this.destroy(id)) return this.insert(data);
+    return null;
 };
 
 Insert.prototype.changeTarget = function (target) {

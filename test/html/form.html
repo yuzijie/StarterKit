@@ -23,6 +23,10 @@
         form label {
             position: relative;
         }
+
+        select {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -48,6 +52,15 @@
         <input type="radio" id="r2" name="radio" value="r2">
         <label for="r2">F</label>
     </div>
+
+    <label for="school">Choose your school</label>
+
+    <select id="school" required>
+        <option value="">Choose</option>
+        <option>oxford</option>
+        <option>MIT</option>
+        <option>Harvard</option>
+    </select>
 
     <label>multiple choices</label>
 

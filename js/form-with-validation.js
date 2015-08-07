@@ -1,5 +1,6 @@
 var Form = require("./form");
 var Alert = require("./alert");
+var scrollTo = require("./scroll-to");
 var tooltipTemplate = require("../templates/tooltip.hbs");
 
 // helper function
@@ -69,6 +70,10 @@ var BetterForm = function (target) {
             var tooltip = that.tooltip.show({text: info});
             if (tooltip) tooltip.css("left", ($el.width() - tooltip.width()) / 2 + "px");
         }
+    });
+
+    this.form.onValidateError(function (el) {
+        scrollTo($(el).prev("label"));
     });
 };
 

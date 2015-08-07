@@ -233,6 +233,7 @@ module.exports = FloatBox;
 },{"./listener":6,"./prevent-scroll":7,"./scrollbar":9}],3:[function(require,module,exports){
 var Form = require("./form");
 var Alert = require("./alert");
+var scrollTo = require("./scroll-to");
 var tooltipTemplate = require("../templates/tooltip.hbs");
 
 // helper function
@@ -303,11 +304,15 @@ var BetterForm = function (target) {
             if (tooltip) tooltip.css("left", ($el.width() - tooltip.width()) / 2 + "px");
         }
     });
+
+    this.form.onValidateError(function (el) {
+        scrollTo($(el).prev("label"));
+    });
 };
 
 module.exports = BetterForm;
 
-},{"../templates/tooltip.hbs":25,"./alert":1,"./form":4}],4:[function(require,module,exports){
+},{"../templates/tooltip.hbs":25,"./alert":1,"./form":4,"./scroll-to":8}],4:[function(require,module,exports){
 var validator = require("./validator");
 var Listener = require("./listener");
 
@@ -320,7 +325,8 @@ var validationList = [
     '[type=email]',
     '[type=password]',
     '[data-input-group]',
-    'textarea'
+    'textarea',
+    'select'
 ];
 
 // helper function

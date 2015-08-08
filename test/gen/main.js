@@ -24,7 +24,7 @@ var Alert = function (template, target) {
 
         $el.data("float", new Floatbox($el));
         $el.data("float").addListener('button[data-type="close"]', "click", function () {
-            alert.destroyAll();
+            that.hide();
         });
 
         $el.data("float").open();
@@ -312,7 +312,7 @@ var BetterForm = function (target) {
 
 module.exports = BetterForm;
 
-},{"../templates/tooltip.hbs":25,"./alert":1,"./form":4,"./scroll-to":8}],4:[function(require,module,exports){
+},{"../templates/tooltip.hbs":24,"./alert":1,"./form":4,"./scroll-to":8}],4:[function(require,module,exports){
 var validator = require("./validator");
 var Listener = require("./listener");
 
@@ -572,7 +572,7 @@ var Insert = function (template, target, insertMethod) {
     this.$target = to$(target);                   // target to insert
     this.template = template;                     // template file
     this.insertMethod = insertMethod || "append"; // insert method
-    this.$elements = [];
+    this.$elements = [];                          // inserted elements
 
     // Actions
     this.insertAction = null;
@@ -607,12 +607,12 @@ Insert.prototype.destroy = function (index) {
 
         if ($.isNumeric(index) && index < length - 1) {
             $element = this.$elements[index];
-            this.$elements[index] = null;
+            if ($element) this.$elements[index] = null;
         } else {
             $element = this.$elements.pop();
         }
 
-        if ($element !== null) {
+        if ($element) {
             if (this.destroyAction) this.destroyAction($element);
             $element.remove();
             return true;
@@ -649,8 +649,8 @@ Insert.prototype.destroyAll = function () {
 };
 
 Insert.prototype.reinsert = function (data, id) {
-    if (this.destroy(id)) return this.insert(data);
-    return null;
+    this.destroy(id);
+    return this.insert(data);
 };
 
 Insert.prototype.changeTarget = function (target) {
@@ -763,7 +763,7 @@ var PreventScroll = function ($target) {
 };
 module.exports = PreventScroll;
 
-},{"../node_modules/jquery-mousewheel/jquery.mousewheel.js":20}],8:[function(require,module,exports){
+},{"../node_modules/jquery-mousewheel/jquery.mousewheel.js":19}],8:[function(require,module,exports){
 // helper function
 function to$(item) {
     return (item instanceof jQuery) ? item : $(item);
@@ -902,26 +902,6 @@ Validator.check = function (field) {
 module.exports = Validator;
 
 },{}],11:[function(require,module,exports){
-module.exports = function (className) {
-    className = className || "spin-kit";
-    var output = '<div class="' + className + '">';
-    output += '<div class="sk-circle1 sk-child"></div>';
-    output += '<div class="sk-circle2 sk-child"></div>';
-    output += '<div class="sk-circle3 sk-child"></div>';
-    output += '<div class="sk-circle4 sk-child"></div>';
-    output += '<div class="sk-circle5 sk-child"></div>';
-    output += '<div class="sk-circle6 sk-child"></div>';
-    output += '<div class="sk-circle7 sk-child"></div>';
-    output += '<div class="sk-circle8 sk-child"></div>';
-    output += '<div class="sk-circle9 sk-child"></div>';
-    output += '<div class="sk-circle10 sk-child"></div>';
-    output += '<div class="sk-circle11 sk-child"></div>';
-    output += '<div class="sk-circle12 sk-child"></div>';
-    output += '</div>';
-    return output;
-};
-
-},{}],12:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -982,7 +962,7 @@ inst['default'] = inst;
 
 exports['default'] = inst;
 module.exports = exports['default'];
-},{"./handlebars/base":13,"./handlebars/exception":14,"./handlebars/no-conflict":15,"./handlebars/runtime":16,"./handlebars/safe-string":17,"./handlebars/utils":18}],13:[function(require,module,exports){
+},{"./handlebars/base":12,"./handlebars/exception":13,"./handlebars/no-conflict":14,"./handlebars/runtime":15,"./handlebars/safe-string":16,"./handlebars/utils":17}],12:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -1256,7 +1236,7 @@ function createFrame(object) {
 }
 
 /* [args, ]options */
-},{"./exception":14,"./utils":18}],14:[function(require,module,exports){
+},{"./exception":13,"./utils":17}],13:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -1295,7 +1275,7 @@ Exception.prototype = new Error();
 
 exports['default'] = Exception;
 module.exports = exports['default'];
-},{}],15:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1316,7 +1296,7 @@ exports['default'] = function (Handlebars) {
 
 module.exports = exports['default'];
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],16:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -1549,7 +1529,7 @@ function initData(context, data) {
   }
   return data;
 }
-},{"./base":13,"./exception":14,"./utils":18}],17:[function(require,module,exports){
+},{"./base":12,"./exception":13,"./utils":17}],16:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -1564,7 +1544,7 @@ SafeString.prototype.toString = SafeString.prototype.toHTML = function () {
 
 exports['default'] = SafeString;
 module.exports = exports['default'];
-},{}],18:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -1679,12 +1659,12 @@ function blockParams(params, ids) {
 function appendContextPath(contextPath, id) {
   return (contextPath ? contextPath + '.' : '') + id;
 }
-},{}],19:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 // Create a simple path alias to allow browserify to resolve
 // the runtime on a supported path.
 module.exports = require('./dist/cjs/handlebars.runtime')['default'];
 
-},{"./dist/cjs/handlebars.runtime":12}],20:[function(require,module,exports){
+},{"./dist/cjs/handlebars.runtime":11}],19:[function(require,module,exports){
 /*!
  * jQuery Mousewheel 3.1.13
  *
@@ -1907,7 +1887,7 @@ module.exports = require('./dist/cjs/handlebars.runtime')['default'];
 
 }));
 
-},{}],21:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper;
 
@@ -1915,7 +1895,7 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
     + "\n        <button style=\"padding: 5px 8px; margin-left: 15px\" data-type=\"close\">Close</button>\n        <button style=\"padding: 5px 8px; margin-left: 15px\" data-type=\"alert\">Yes</button>\n    </div>\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":19}],22:[function(require,module,exports){
+},{"handlebars/runtime":18}],21:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper;
 
@@ -1923,7 +1903,7 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
     + "<br>\n        <button data-type=\"alert\" style=\"padding: 0;\">Yes</button>\n    </div>\n    <div style=\"height: 100px;overflow: hidden;margin-bottom: 10px\">\n        <div style=\"overflow: auto; height: 100px\" class=\"scroll1\">\n            <div style=\"height: 500px;background: blue\"></div>\n        </div>\n    </div>\n    <div style=\"height: 100px;overflow: hidden\">\n        <div style=\"overflow: auto; height: 100px\" class=\"scroll2\">\n            <div style=\"height: 500px;background: green\"></div>\n        </div>\n    </div>\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":19}],23:[function(require,module,exports){
+},{"handlebars/runtime":18}],22:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper;
 
@@ -1931,7 +1911,7 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
     + "<br>\n    <button data-type=\"alert\">Yes</button>\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":19}],24:[function(require,module,exports){
+},{"handlebars/runtime":18}],23:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper;
 
@@ -1939,7 +1919,7 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
     + "</div>\n";
 },"useData":true});
-},{"handlebars/runtime":19}],25:[function(require,module,exports){
+},{"handlebars/runtime":18}],24:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var stack1, helper;
 
@@ -1947,9 +1927,8 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
     + ((stack1 = ((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper))) != null ? stack1 : "")
     + "</div>";
 },"useData":true});
-},{"handlebars/runtime":19}],26:[function(require,module,exports){
+},{"handlebars/runtime":18}],25:[function(require,module,exports){
 var FloatBox = require("../../js/float-box");
-var template = require("../../modules/spin-kit/templates/sk-circle.js")("spinner");
 var Form = require("../../js/form-with-validation");
 var Insert = require("../../js/insert");
 var Alert = require("../../js/alert");
@@ -1965,12 +1944,6 @@ var alert1HBS = require("../templates/alert1.hbs");
 var alert2HBS = require("../templates/alert2.hbs");
 var alert3HBS = require("../templates/alert3.hbs");
 var tooltipHBS = require("../../templates/tooltip.hbs");
-
-// spin kit
-var $spinkit = $(".spinkit");
-if ($spinkit.length > 0) {
-    $spinkit.append(template);
-}
 
 // float-box.js
 var $floatBox = $(".float-box");
@@ -2107,16 +2080,16 @@ if ($scrollTo.length > 0) {
     });
 }
 
-},{"../../js/alert":1,"../../js/float-box":2,"../../js/form-with-validation":3,"../../js/insert":5,"../../js/listener":6,"../../js/scroll-to":8,"../../modules/spin-kit/templates/sk-circle.js":11,"../../templates/alert.hbs":21,"../../templates/dropdown.hbs":22,"../../templates/modal.hbs":23,"../../templates/text.hbs":24,"../../templates/tooltip.hbs":25,"../templates/alert1.hbs":27,"../templates/alert2.hbs":28,"../templates/alert3.hbs":29}],27:[function(require,module,exports){
+},{"../../js/alert":1,"../../js/float-box":2,"../../js/form-with-validation":3,"../../js/insert":5,"../../js/listener":6,"../../js/scroll-to":8,"../../templates/alert.hbs":20,"../../templates/dropdown.hbs":21,"../../templates/modal.hbs":22,"../../templates/text.hbs":23,"../../templates/tooltip.hbs":24,"../templates/alert1.hbs":26,"../templates/alert2.hbs":27,"../templates/alert3.hbs":28}],26:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     return "<div>\n    <button data-msg=\"alert1\">alert1</button>\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":19}],28:[function(require,module,exports){
+},{"handlebars/runtime":18}],27:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     return "<div>\n    <button data-msg=\"alert2\">alert2</button>\n</div>";
 },"useData":true});
-},{"handlebars/runtime":19}],29:[function(require,module,exports){
+},{"handlebars/runtime":18}],28:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     return "<div>\n    <button data-msg=\"alert3\">alert3</button>\n</div>";
 },"useData":true});
-},{"handlebars/runtime":19}]},{},[26]);
+},{"handlebars/runtime":18}]},{},[25]);

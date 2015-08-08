@@ -23,7 +23,7 @@ var Alert = function (template, target) {
 
         $el.data("float", new Floatbox($el));
         $el.data("float").addListener('button[data-type="close"]', "click", function () {
-            alert.destroyAll();
+            that.hide();
         });
 
         $el.data("float").open();

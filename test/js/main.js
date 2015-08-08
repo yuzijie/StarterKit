@@ -1,5 +1,4 @@
 var FloatBox = require("../../js/float-box");
-var template = require("../../modules/spin-kit/templates/sk-circle.js")("spinner");
 var Form = require("../../js/form-with-validation");
 var Insert = require("../../js/insert");
 var Alert = require("../../js/alert");
@@ -15,12 +14,6 @@ var alert1HBS = require("../templates/alert1.hbs");
 var alert2HBS = require("../templates/alert2.hbs");
 var alert3HBS = require("../templates/alert3.hbs");
 var tooltipHBS = require("../../templates/tooltip.hbs");
-
-// spin kit
-var $spinkit = $(".spinkit");
-if ($spinkit.length > 0) {
-    $spinkit.append(template);
-}
 
 // float-box.js
 var $floatBox = $(".float-box");

@@ -14,6 +14,7 @@ var alert1HBS = require("../templates/alert1.hbs");
 var alert2HBS = require("../templates/alert2.hbs");
 var alert3HBS = require("../templates/alert3.hbs");
 var tooltipHBS = require("../../templates/tooltip.hbs");
+var mapCanvasHBS = require("../templates/map.hbs");
 
 // float-box.js
 var $floatBox = $(".float-box");
@@ -83,7 +84,36 @@ if ($floatBox.length > 0) {
 // BetterForm.js
 var $userForm = $("#usrForm");
 if ($userForm.length > 0) {
-    new Form($userForm);
+    var map;
+    var geocoder = new google.maps.Geocoder();
+    var mapCanvas = new Insert(mapCanvasHBS, "#location", "after");
+    mapCanvas.onInsert(function ($el) {
+        var latlng = new google.maps.LatLng(-34.397, 150.644);
+        var mapOptions = {
+            zoom: 8,
+            center: latlng,
+            disableDefaultUI: true
+        };
+        map = new google.maps.Map($el.children().get(0), mapOptions);
+    });
+
+    var form = new Form($userForm);
+    var $location = form.self.find("#location");
+    $location.on("blur", function () {
+        var address = $(this).val();
+
+        if (!$.isNumeric($(this).data("map-id"))) {
+            $(this).data("map-id", mapCanvas.insert());
+        }
+
+        //geocoder.geocode({'address': address}, function (result, status) {
+        //    if (status == google.maps.GeocoderStatus.OK) {
+        //
+        //    } else {
+        //        console.log(status);
+        //    }
+        //});
+    });
 }
 
 // insert.js

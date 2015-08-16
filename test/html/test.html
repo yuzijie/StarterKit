@@ -1,0 +1,83 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Starter Kit</title>
+    <meta name="description" content="YU's starter kit">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../gen/main.css">
+    <script src="../gen/modernizr-2.8.3.min.js"></script>
+    <style>
+        .tabs {
+            width: 600px;
+            margin: 20px auto;
+        }
+
+        section {
+            display: inline;
+            padding-right: 20px;
+        }
+
+        section .content {
+            float: left;
+            display: none;
+            background: darkgray;
+            color: white;
+        }
+
+        label {
+            cursor: pointer;
+        }
+
+        input[type=radio]:checked ~ .content {
+            display: block;
+        }
+
+        input[type=radio]:checked + label {
+            color: red;
+        }
+
+        input[type=radio] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="tabs">
+    <section id="s1">
+        <input type="radio" name="yes" id="s11"><label class="title" for="s11">title 1</label>
+        <div class="content">
+            Validating forms has notoriously been a painful development experience. Implementing client side
+            validation
+            in a user friendly, developer friendly, and accessible way is hard. Before HTML5 there was no means of
+            implementing validation natively; therefore, developers have resorted to a variety of JavaScript based
+            solutions.
+        </div>
+    </section>
+    <section id="s2">
+        <input type="radio" name="yes" id="s12"><label class="title" for="s12">title 2</label>
+        <div class="content">
+            Yet, despite being available in the latest version of all major browsers, constraint validation is a
+            topic
+            largely relegated to presentations and demos. My goal in writing this is to shed some light on the new
+            APIs
+            to help developers make better web forms for everyone.
+        </div>
+    </section>
+    <section id="s3">
+        <input type="radio" name="yes" id="s13"><label class="title" for="s13">title 3</label>
+        <div class="content">
+            The core of constraint validation is an algorithm browsers run when a form is submitted to determine its
+            validity. To make this determination, the algorithm utilizes new HTML5 attributes min, max, step,
+            pattern,
+            and required as well as existing attributes maxlength and type.
+        </div>
+    </section>
+</div>
+
+<script>window.jQuery || document.write('<script src="../gen/jquery-2.1.4.min.js"><\/script>')</script>
+<script src="../gen/main.js"></script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 var h = require("./helper.js");
 
+// messages
 var msg = {
     e1: "Missing Box Element!"
 };
@@ -11,6 +12,14 @@ function closeOnClick($box, id) {
     });
 }
 
+// close box when page is scrolling
+function closeOnScroll($box, id) {
+    $(window).on("scroll." + id, function () {
+        $box.trigger("close");
+    });
+}
+
+// turn element into box
 module.exports.on = function (box, options) {
     if (box) {
         var $box = h.to$(box),
@@ -28,12 +37,12 @@ module.exports.on = function (box, options) {
     function open() {
         if ($box.is(":hidden")) {
             $box.show();
-            setTimeout(function () { // bind listeners
+            setTimeout(function () {
                 if (opts.closeOnClick === true) closeOnClick($box, id);
+                if (opts.closeOnScroll === true) closeOnScroll($box, id);
             }, 50);
             return true;
         }
-        preventClose = true;
         return false;
     }
 
@@ -41,22 +50,27 @@ module.exports.on = function (box, options) {
     function close() {
         if ($box.is(":visible") && preventClose === false) {
             $box.hide();
-            $(window).off("." + id); // clear listeners
-            return true;
+            $(window).off("." + id);
         }
-        preventClose = false;
-        return false;
     }
 
-    // toggle action
-    function toggle() {
-        if (!open()) close();
-    }
-
+    // assign events
     $box.on({
-        open: open,
+        open: function () {
+            open();
+            preventClose = true;
+            setTimeout(function () {
+                preventClose = false;
+            }, 50);
+        },
         close: close,
-        toggle: toggle
+        toggle: function () {
+            if (!open()) close();
+        }
+    });
+
+    if (opts.closeOnLeave === true) $box.on("mouseleave", function () {
+        $box.trigger("close");
     });
 };
 

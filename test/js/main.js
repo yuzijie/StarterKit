@@ -179,3 +179,22 @@ if ($scrollTo.length > 0) {
         });
     });
 }
+
+// box.js
+var $box = $(".box");
+if ($box.length) {
+    var box = require("../../js/box");
+    var theBox = $("#box");
+    box.on(theBox, {
+        //closeOnClick: true
+    });
+    $("#1").on("click", function () {
+        theBox.trigger("open");
+    });
+    $("#2").on("click", function () {
+        theBox.trigger("toggle");
+    });
+    $("#3").on("click", function () {
+        theBox.trigger("close");
+    });
+}

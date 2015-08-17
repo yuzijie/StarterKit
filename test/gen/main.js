@@ -84,7 +84,92 @@ Alert.prototype.onShow = function (func) {
 
 module.exports = Alert;
 
-},{"./float-box.js":2,"./insert.js":5}],2:[function(require,module,exports){
+},{"./float-box.js":3,"./insert.js":7}],2:[function(require,module,exports){
+var h = require("./helper.js");
+
+// messages
+var msg = {
+    e1: "Missing Box Element!"
+};
+
+// close box when clicking outside of it
+function closeOnClick($box, id) {
+    $(window).on("click." + id, function (e) {
+        if (!h.within(e.target, $box)) $box.trigger("close");
+    });
+}
+
+// close box when page is scrolling
+function closeOnScroll($box, id) {
+    $(window).on("scroll." + id, function () {
+        $box.trigger("close");
+    });
+}
+
+// turn element into box
+module.exports.on = function (box, options) {
+    if (box) {
+        var $box = h.to$(box),
+            opts = options || {},
+            preventClose = false;
+    } else {
+        throw "box.on: " + msg.e1;
+    }
+
+    // assign unique id
+    var id = h.r4();
+    $box.data("box-id", id);
+
+    // open action
+    function open() {
+        if ($box.is(":hidden")) {
+            $box.show();
+            setTimeout(function () {
+                if (opts.closeOnClick === true) closeOnClick($box, id);
+                if (opts.closeOnScroll === true) closeOnScroll($box, id);
+            }, 50);
+            return true;
+        }
+        return false;
+    }
+
+    // close action
+    function close() {
+        if ($box.is(":visible") && preventClose === false) {
+            $box.hide();
+            $(window).off("." + id);
+        }
+    }
+
+    // assign events
+    $box.on({
+        open: function () {
+            open();
+            preventClose = true;
+            setTimeout(function () {
+                preventClose = false;
+            }, 50);
+        },
+        close: close,
+        toggle: function () {
+            if (!open()) close();
+        }
+    });
+
+    if (opts.closeOnLeave === true) $box.on("mouseleave", function () {
+        $box.trigger("close");
+    });
+};
+
+module.exports.getId = function (box) {
+    if (box) {
+        return h.to$(box).data("box-id");
+    } else {
+        throw "box.getId: " + msg.e1;
+    }
+};
+
+},{"./helper.js":6}],3:[function(require,module,exports){
 var prevent = require("./prevent-scroll");
 var scrollbar = require("./scrollbar");
 var Listener = require("./listener");
@@ -230,7 +315,7 @@ FloatBox.prototype.addCloseButton = function (target) {
 
 module.exports = FloatBox;
 
-},{"./listener":6,"./prevent-scroll":7,"./scrollbar":9}],3:[function(require,module,exports){
+},{"./listener":8,"./prevent-scroll":9,"./scrollbar":11}],4:[function(require,module,exports){
 var Form = require("./form");
 var Alert = require("./alert");
 var scrollTo = require("./scroll-to");
@@ -312,7 +397,7 @@ var BetterForm = function (target) {
 
 module.exports = BetterForm;
 
-},{"../templates/tooltip.hbs":24,"./alert":1,"./form":4,"./scroll-to":8}],4:[function(require,module,exports){
+},{"../templates/tooltip.hbs":26,"./alert":1,"./form":5,"./scroll-to":10}],5:[function(require,module,exports){
 var validator = require("./validator");
 var Listener = require("./listener");
 
@@ -560,7 +645,27 @@ Form.prototype.submit = function () {
 
 module.exports = Form;
 
-},{"./listener":6,"./validator":10}],5:[function(require,module,exports){
+},{"./listener":8,"./validator":12}],6:[function(require,module,exports){
+function to$(item) {
+    return (item instanceof jQuery) ? item : $(item);
+}
+
+function r4() {
+    return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+}
+
+function within(target, element) {
+    element = to$(element);
+    return (element.is(target) || element.has(target).length);
+}
+
+module.exports = {
+    to$: to$,
+    r4: r4,
+    within: within
+};
+
+},{}],7:[function(require,module,exports){
 // Insert.js 唯一用到的场合，是当一系列 DOM 元素需要频繁添加或删除的时候
 
 // helper functions
@@ -680,7 +785,7 @@ Insert.prototype.onDestroy = function (func) {
 
 module.exports = Insert;
 
-},{}],6:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 // 注明：只有在需要频繁开启和关闭 listeners 的时候才需要这个库
 // 否则直接使用 jQuery 的 on 即可
 
@@ -748,7 +853,7 @@ Listener.prototype.remove = function () {
 
 module.exports = Listener;
 
-},{}],7:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 require("../node_modules/jquery-mousewheel/jquery.mousewheel.js")($);
 var PreventScroll = function ($target) {
     $target = ($target instanceof jQuery) ? $target : $($target);
@@ -763,18 +868,15 @@ var PreventScroll = function ($target) {
 };
 module.exports = PreventScroll;
 
-},{"../node_modules/jquery-mousewheel/jquery.mousewheel.js":19}],8:[function(require,module,exports){
-// helper function
-function to$(item) {
-    return (item instanceof jQuery) ? item : $(item);
-}
+},{"../node_modules/jquery-mousewheel/jquery.mousewheel.js":21}],10:[function(require,module,exports){
+var h = require("./helper.js");
 
 var scrollTo = function (target, options) {
-    target = to$(target);
+    target = h.to$(target);
     options = options || {};
 
     if (options["container"]) {
-        var container = to$(options["container"]);
+        var container = h.to$(options["container"]);
         container.stop().animate({
             scrollTop: target.offset().top - container.offset().top + container.scrollTop()
         }, options.duration || '1000', function () {
@@ -791,7 +893,7 @@ var scrollTo = function (target, options) {
 
 module.exports = scrollTo;
 
-},{}],9:[function(require,module,exports){
+},{"./helper.js":6}],11:[function(require,module,exports){
 var getScrollbarWidth = function () {
     var scrollDiv = document.createElement('div');
     scrollDiv.className = "scrollbar-measure";
@@ -821,7 +923,7 @@ module.exports = {
     resetPadding: resetPadding
 };
 
-},{}],10:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 // helper function
 function to$(item) {
     return (item instanceof jQuery) ? item : $(item);
@@ -901,7 +1003,7 @@ Validator.check = function (field) {
 
 module.exports = Validator;
 
-},{}],11:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -962,7 +1064,7 @@ inst['default'] = inst;
 
 exports['default'] = inst;
 module.exports = exports['default'];
-},{"./handlebars/base":12,"./handlebars/exception":13,"./handlebars/no-conflict":14,"./handlebars/runtime":15,"./handlebars/safe-string":16,"./handlebars/utils":17}],12:[function(require,module,exports){
+},{"./handlebars/base":14,"./handlebars/exception":15,"./handlebars/no-conflict":16,"./handlebars/runtime":17,"./handlebars/safe-string":18,"./handlebars/utils":19}],14:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -1236,7 +1338,7 @@ function createFrame(object) {
 }
 
 /* [args, ]options */
-},{"./exception":13,"./utils":17}],13:[function(require,module,exports){
+},{"./exception":15,"./utils":19}],15:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -1275,7 +1377,7 @@ Exception.prototype = new Error();
 
 exports['default'] = Exception;
 module.exports = exports['default'];
-},{}],14:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1296,7 +1398,7 @@ exports['default'] = function (Handlebars) {
 
 module.exports = exports['default'];
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],15:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -1529,7 +1631,7 @@ function initData(context, data) {
   }
   return data;
 }
-},{"./base":12,"./exception":13,"./utils":17}],16:[function(require,module,exports){
+},{"./base":14,"./exception":15,"./utils":19}],18:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -1544,7 +1646,7 @@ SafeString.prototype.toString = SafeString.prototype.toHTML = function () {
 
 exports['default'] = SafeString;
 module.exports = exports['default'];
-},{}],17:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -1659,12 +1761,12 @@ function blockParams(params, ids) {
 function appendContextPath(contextPath, id) {
   return (contextPath ? contextPath + '.' : '') + id;
 }
-},{}],18:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 // Create a simple path alias to allow browserify to resolve
 // the runtime on a supported path.
 module.exports = require('./dist/cjs/handlebars.runtime')['default'];
 
-},{"./dist/cjs/handlebars.runtime":11}],19:[function(require,module,exports){
+},{"./dist/cjs/handlebars.runtime":13}],21:[function(require,module,exports){
 /*!
  * jQuery Mousewheel 3.1.13
  *
@@ -1887,7 +1989,7 @@ module.exports = require('./dist/cjs/handlebars.runtime')['default'];
 
 }));
 
-},{}],20:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper;
 
@@ -1895,7 +1997,7 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
     + "\n        <button style=\"padding: 5px 8px; margin-left: 15px\" data-type=\"close\">Close</button>\n        <button style=\"padding: 5px 8px; margin-left: 15px\" data-type=\"alert\">Yes</button>\n    </div>\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":18}],21:[function(require,module,exports){
+},{"handlebars/runtime":20}],23:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper;
 
@@ -1903,7 +2005,7 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
     + "<br>\n        <button data-type=\"alert\" style=\"padding: 0;\">Yes</button>\n    </div>\n    <div style=\"height: 100px;overflow: hidden;margin-bottom: 10px\">\n        <div style=\"overflow: auto; height: 100px\" class=\"scroll1\">\n            <div style=\"height: 500px;background: blue\"></div>\n        </div>\n    </div>\n    <div style=\"height: 100px;overflow: hidden\">\n        <div style=\"overflow: auto; height: 100px\" class=\"scroll2\">\n            <div style=\"height: 500px;background: green\"></div>\n        </div>\n    </div>\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":18}],22:[function(require,module,exports){
+},{"handlebars/runtime":20}],24:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper;
 
@@ -1911,7 +2013,7 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
     + "<br>\n    <button data-type=\"alert\">Yes</button>\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":18}],23:[function(require,module,exports){
+},{"handlebars/runtime":20}],25:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper;
 
@@ -1919,7 +2021,7 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
     + "</div>\n";
 },"useData":true});
-},{"handlebars/runtime":18}],24:[function(require,module,exports){
+},{"handlebars/runtime":20}],26:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var stack1, helper;
 
@@ -1927,7 +2029,7 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
     + ((stack1 = ((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper))) != null ? stack1 : "")
     + "</div>";
 },"useData":true});
-},{"handlebars/runtime":18}],25:[function(require,module,exports){
+},{"handlebars/runtime":20}],27:[function(require,module,exports){
 var FloatBox = require("../../js/float-box");
 var Form = require("../../js/form-with-validation");
 var Insert = require("../../js/insert");
@@ -2110,20 +2212,38 @@ if ($scrollTo.length > 0) {
     });
 }
 
-},{"../../js/alert":1,"../../js/float-box":2,"../../js/form-with-validation":3,"../../js/insert":5,"../../js/listener":6,"../../js/scroll-to":8,"../../templates/alert.hbs":20,"../../templates/dropdown.hbs":21,"../../templates/modal.hbs":22,"../../templates/text.hbs":23,"../../templates/tooltip.hbs":24,"../templates/alert1.hbs":26,"../templates/alert2.hbs":27,"../templates/alert3.hbs":28,"../templates/map.hbs":29}],26:[function(require,module,exports){
+// box.js
+var $box = $(".box");
+if ($box.length) {
+    var box = require("../../js/box");
+    var theBox = $("#box");
+    box.on(theBox, {
+        //closeOnClick: true
+    });
+    $("#1").on("click", function () {
+        theBox.trigger("open");
+    });
+    $("#2").on("click", function () {
+        theBox.trigger("toggle");
+    });
+    $("#3").on("click", function () {
+        theBox.trigger("close");
+    });
+}
+},{"../../js/alert":1,"../../js/box":2,"../../js/float-box":3,"../../js/form-with-validation":4,"../../js/insert":7,"../../js/listener":8,"../../js/scroll-to":10,"../../templates/alert.hbs":22,"../../templates/dropdown.hbs":23,"../../templates/modal.hbs":24,"../../templates/text.hbs":25,"../../templates/tooltip.hbs":26,"../templates/alert1.hbs":28,"../templates/alert2.hbs":29,"../templates/alert3.hbs":30,"../templates/map.hbs":31}],28:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     return "<div>\n    <button data-msg=\"alert1\">alert1</button>\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":18}],27:[function(require,module,exports){
+},{"handlebars/runtime":20}],29:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     return "<div>\n    <button data-msg=\"alert2\">alert2</button>\n</div>";
 },"useData":true});
-},{"handlebars/runtime":18}],28:[function(require,module,exports){
+},{"handlebars/runtime":20}],30:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     return "<div>\n    <button data-msg=\"alert3\">alert3</button>\n</div>";
 },"useData":true});
-},{"handlebars/runtime":18}],29:[function(require,module,exports){
+},{"handlebars/runtime":20}],31:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     return "<div class=\"googleMap\">\n    <div id=\"map-canvas\" style=\"height: 200px\"></div>\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":18}]},{},[25]);
+},{"handlebars/runtime":20}]},{},[27]);

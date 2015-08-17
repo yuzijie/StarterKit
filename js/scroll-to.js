@@ -1,14 +1,11 @@
-// helper function
-function to$(item) {
-    return (item instanceof jQuery) ? item : $(item);
-}
+var h = require("./helper.js");
 
 var scrollTo = function (target, options) {
-    target = to$(target);
+    target = h.to$(target);
     options = options || {};
 
     if (options["container"]) {
-        var container = to$(options["container"]);
+        var container = h.to$(options["container"]);
         container.stop().animate({
             scrollTop: target.offset().top - container.offset().top + container.scrollTop()
         }, options.duration || '1000', function () {

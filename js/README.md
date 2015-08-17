@@ -2,16 +2,17 @@
 
 * 基础
     * xhr.js：帮助简化 AJAX post/get 方法
+    * helper.js：一些辅助性的小方法
     * prevent-scroll.js：页面某一些元素滚动时，阻止背景滚动
     * scrollbar.js：当 Body 设置为 `overflow: hidden` 时候，为解决滚动条消失问题，添加 right padding
     * geo.js：操作 HTML5 geolocation API
     * validator.js：验证表单
     * scroll-to.js：滚动页面元素的对应位置
-* 零件
-    * float-box.js：定义页面中所有浮动元素的行为
+* 核心
+    * box.js：定义页面中所有可以打开和关闭的元素的行为
     * form.js：定义页面中 Form 的行为，简化 Form 编程过程
     * dom.js：管理页面中动态添加的元素
-* 工具
+* 组合
     * alert.js：弹出一个临时的提示框
     * form-with-validation.js：有验证提示的表单
 * 过时

@@ -36,3 +36,8 @@ $base-border: 1px $base-border-style $base-border-color !default; /* bourbon bit
 // Forms
 $form-box-shadow: inset 0 1px 3px rgba(#000, 0.06) !default; /* bourbon bitters v1.0.0 */
 $form-box-shadow-focus: $form-box-shadow, 0 0 5px adjust-color($action-color, $lightness: -5%, $alpha: -0.3) !default; /* bourbon bitters v1.0.0 */
+
+// Float box open duration
+$box-animation-duration: 0.3s !default; /* yuzijie */
+$box-open-duration: $box-animation-duration !default; /* yuzijie */
+$box-close-duration: $box-animation-duration !default; /* yuzijie */

@@ -64,6 +64,7 @@ module.exports.on = function (box, options) {
                 $box.removeClass("box--open").addClass("box--close");
                 $box.one(animDetect.animationEnd, function () {
                     $box.removeClass("box--close").hide();
+                    if (opts["afterClose"]) opts["afterClose"]();
                 });
 
                 // animation is not supported or turned off manually

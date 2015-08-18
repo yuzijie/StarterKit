@@ -1,4 +1,5 @@
-var h = require("./helper.js");
+var h = require("./helper");
+var animDetect = require("./anim-detect");
 
 // messages
 var msg = {
@@ -15,7 +16,7 @@ function closeOnClick($box, id) {
 // close box when page is scrolling
 function closeOnScroll($box, id) {
     $(window).on("scroll." + id, function () {
-        $box.trigger("close");
+        $box.trigger("close", {animation: false});
     });
 }
 
@@ -36,7 +37,7 @@ module.exports.on = function (box, options) {
     // open action
     function open() {
         if ($box.is(":hidden")) {
-            $box.show();
+            $box.addClass("box--open").show();
             setTimeout(function () {
                 if (opts.closeOnClick === true) closeOnClick($box, id);
                 if (opts.closeOnScroll === true) closeOnScroll($box, id);
@@ -47,9 +48,25 @@ module.exports.on = function (box, options) {
     }
 
     // close action
-    function close() {
+    function close(opts) {
         if ($box.is(":visible") && preventClose === false) {
-            $box.hide();
+            opts = opts || {};
+
+            // close the box
+            $box.removeClass("box--open").addClass("box--close");
+            $box.one(animDetect.animationEnd, function () {
+                $box.removeClass("box--close").hide();
+            });
+
+            // animation is not supported or turned off manually
+            if (!animDetect.animationSupport || opts.animation === false) {
+                $box.trigger(animDetect.animationEnd);
+            } else { // no animation
+                var duration = $box.css("animation-duration").slice(0, -1) * 1000;
+                if (duration === 0) $box.trigger(animDetect.animationEnd);
+            }
+
+            // reset listeners
             $(window).off("." + id);
         }
     }
@@ -63,7 +80,9 @@ module.exports.on = function (box, options) {
                 preventClose = false;
             }, 50);
         },
-        close: close,
+        close: function (event, opts) {
+            close(opts);
+        },
         toggle: function () {
             if (!open()) close();
         }

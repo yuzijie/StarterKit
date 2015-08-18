@@ -88,7 +88,13 @@ module.exports.on = function (box, options) {
         }
     });
 
+    // close on leave
     if (opts.closeOnLeave === true) $box.on("mouseleave", function () {
+        $box.trigger("close");
+    });
+
+    // assign close button
+    $box.on("click", "[data-box-close]", function () {
         $box.trigger("close");
     });
 };

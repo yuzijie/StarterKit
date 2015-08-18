@@ -8,6 +8,7 @@
     * geo.js：操作 HTML5 geolocation API
     * validator.js：验证表单
     * scroll-to.js：滚动页面元素的对应位置
+    * anim-detect.js：浏览器 css3 animation 支持检测
 * 核心
     * box.js：定义页面中所有可以打开和关闭的元素的行为
     * form.js：定义页面中 Form 的行为，简化 Form 编程过程

@@ -84,8 +84,26 @@ Alert.prototype.onShow = function (func) {
 
 module.exports = Alert;
 
-},{"./float-box.js":3,"./insert.js":7}],2:[function(require,module,exports){
-var h = require("./helper.js");
+},{"./float-box.js":4,"./insert.js":8}],2:[function(require,module,exports){
+function isSupported(property) {
+    return property in document.body.style;
+}
+
+var ias = isSupported("animation");
+
+var supportTest = {
+    transitionSupport: isSupported("transition"),
+    animationSupport: ias || isSupported("webkitAnimation"),
+    animationStart: ias ? "animationstart" : "webkitAnimationStart",
+    animationIteration: ias ? "animationiteration" : "webkitAnimationIteration",
+    animationEnd: ias ? "animationend" : "webkitAnimationEnd"
+};
+
+module.exports = supportTest;
+
+},{}],3:[function(require,module,exports){
+var h = require("./helper");
+var animDetect = require("./anim-detect");
 
 // messages
 var msg = {
@@ -102,7 +120,7 @@ function closeOnClick($box, id) {
 // close box when page is scrolling
 function closeOnScroll($box, id) {
     $(window).on("scroll." + id, function () {
-        $box.trigger("close");
+        $box.trigger("close", {animation: false});
     });
 }
 
@@ -123,7 +141,7 @@ module.exports.on = function (box, options) {
     // open action
     function open() {
         if ($box.is(":hidden")) {
-            $box.show();
+            $box.addClass("box--open").show();
             setTimeout(function () {
                 if (opts.closeOnClick === true) closeOnClick($box, id);
                 if (opts.closeOnScroll === true) closeOnScroll($box, id);
@@ -134,9 +152,25 @@ module.exports.on = function (box, options) {
     }
 
     // close action
-    function close() {
+    function close(opts) {
         if ($box.is(":visible") && preventClose === false) {
-            $box.hide();
+            opts = opts || {};
+
+            // close the box
+            $box.removeClass("box--open").addClass("box--close");
+            $box.one(animDetect.animationEnd, function () {
+                $box.removeClass("box--close").hide();
+            });
+
+            // animation is not supported or turned off manually
+            if (!animDetect.animationSupport || opts.animation === false) {
+                $box.trigger(animDetect.animationEnd);
+            } else { // no animation
+                var duration = $box.css("animation-duration").slice(0, -1) * 1000;
+                if (duration === 0) $box.trigger(animDetect.animationEnd);
+            }
+
+            // reset listeners
             $(window).off("." + id);
         }
     }
@@ -150,13 +184,21 @@ module.exports.on = function (box, options) {
                 preventClose = false;
             }, 50);
         },
-        close: close,
+        close: function (event, opts) {
+            close(opts);
+        },
         toggle: function () {
             if (!open()) close();
         }
     });
 
+    // close on leave
     if (opts.closeOnLeave === true) $box.on("mouseleave", function () {
+        $box.trigger("close");
+    });
+
+    // assign close button
+    $box.on("click", "[data-box-close]", function () {
         $box.trigger("close");
     });
 };
@@ -169,7 +211,7 @@ module.exports.getId = function (box) {
     }
 };
 
-},{"./helper.js":6}],3:[function(require,module,exports){
+},{"./anim-detect":2,"./helper":7}],4:[function(require,module,exports){
 var prevent = require("./prevent-scroll");
 var scrollbar = require("./scrollbar");
 var Listener = require("./listener");
@@ -315,7 +357,7 @@ FloatBox.prototype.addCloseButton = function (target) {
 
 module.exports = FloatBox;
 
-},{"./listener":8,"./prevent-scroll":9,"./scrollbar":11}],4:[function(require,module,exports){
+},{"./listener":9,"./prevent-scroll":10,"./scrollbar":12}],5:[function(require,module,exports){
 var Form = require("./form");
 var Alert = require("./alert");
 var scrollTo = require("./scroll-to");
@@ -397,7 +439,7 @@ var BetterForm = function (target) {
 
 module.exports = BetterForm;
 
-},{"../templates/tooltip.hbs":26,"./alert":1,"./form":5,"./scroll-to":10}],5:[function(require,module,exports){
+},{"../templates/tooltip.hbs":27,"./alert":1,"./form":6,"./scroll-to":11}],6:[function(require,module,exports){
 var validator = require("./validator");
 var Listener = require("./listener");
 
@@ -645,7 +687,7 @@ Form.prototype.submit = function () {
 
 module.exports = Form;
 
-},{"./listener":8,"./validator":12}],6:[function(require,module,exports){
+},{"./listener":9,"./validator":13}],7:[function(require,module,exports){
 function to$(item) {
     return (item instanceof jQuery) ? item : $(item);
 }
@@ -665,7 +707,7 @@ module.exports = {
     within: within
 };
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 // Insert.js 唯一用到的场合，是当一系列 DOM 元素需要频繁添加或删除的时候
 
 // helper functions
@@ -785,7 +827,7 @@ Insert.prototype.onDestroy = function (func) {
 
 module.exports = Insert;
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 // 注明：只有在需要频繁开启和关闭 listeners 的时候才需要这个库
 // 否则直接使用 jQuery 的 on 即可
 
@@ -853,7 +895,7 @@ Listener.prototype.remove = function () {
 
 module.exports = Listener;
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 require("../node_modules/jquery-mousewheel/jquery.mousewheel.js")($);
 var PreventScroll = function ($target) {
     $target = ($target instanceof jQuery) ? $target : $($target);
@@ -868,7 +910,7 @@ var PreventScroll = function ($target) {
 };
 module.exports = PreventScroll;
 
-},{"../node_modules/jquery-mousewheel/jquery.mousewheel.js":21}],10:[function(require,module,exports){
+},{"../node_modules/jquery-mousewheel/jquery.mousewheel.js":22}],11:[function(require,module,exports){
 var h = require("./helper.js");
 
 var scrollTo = function (target, options) {
@@ -893,7 +935,7 @@ var scrollTo = function (target, options) {
 
 module.exports = scrollTo;
 
-},{"./helper.js":6}],11:[function(require,module,exports){
+},{"./helper.js":7}],12:[function(require,module,exports){
 var getScrollbarWidth = function () {
     var scrollDiv = document.createElement('div');
     scrollDiv.className = "scrollbar-measure";
@@ -923,7 +965,7 @@ module.exports = {
     resetPadding: resetPadding
 };
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 // helper function
 function to$(item) {
     return (item instanceof jQuery) ? item : $(item);
@@ -1003,7 +1045,7 @@ Validator.check = function (field) {
 
 module.exports = Validator;
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -1064,7 +1106,7 @@ inst['default'] = inst;
 
 exports['default'] = inst;
 module.exports = exports['default'];
-},{"./handlebars/base":14,"./handlebars/exception":15,"./handlebars/no-conflict":16,"./handlebars/runtime":17,"./handlebars/safe-string":18,"./handlebars/utils":19}],14:[function(require,module,exports){
+},{"./handlebars/base":15,"./handlebars/exception":16,"./handlebars/no-conflict":17,"./handlebars/runtime":18,"./handlebars/safe-string":19,"./handlebars/utils":20}],15:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -1338,7 +1380,7 @@ function createFrame(object) {
 }
 
 /* [args, ]options */
-},{"./exception":15,"./utils":19}],15:[function(require,module,exports){
+},{"./exception":16,"./utils":20}],16:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -1377,7 +1419,7 @@ Exception.prototype = new Error();
 
 exports['default'] = Exception;
 module.exports = exports['default'];
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1398,7 +1440,7 @@ exports['default'] = function (Handlebars) {
 
 module.exports = exports['default'];
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -1631,7 +1673,7 @@ function initData(context, data) {
   }
   return data;
 }
-},{"./base":14,"./exception":15,"./utils":19}],18:[function(require,module,exports){
+},{"./base":15,"./exception":16,"./utils":20}],19:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -1646,7 +1688,7 @@ SafeString.prototype.toString = SafeString.prototype.toHTML = function () {
 
 exports['default'] = SafeString;
 module.exports = exports['default'];
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -1761,12 +1803,12 @@ function blockParams(params, ids) {
 function appendContextPath(contextPath, id) {
   return (contextPath ? contextPath + '.' : '') + id;
 }
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 // Create a simple path alias to allow browserify to resolve
 // the runtime on a supported path.
 module.exports = require('./dist/cjs/handlebars.runtime')['default'];
 
-},{"./dist/cjs/handlebars.runtime":13}],21:[function(require,module,exports){
+},{"./dist/cjs/handlebars.runtime":14}],22:[function(require,module,exports){
 /*!
  * jQuery Mousewheel 3.1.13
  *
@@ -1989,7 +2031,7 @@ module.exports = require('./dist/cjs/handlebars.runtime')['default'];
 
 }));
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper;
 
@@ -1997,7 +2039,7 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
     + "\n        <button style=\"padding: 5px 8px; margin-left: 15px\" data-type=\"close\">Close</button>\n        <button style=\"padding: 5px 8px; margin-left: 15px\" data-type=\"alert\">Yes</button>\n    </div>\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":20}],23:[function(require,module,exports){
+},{"handlebars/runtime":21}],24:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper;
 
@@ -2005,7 +2047,7 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
     + "<br>\n        <button data-type=\"alert\" style=\"padding: 0;\">Yes</button>\n    </div>\n    <div style=\"height: 100px;overflow: hidden;margin-bottom: 10px\">\n        <div style=\"overflow: auto; height: 100px\" class=\"scroll1\">\n            <div style=\"height: 500px;background: blue\"></div>\n        </div>\n    </div>\n    <div style=\"height: 100px;overflow: hidden\">\n        <div style=\"overflow: auto; height: 100px\" class=\"scroll2\">\n            <div style=\"height: 500px;background: green\"></div>\n        </div>\n    </div>\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":20}],24:[function(require,module,exports){
+},{"handlebars/runtime":21}],25:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper;
 
@@ -2013,7 +2055,7 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
     + "<br>\n    <button data-type=\"alert\">Yes</button>\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":20}],25:[function(require,module,exports){
+},{"handlebars/runtime":21}],26:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper;
 
@@ -2021,7 +2063,7 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
     + "</div>\n";
 },"useData":true});
-},{"handlebars/runtime":20}],26:[function(require,module,exports){
+},{"handlebars/runtime":21}],27:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var stack1, helper;
 
@@ -2029,7 +2071,7 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
     + ((stack1 = ((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper))) != null ? stack1 : "")
     + "</div>";
 },"useData":true});
-},{"handlebars/runtime":20}],27:[function(require,module,exports){
+},{"handlebars/runtime":21}],28:[function(require,module,exports){
 var FloatBox = require("../../js/float-box");
 var Form = require("../../js/form-with-validation");
 var Insert = require("../../js/insert");
@@ -2048,7 +2090,7 @@ var alert3HBS = require("../templates/alert3.hbs");
 var tooltipHBS = require("../../templates/tooltip.hbs");
 var mapCanvasHBS = require("../templates/map.hbs");
 
-// float-box.js
+// float-box.js //
 var $floatBox = $(".float-box");
 if ($floatBox.length > 0) {
     var $target = $(".target"); // to show elements
@@ -2113,7 +2155,7 @@ if ($floatBox.length > 0) {
     });
 }
 
-// BetterForm.js
+// BetterForm.js //
 var $userForm = $("#usrForm");
 if ($userForm.length > 0) {
     var map;
@@ -2148,7 +2190,7 @@ if ($userForm.length > 0) {
     });
 }
 
-// insert.js
+// insert.js //
 var $insert = $("#insert-test");
 if ($insert.length > 0) {
 
@@ -2202,7 +2244,7 @@ if ($insert.length > 0) {
     });
 }
 
-// scroll-to.js
+// scroll-to.js //
 var $scrollTo = $(".scroll");
 if ($scrollTo.length > 0) {
     $("button").click(function () {
@@ -2212,13 +2254,15 @@ if ($scrollTo.length > 0) {
     });
 }
 
-// box.js
+// box.js //
 var $box = $(".box");
 if ($box.length) {
     var box = require("../../js/box");
     var theBox = $("#box");
     box.on(theBox, {
-        //closeOnClick: true
+        //closeOnScroll: true,
+        //closeOnLeave: true,
+        closeOnClick: true
     });
     $("#1").on("click", function () {
         theBox.trigger("open");
@@ -2230,20 +2274,20 @@ if ($box.length) {
         theBox.trigger("close");
     });
 }
-},{"../../js/alert":1,"../../js/box":2,"../../js/float-box":3,"../../js/form-with-validation":4,"../../js/insert":7,"../../js/listener":8,"../../js/scroll-to":10,"../../templates/alert.hbs":22,"../../templates/dropdown.hbs":23,"../../templates/modal.hbs":24,"../../templates/text.hbs":25,"../../templates/tooltip.hbs":26,"../templates/alert1.hbs":28,"../templates/alert2.hbs":29,"../templates/alert3.hbs":30,"../templates/map.hbs":31}],28:[function(require,module,exports){
+},{"../../js/alert":1,"../../js/box":3,"../../js/float-box":4,"../../js/form-with-validation":5,"../../js/insert":8,"../../js/listener":9,"../../js/scroll-to":11,"../../templates/alert.hbs":23,"../../templates/dropdown.hbs":24,"../../templates/modal.hbs":25,"../../templates/text.hbs":26,"../../templates/tooltip.hbs":27,"../templates/alert1.hbs":29,"../templates/alert2.hbs":30,"../templates/alert3.hbs":31,"../templates/map.hbs":32}],29:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     return "<div>\n    <button data-msg=\"alert1\">alert1</button>\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":20}],29:[function(require,module,exports){
+},{"handlebars/runtime":21}],30:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     return "<div>\n    <button data-msg=\"alert2\">alert2</button>\n</div>";
 },"useData":true});
-},{"handlebars/runtime":20}],30:[function(require,module,exports){
+},{"handlebars/runtime":21}],31:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     return "<div>\n    <button data-msg=\"alert3\">alert3</button>\n</div>";
 },"useData":true});
-},{"handlebars/runtime":20}],31:[function(require,module,exports){
+},{"handlebars/runtime":21}],32:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     return "<div class=\"googleMap\">\n    <div id=\"map-canvas\" style=\"height: 200px\"></div>\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":20}]},{},[27]);
+},{"handlebars/runtime":21}]},{},[28]);

@@ -16,7 +16,7 @@ var alert3HBS = require("../templates/alert3.hbs");
 var tooltipHBS = require("../../templates/tooltip.hbs");
 var mapCanvasHBS = require("../templates/map.hbs");
 
-// float-box.js
+// float-box.js //
 var $floatBox = $(".float-box");
 if ($floatBox.length > 0) {
     var $target = $(".target"); // to show elements
@@ -81,7 +81,7 @@ if ($floatBox.length > 0) {
     });
 }
 
-// BetterForm.js
+// BetterForm.js //
 var $userForm = $("#usrForm");
 if ($userForm.length > 0) {
     var map;
@@ -116,7 +116,7 @@ if ($userForm.length > 0) {
     });
 }
 
-// insert.js
+// insert.js //
 var $insert = $("#insert-test");
 if ($insert.length > 0) {
 
@@ -170,7 +170,7 @@ if ($insert.length > 0) {
     });
 }
 
-// scroll-to.js
+// scroll-to.js //
 var $scrollTo = $(".scroll");
 if ($scrollTo.length > 0) {
     $("button").click(function () {
@@ -180,13 +180,15 @@ if ($scrollTo.length > 0) {
     });
 }
 
-// box.js
+// box.js //
 var $box = $(".box");
 if ($box.length) {
     var box = require("../../js/box");
     var theBox = $("#box");
     box.on(theBox, {
-        //closeOnClick: true
+        //closeOnScroll: true,
+        //closeOnLeave: true,
+        closeOnClick: true
     });
     $("#1").on("click", function () {
         theBox.trigger("open");

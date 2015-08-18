@@ -34,12 +34,25 @@
             border-radius: 3px;
             margin: 20px auto;
             display: none;
+            padding: 40px;
         }
 
         .box--open {
+            animation-duration: 0.3s;
+            animation-fill-mode: forwards;
+            animation-name: anim-open;
             -webkit-animation-duration: 0.3s;
             -webkit-animation-fill-mode: forwards;
             -webkit-animation-name: anim-open;
+        }
+
+        .box--close {
+            animation-duration: 0.3s;
+            animation-fill-mode: forwards;
+            animation-name: anim-close;
+            -webkit-animation-duration: 0.3s;
+            -webkit-animation-fill-mode: forwards;
+            -webkit-animation-name: anim-close;
         }
 
         @-webkit-keyframes anim-open {
@@ -52,6 +65,37 @@
                 -webkit-transform: scale3d(1, 1, 1);
             }
         }
+
+        @-webkit-keyframes anim-close {
+            0% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                -webkit-transform: scale3d(0.9, 0.9, 1);
+            }
+        }
+
+        @keyframes anim-open {
+            0% {
+                opacity: 0;
+                transform: scale3d(1.1, 1.1, 1);
+            }
+            100% {
+                opacity: 1;
+                transform: scale3d(1, 1, 1);
+            }
+        }
+
+        @keyframes anim-close {
+            0% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: scale3d(0.9, 0.9, 1);
+            }
+        }
     </style>
 </head>
 <body>
@@ -61,8 +105,8 @@
     <button id="2">toggle</button>
     <button id="3">close</button>
 </div>
-<div id="box" class="box--open">
-    <p style="color: white; font-size: 20px; text-align: center; cursor: pointer">abc</p>
+<div id="box">
+    <p style="color: white; font-size: 20px; text-align: center; cursor: pointer;" data-box-close>Close</p>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>

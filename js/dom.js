@@ -3,13 +3,13 @@ var h = require("./helper");
 var $elements = {}, // list of elements that have been inserted
     index = 0; // index of new element
 
-function insert(element, target, method, opts) {
+function insert(element, target, method, beforeInsert) {
     var $target = h.to$(target),
         $element = h.to$(element),
         allow;
 
     // before insert
-    if (opts["beforeInsert"]) allow = opts["beforeInsert"]();
+    if (beforeInsert) allow = beforeInsert($element);
 
     if (allow !== false) {
         // add to DOM
@@ -25,14 +25,14 @@ function insert(element, target, method, opts) {
     return false;
 }
 
-function remove(index, opts) {
+function remove(index, beforeRemove) {
     if (!index) throw "you must provide a valid key!";
 
     if ($elements.hasOwnProperty(index)) {
         var allow, $element = $elements[index];
 
         // before remove
-        if (opts["beforeRemove"]) allow = opts["beforeRemove"]($element);
+        if (beforeRemove) allow = beforeRemove($element);
 
         if (allow !== false) {
             // delete cache
@@ -55,17 +55,17 @@ function element(index) {
 }
 
 module.exports = {
-    append: function (element, target, opts) {
-        return insert(element, target, "append", opts);
+    append: function (element, target, func) {
+        return insert(element, target, "append", func);
     },
-    prepend: function (element, target, opts) {
-        return insert(element, target, "prepend", opts);
+    prepend: function (element, target, func) {
+        return insert(element, target, "prepend", func);
     },
-    before: function (element, target, opts) {
-        return insert(element, target, "before", opts);
+    before: function (element, target, func) {
+        return insert(element, target, "before", func);
     },
-    after: function (element, target, opts) {
-        return insert(element, target, "after", opts);
+    after: function (element, target, func) {
+        return insert(element, target, "after", func);
     },
     remove: remove, element: element
 };

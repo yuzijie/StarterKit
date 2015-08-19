@@ -1,21 +1,28 @@
 var box = require("./box"),
-    dom = require("./dom");
+    dom = require("./dom"),
+    scrollbar = require("./scrollbar");
 
 var target = $(document.body), id,
-    overlay = '<figure class="overlay"></figure>';
+    el = '<figure class="overlay"></figure>';
 
 module.exports.on = function () {
-    id = dom.append(overlay, target, function ($el) {
+    id = dom.append(el, target, function ($el) {
         box.transform($el, {
             openClass: "overlay--open",
-            closeClass: "overlay--close"
+            closeClass: "overlay--close",
+            beforeOpen: function () {
+                scrollbar.setPadding();
+            },
+            afterClose: function () {
+                scrollbar.resetPadding();
+                dom.remove(id);
+            }
         });
         $el.trigger("open");
     });
 };
 
 module.exports.off = function () {
-    dom.remove(id, function ($el) {
-        $el.trigger("close");
-    });
+    var el = dom.element(id);
+    el.trigger("close");
 };

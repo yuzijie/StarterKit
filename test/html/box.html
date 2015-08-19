@@ -17,8 +17,8 @@
         .box {
             border: 1px dashed black;
             margin: 20px auto;
-            height: 60px;
-            width: 300px;
+            padding: 10px;
+            width: 421px;
         }
 
         button {
@@ -35,10 +35,14 @@
             margin: 20px auto;
             display: none;
             padding: 40px;
+            z-index: 21;
+            position: fixed;
+            top: 300px;
+            left: 600px;
         }
 
         .box--open {
-            animation-duration: 0.3s;
+            animation-duration: 0.4s;
             animation-fill-mode: forwards;
             animation-name: anim-open;
             -webkit-animation-duration: 0.3s;
@@ -58,11 +62,24 @@
         @-webkit-keyframes anim-open {
             0% {
                 opacity: 0;
-                -webkit-transform: scale3d(1.1, 1.1, 1);
+                -webkit-transform: scale3d(0, 0, 1);
             }
             100% {
                 opacity: 1;
                 -webkit-transform: scale3d(1, 1, 1);
+            }
+        }
+
+        @keyframes anim-open {
+            0% {
+                opacity: 0;
+                -webkit-transform: scale3d(0, 0, 1);
+                transform: scale3d(0, 0, 1);
+            }
+            100% {
+                opacity: 1;
+                -webkit-transform: scale3d(1, 1, 1);
+                transform: scale3d(1, 1, 1);
             }
         }
 
@@ -72,18 +89,7 @@
             }
             100% {
                 opacity: 0;
-                -webkit-transform: scale3d(0.9, 0.9, 1);
-            }
-        }
-
-        @keyframes anim-open {
-            0% {
-                opacity: 0;
-                transform: scale3d(1.1, 1.1, 1);
-            }
-            100% {
-                opacity: 1;
-                transform: scale3d(1, 1, 1);
+                -webkit-transform: scale3d(0.5, 0.5, 1);
             }
         }
 
@@ -93,17 +99,19 @@
             }
             100% {
                 opacity: 0;
-                transform: scale3d(0.9, 0.9, 1);
+                -webkit-transform: scale3d(0.5, 0.5, 1);
+                transform: scale3d(0.5, 0.5, 1);
             }
         }
     </style>
 </head>
 <body>
 
-<div class="box">
+<div class="box clearfix">
     <button id="1">open</button>
     <button id="2">toggle</button>
     <button id="3">close</button>
+    <button id="4">open overlay</button>
 </div>
 <div id="box">
     <p style="color: white; font-size: 20px; text-align: center; cursor: pointer;" data-box-close>Close</p>

@@ -4,6 +4,8 @@ var $elements = {}, // list of elements that have been inserted
     index = 0; // index of new element
 
 function insert(element, target, method, beforeInsert) {
+    if (!element || !target) throw "element or target missing!";
+
     var $target = h.to$(target),
         $element = h.to$(element),
         allow;

@@ -15,24 +15,6 @@ function closeOnScroll($box, id) {
     });
 }
 
-// animation helper
-function animHelper($el, anim, func) {
-    var duration = null;
-
-    // listener
-    $el.one(animDetect.animationEnd, func);
-
-    // animation is not supported or turned off manually
-    if (!animDetect.animationSupport || anim === false) {
-        $el.trigger(animDetect.animationEnd);
-    } else { // no animation
-        duration = $el.css("animation-duration").slice(0, -1) * 1000;
-        if (duration === 0) $el.trigger(animDetect.animationEnd);
-    }
-
-    return duration;
-}
-
 // turn element into box
 module.exports.transform = function (box, options) {
     if (!box) throw "box.on: Missing Box Element!";
@@ -58,7 +40,7 @@ module.exports.transform = function (box, options) {
                 $box.addClass(opts.openClass).show();
 
                 // set animation finish action
-                animHelper($box, true, function () {
+                animDetect.animFinish(true, $box, function () {
                     if (opts["afterOpen"]) opts["afterOpen"]();
                 });
 
@@ -84,7 +66,7 @@ module.exports.transform = function (box, options) {
                 $box.removeClass(opts.openClass).addClass(opts.closeClass);
 
                 // set animation finish action
-                duration = animHelper($box, arguments[1], function () {
+                duration = animDetect.animFinish(arguments[1], $box, function () {
                     $box.removeClass(opts.closeClass).hide();
                     if (opts["afterClose"]) opts["afterClose"]();
                 });

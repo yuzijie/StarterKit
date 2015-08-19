@@ -17,13 +17,13 @@ function closeOnScroll($box, id) {
 
 // turn element into box
 module.exports.on = function (box, options) {
-    if (box) {
-        var $box = h.to$(box),
-            opts = options || {},
-            preventClose = false;
-    } else {
-        throw "box.on: Missing Box Element!";
-    }
+    if (!box) throw "box.on: Missing Box Element!";
+
+    var $box = h.to$(box), preventClose = false,
+        opts = $.extend({
+            openClass: "box--open",
+            closeClass: "box--close"
+        }, options);
 
     // assign unique id
     var id = h.r4();
@@ -36,12 +36,11 @@ module.exports.on = function (box, options) {
             if (opts["beforeOpen"]) allow = opts["beforeOpen"]();
 
             if (allow !== false) {
-                $box.addClass("box--open").show();
+                $box.addClass(opts.openClass).show();
                 setTimeout(function () {
                     if (opts.closeOnClick === true) closeOnClick($box, id);
                     if (opts.closeOnScroll === true) closeOnScroll($box, id);
                 }, 50);
-                if (opts["afterOpen"]) opts["afterOpen"]();
             }
             return true;
         }
@@ -56,10 +55,9 @@ module.exports.on = function (box, options) {
 
             if (allow !== false) {
                 // close the box
-                $box.removeClass("box--open").addClass("box--close");
+                $box.removeClass(opts.openClass).addClass(opts.closeClass);
                 $box.one(animDetect.animationEnd, function () {
-                    $box.removeClass("box--close").hide();
-                    if (opts["afterClose"]) opts["afterClose"]();
+                    $box.removeClass(opts.closeClass).hide();
                 });
 
                 // animation is not supported or turned off manually

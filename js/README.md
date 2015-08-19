@@ -14,7 +14,7 @@
     * form.js：定义页面中 Form 的行为，简化 Form 编程过程
     * dom.js：管理页面中动态添加的元素
 * 组合
-    * overlay.js：为页面添加 overlay
+    * overlay.js：为页面添加 overlay，依赖 box.js, dom.js
     * alert.js：弹出一个临时的提示框
     * form-with-validation.js：有验证提示的表单
 * 待完成
@@ -23,7 +23,8 @@
     * fake-select.js：把 HTML select 替换成 checkbox，同时提供 select 的所有功能
     * image-crop.js：提供切割图片的功能
     * multi-select.js：多选输入框，当用户有输入后，弹出下拉菜单，用户选择后下拉菜单消失，用户可以继续输入文字
-* 过时
+* 已停用
     * listener.js：在元素内添加或删除 Listener
     * window-scroll.js：可以手动停止页面滚动，但是用处不是很大
     * insert.js：按需要自动在页面内插入 HTML 元素
+    * float-box.js：定义网页中浮动的窗口

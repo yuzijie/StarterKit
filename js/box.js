@@ -16,7 +16,7 @@ function closeOnScroll($box, id) {
 }
 
 // turn element into box
-module.exports.on = function (box, options) {
+module.exports.transform = function (box, options) {
     if (!box) throw "box.on: Missing Box Element!";
 
     var $box = h.to$(box), preventClose = false,

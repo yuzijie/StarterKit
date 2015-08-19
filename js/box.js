@@ -15,6 +15,24 @@ function closeOnScroll($box, id) {
     });
 }
 
+// animation helper
+function animHelper($el, anim, func) {
+    var duration = null;
+
+    // listener
+    $el.one(animDetect.animationEnd, func);
+
+    // animation is not supported or turned off manually
+    if (!animDetect.animationSupport || anim === false) {
+        $el.trigger(animDetect.animationEnd);
+    } else { // no animation
+        duration = $el.css("animation-duration").slice(0, -1) * 1000;
+        if (duration === 0) $el.trigger(animDetect.animationEnd);
+    }
+
+    return duration;
+}
+
 // turn element into box
 module.exports.transform = function (box, options) {
     if (!box) throw "box.on: Missing Box Element!";
@@ -36,19 +54,27 @@ module.exports.transform = function (box, options) {
             if (opts["beforeOpen"]) allow = opts["beforeOpen"]();
 
             if (allow !== false) {
+                // open the box
                 $box.addClass(opts.openClass).show();
-                setTimeout(function () {
+
+                // set animation finish action
+                animHelper($box, true, function () {
+                    if (opts["afterOpen"]) opts["afterOpen"]();
+                });
+
+                // set listeners
+                setTimeout(function () { // 防止添加 listener 太早，从而 trigger close event
                     if (opts.closeOnClick === true) closeOnClick($box, id);
                     if (opts.closeOnScroll === true) closeOnScroll($box, id);
                 }, 50);
             }
-            return true;
         }
+        prevent(); // prevent close
         return false;
     }
 
     // close action
-    function close(animation) {
+    function close() {
         if ($box.is(":visible") && preventClose === false) {
             var allow, duration;
             if (opts["beforeClose"]) allow = opts["beforeClose"]();
@@ -56,36 +82,30 @@ module.exports.transform = function (box, options) {
             if (allow !== false) {
                 // close the box
                 $box.removeClass(opts.openClass).addClass(opts.closeClass);
-                $box.one(animDetect.animationEnd, function () {
-                    $box.removeClass(opts.closeClass).hide();
-                });
 
-                // animation is not supported or turned off manually
-                if (!animDetect.animationSupport || animation === false) {
-                    $box.trigger(animDetect.animationEnd);
-                } else { // no animation
-                    duration = $box.css("animation-duration").slice(0, -1) * 1000;
-                    if (duration === 0) $box.trigger(animDetect.animationEnd);
-                }
+                // set animation finish action
+                duration = animHelper($box, arguments[1], function () {
+                    $box.removeClass(opts.closeClass).hide();
+                    if (opts["afterClose"]) opts["afterClose"]();
+                });
 
                 // reset listeners
                 $(window).off("." + id);
+
+                // prevent close
+                prevent(duration);
             }
-            prevent(duration); // prevent close
+            return true;
         }
+        return false;
     }
 
     // assign events
     $box.on({
-        open: function () {
-            open();
-            prevent(); // prevent close
-        },
-        close: function (event, animation) {
-            close(animation);
-        },
+        open: open,
+        close: close,
         toggle: function () {
-            if (!open()) close();
+            if (!close()) open();
         }
     });
 

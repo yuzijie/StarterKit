@@ -32,7 +32,7 @@ function remove(index, beforeRemove) {
 
         if (allow !== false) {
             // delete cache
-            delete $elements[key];
+            delete $elements[index];
 
             // remove from DOM
             $element.remove();

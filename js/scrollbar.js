@@ -10,16 +10,23 @@ var getScrollbarWidth = function () {
 var $body = $(document.body);
 var scrollbarWidth = getScrollbarWidth();
 var bodyPad = parseInt(($body.css('padding-right') || 0), 10);
-var originalBodyPad = document.body.style.paddingRight || '';
+
+// default style
+var originalBodyPad = document.body.style.paddingRight || "";
+var originalBodyOverflow = document.body.style.overflow || "";
 
 var setPadding = function () {
     if (document.body.clientWidth < window.innerWidth) {
         $body.css('padding-right', bodyPad + scrollbarWidth);
     }
+    $body.css("overflow", "hidden");
 };
 
 var resetPadding = function () {
-    $body.css("padding-right", originalBodyPad);
+    $body.css({
+        "padding-right": originalBodyPad,
+        "overflow": originalBodyOverflow
+    });
 };
 
 module.exports = {

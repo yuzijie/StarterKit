@@ -9,7 +9,7 @@ function insert(element, target, method, opts) {
         allow;
 
     // before insert
-    if (opts["beforeInsert"]) allow = opts["beforeInsert"]($element);
+    if (opts["beforeInsert"]) allow = opts["beforeInsert"]();
 
     if (allow !== false) {
         // add to DOM

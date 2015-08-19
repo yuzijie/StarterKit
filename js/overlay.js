@@ -23,6 +23,5 @@ module.exports.on = function () {
 };
 
 module.exports.off = function () {
-    var el = dom.element(id);
-    el.trigger("close");
+    dom.element(id).trigger("close");
 };

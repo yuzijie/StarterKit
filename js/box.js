@@ -1,5 +1,6 @@
-var h = require("./helper");
-var animDetect = require("./anim-detect");
+var h = require("./helper"),
+    animDetect = require("./anim-detect"),
+    overlay = require("./overlay");
 
 // close box when clicking outside of it
 function closeOnClick($box, id) {
@@ -37,7 +38,8 @@ module.exports.transform = function (box, options) {
 
             if (allow !== false) {
                 // open the box
-                $box.addClass(opts.openClass).show();
+                if (opts.hasOverlay === true) overlay.on();
+                $box.show().addClass(opts.openClass);
 
                 // set animation finish action
                 animDetect.animFinish(true, $box, function () {
@@ -64,6 +66,7 @@ module.exports.transform = function (box, options) {
             if (allow !== false) {
                 // close the box
                 $box.removeClass(opts.openClass).addClass(opts.closeClass);
+                if (opts.hasOverlay === true) overlay.off();
 
                 // set animation finish action
                 duration = animDetect.animFinish(arguments[1], $box, function () {

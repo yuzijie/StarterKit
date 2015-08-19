@@ -12,7 +12,7 @@ function closeOnClick($box, id) {
 // close box when page is scrolling
 function closeOnScroll($box, id) {
     $(window).on("scroll." + id, function () {
-        $box.trigger("close", false);
+        $box.trigger("close", {enableAnim: false});
     });
 }
 
@@ -33,8 +33,8 @@ module.exports.transform = function (box, options) {
     // open action
     function open() {
         if ($box.is(":hidden")) {
-            var allow;
-            if (opts["beforeOpen"]) allow = opts["beforeOpen"]();
+            var allow, info = arguments[1] || {};
+            if (opts["beforeOpen"]) allow = opts["beforeOpen"](info);
 
             if (allow !== false) {
                 // open the box
@@ -43,7 +43,7 @@ module.exports.transform = function (box, options) {
 
                 // set animation finish action
                 animDetect.animFinish(true, $box, function () {
-                    if (opts["afterOpen"]) opts["afterOpen"]();
+                    if (opts["afterOpen"]) opts["afterOpen"](info);
                 });
 
                 // set listeners
@@ -60,8 +60,8 @@ module.exports.transform = function (box, options) {
     // close action
     function close() {
         if ($box.is(":visible") && preventClose === false) {
-            var allow, duration;
-            if (opts["beforeClose"]) allow = opts["beforeClose"]();
+            var allow, duration, info = arguments[1] || {};
+            if (opts["beforeClose"]) allow = opts["beforeClose"](info);
 
             if (allow !== false) {
                 // close the box
@@ -69,9 +69,9 @@ module.exports.transform = function (box, options) {
                 if (opts.hasOverlay === true) overlay.off();
 
                 // set animation finish action
-                duration = animDetect.animFinish(arguments[1], $box, function () {
+                duration = animDetect.animFinish(info.enableAnim, $box, function () {
                     $box.removeClass(opts.closeClass).hide();
-                    if (opts["afterClose"]) opts["afterClose"]();
+                    if (opts["afterClose"]) opts["afterClose"](info);
                 });
 
                 // reset listeners
@@ -89,8 +89,8 @@ module.exports.transform = function (box, options) {
     $box.on({
         open: open,
         close: close,
-        toggle: function () {
-            if (!close()) open();
+        toggle: function (event, info) {
+            if (!close(event, info)) open(event, info);
         }
     });
 

@@ -3,28 +3,22 @@ var h = require("./helper");
 var $elements = {}, // list of elements that have been inserted
     index = 0; // index of new element
 
-function insert(element, target, method, beforeInsert) {
+function insert(element, target, method, afterInsert) {
     if (!element || !target) throw "element or target missing!";
 
-    var $target = h.to$(target),
-        $element = h.to$(element),
-        allow;
+    var $target = h.to$(target), $element = h.to$(element);
 
-    // before insert
-    if (beforeInsert) allow = beforeInsert($element);
+    // add to DOM
+    $target[method]($element);
 
-    if (allow !== false) {
-        // add to DOM
-        $target[method]($element);
+    // cache in Elements object
+    $elements[++index] = $element;
 
-        // cache in Elements object
-        $elements[++index] = $element;
+    // after insert
+    if (afterInsert) afterInsert($element);
 
-        // return index number
-        return index;
-    }
-
-    return false;
+    // return index number
+    return index;
 }
 
 function remove(index, beforeRemove) {

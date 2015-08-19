@@ -1,9 +1,26 @@
-body.overlay
-    $overlay-background-color: rgba(0, 0, 0, 0.75) !default
-    overflow: hidden
+@include keyframes(overlay-open)
+    from
+        opacity: 0
+    to
+        opacity: 1
 
-    &:after
-        content: ""
-        @include position(fixed, 0 0 0 0)
-        background-color: $overlay-background-color
-        z-index: 20
+@include keyframes(overlay-close)
+    from
+        opacity: 1
+    to
+        opacity: 0
+
+figure.overlay
+    $overlay-background-color: rgba(55, 58, 71, 0.8) !default
+
+    background-color: $overlay-background-color
+    @include position(fixed, 0 0 0 0)
+    margin: 0
+    z-index: 20
+    display: none
+
+figure.overlay.overlay--open
+    @include animation(overlay-open 0.3s forwards)
+
+figure.overlay.overlay--close
+    @include animation(overlay-close 0.3s forwards)

@@ -1,11 +1,6 @@
 var h = require("./helper");
 var animDetect = require("./anim-detect");
 
-// messages
-var msg = {
-    e1: "Missing Box Element!"
-};
-
 // close box when clicking outside of it
 function closeOnClick($box, id) {
     $(window).on("click." + id, function (e) {
@@ -27,7 +22,7 @@ module.exports.on = function (box, options) {
             opts = options || {},
             preventClose = false;
     } else {
-        throw "box.on: " + msg.e1;
+        throw "box.on: Missing Box Element!";
     }
 
     // assign unique id
@@ -119,6 +114,6 @@ module.exports.getId = function (box) {
     if (box) {
         return h.to$(box).data("box-id");
     } else {
-        throw "box.getId: " + msg.e1;
+        throw "box.getId: Missing Box Element!";
     }
 };

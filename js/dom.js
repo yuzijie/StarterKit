@@ -47,6 +47,7 @@ function remove(index, beforeRemove) {
 
 function element(index) {
     if ($elements.hasOwnProperty(index)) return $elements[index];
+    if (index === "all") return $elements;
     return false;
 }
 

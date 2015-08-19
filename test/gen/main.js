@@ -1028,10 +1028,11 @@ module.exports.off = function () {
 };
 },{"./box":3,"./dom":4,"./scrollbar":14}],12:[function(require,module,exports){
 require("../node_modules/jquery-mousewheel/jquery.mousewheel.js")($);
+var h = require("./helper");
+
 var PreventScroll = function ($target) {
-    $target = ($target instanceof jQuery) ? $target : $($target);
+    $target = h.to$($target);
     $target.on("mousewheel.preventScroll", function (e) {
-        //console.log("scrollTop: " + $target.scrollTop() + " scrollHeight: " + $target[0].scrollHeight + " outerHeight: " + $target.outerHeight());
         e.stopPropagation();
         if (($target.scrollTop() >= $target[0].scrollHeight - $target.outerHeight() && e.deltaY < 0) ||
             ($target.scrollTop() <= 0 && e.deltaY > 0)) {
@@ -1039,9 +1040,10 @@ var PreventScroll = function ($target) {
         }
     });
 };
+
 module.exports = PreventScroll;
 
-},{"../node_modules/jquery-mousewheel/jquery.mousewheel.js":24}],13:[function(require,module,exports){
+},{"../node_modules/jquery-mousewheel/jquery.mousewheel.js":24,"./helper":8}],13:[function(require,module,exports){
 var h = require("./helper.js");
 
 var scrollTo = function (target, options) {
@@ -2393,18 +2395,12 @@ if ($scrollTo.length > 0) {
 }
 
 // box.js //
-
-closeIndex = 0;
-
 var $box = $(".box");
 if ($box.length) {
     var box = require("../../js/box");
     var theBox = $("#box");
     box.transform(theBox, {
-        hasOverlay: true,
-        //closeOnScroll: true,
-        closeOnLeave: true,
-        closeOnClick: true
+        hasOverlay: true
     });
     $("#1").on("click", function () {
         theBox.trigger("open");
@@ -2415,17 +2411,9 @@ if ($box.length) {
     $("#3").on("click", function () {
         theBox.trigger("close");
     });
-
-    var overlay = require("../../js/overlay");
-    $("#4").on("click", function () {
-        overlay.on();
-        setTimeout(function () {
-            overlay.off();
-        }, 2000);
-    });
 }
 
-},{"../../js/alert":1,"../../js/box":3,"../../js/float-box":5,"../../js/form-with-validation":6,"../../js/insert":9,"../../js/listener":10,"../../js/overlay":11,"../../js/scroll-to":13,"../../templates/alert.hbs":25,"../../templates/dropdown.hbs":26,"../../templates/modal.hbs":27,"../../templates/text.hbs":28,"../../templates/tooltip.hbs":29,"../templates/alert1.hbs":31,"../templates/alert2.hbs":32,"../templates/alert3.hbs":33,"../templates/map.hbs":34}],31:[function(require,module,exports){
+},{"../../js/alert":1,"../../js/box":3,"../../js/float-box":5,"../../js/form-with-validation":6,"../../js/insert":9,"../../js/listener":10,"../../js/scroll-to":13,"../../templates/alert.hbs":25,"../../templates/dropdown.hbs":26,"../../templates/modal.hbs":27,"../../templates/text.hbs":28,"../../templates/tooltip.hbs":29,"../templates/alert1.hbs":31,"../templates/alert2.hbs":32,"../templates/alert3.hbs":33,"../templates/map.hbs":34}],31:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     return "<div>\n    <button data-msg=\"alert1\">alert1</button>\n</div>\n";
 },"useData":true});

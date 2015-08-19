@@ -181,18 +181,12 @@ if ($scrollTo.length > 0) {
 }
 
 // box.js //
-
-closeIndex = 0;
-
 var $box = $(".box");
 if ($box.length) {
     var box = require("../../js/box");
     var theBox = $("#box");
     box.transform(theBox, {
-        hasOverlay: true,
-        //closeOnScroll: true,
-        closeOnLeave: true,
-        closeOnClick: true
+        hasOverlay: true
     });
     $("#1").on("click", function () {
         theBox.trigger("open");
@@ -202,13 +196,5 @@ if ($box.length) {
     });
     $("#3").on("click", function () {
         theBox.trigger("close");
-    });
-
-    var overlay = require("../../js/overlay");
-    $("#4").on("click", function () {
-        overlay.on();
-        setTimeout(function () {
-            overlay.off();
-        }, 2000);
     });
 }

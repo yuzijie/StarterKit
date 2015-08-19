@@ -15,7 +15,8 @@
     * dom.js：管理页面中动态添加的元素
 * 组合
     * overlay.js：为页面添加 overlay，依赖 box.js, dom.js
-    * alert.js：弹出一个临时的提示框
+    * alert.js：弹出一个 Modal 提示框
+    * tooltip.js：弹出一个 Tooltip
     * form-with-validation.js：有验证提示的表单
 * 待完成
     * filter.js：根据关键词隐藏不相关的内容

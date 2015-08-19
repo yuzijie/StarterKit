@@ -20,7 +20,7 @@ figure.overlay
     display: none
 
 figure.overlay.overlay--open
-    @include animation(overlay-open 0.3s forwards)
+    @include animation(overlay-open $box-open-duration forwards)
 
 figure.overlay.overlay--close
-    @include animation(overlay-close 0.3s forwards)
+    @include animation(overlay-close $box-close-duration forwards)

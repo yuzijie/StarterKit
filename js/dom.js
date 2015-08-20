@@ -5,14 +5,13 @@ var $elements = {}, // list of elements that have been inserted
 
 function insert(element, target, method, afterInsert) {
     if (!element || !target) throw "element or target missing!";
-
     var $target = h.to$(target), $element = h.to$(element);
 
     // add to DOM
-    $target[method]($element);
+    $target[method]($element.data("dom-id", ++index));
 
-    // cache in Elements object
-    $elements[++index] = $element;
+    // cache element
+    $elements[index] = $element;
 
     // after insert
     if (afterInsert) afterInsert($element);
@@ -21,8 +20,16 @@ function insert(element, target, method, afterInsert) {
     return index;
 }
 
-function remove(index, beforeRemove) {
-    if (!index) throw "you must provide a valid key!";
+function remove(IDorEL, beforeRemove) {
+    var index;
+
+    if ($.isNumeric(IDorEL)) {
+        index = IDorEL;
+    } else {
+        index = h.to$(IDorEL).closest("[data-dom-id]").data("dom-id");
+    }
+
+    if (!index) throw "no dom-id!";
 
     if ($elements.hasOwnProperty(index)) {
         var allow, $element = $elements[index];

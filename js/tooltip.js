@@ -2,33 +2,46 @@ var box = require("./box"),
     dom = require("./dom"),
     h = require("./helper"),
     template = function (msg) {
-        return '<div class="tooltip">' + msg + '</div>';
+        return '<div class="tooltip">' + msg + '&nbsp;<span data-box-close>&times;</span></div>';
     };
 
-module.exports.show = function (msg, target) {
+var show = function (msg, target) {
     var tooltip = $(template(msg));
+    if (target) target = h.to$(target);
 
-    var id = dom.append(tooltip, target, function ($el) {
-        box.transform($el, {
-            openClass: "tooltip--open",
-            closeClass: "tooltip--close",
-            afterClose: function (info) {
-                if (info.tid) dom.remove(info.tid);
-            }
+    if (target.is("[data-tooltip]") && !dom.element(target.data("tooltip-id"))) {
+        var id = dom.append(tooltip, target, function ($el) {
+            box.transform($el, {
+                openClass: "tooltip--open",
+                closeClass: "tooltip--close",
+                afterClose: function (info) {
+                    if (info.tid) return dom.remove(info.tid);
+                    if (info.box) return dom.remove(info.box);
+                }
+            });
+            $el.trigger("open");
         });
-        $el.trigger("open");
-    });
-
-    h.to$(target).data("tooltip-id", id);
+        target.data("tooltip-id", id);
+        return true;
+    }
+    return false;
 };
 
-module.exports.remove = function (target) {
+var remove = function (target) {
     if (!target) throw "remove tooltip: target missing!";
     target = h.to$(target);
 
-    var id = target.data("tooltip-id");
-    if (id) {
+    if (target.is("[data-tooltip]")) {
+        var id = target.data("tooltip-id");
         target.data("tooltip-id", "");
-        dom.element(id).trigger("close", {tid: id});
+        if (id && dom.element(id)) {
+            dom.element(id).trigger("close", {tid: id});
+        }
     }
 };
+
+var toggle = function (msg, target) {
+    if (!show(msg, target)) remove(target);
+};
+
+module.exports = {show: show, remove: remove, toggle: toggle};

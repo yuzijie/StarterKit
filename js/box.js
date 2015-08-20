@@ -28,7 +28,7 @@ module.exports.transform = function (box, options) {
 
     // assign unique id
     var id = h.r4();
-    $box.data("box-id", id);
+    $box.data("boxId", id);
 
     // open action
     function open() {

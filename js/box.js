@@ -20,14 +20,8 @@ function closeOnScroll($box, id) {
 module.exports.transform = function (box, options) {
     if (!box) throw "box.on: Missing Box Element!";
 
-    var $box = h.to$(box), preventClose = false,
-        opts = $.extend({
-            openClass: "box--open",
-            closeClass: "box--close"
-        }, options);
-
-    // unique id
-    var id = h.r4();
+    var $box = h.to$(box), id = h.r4(), preventClose = false,
+        opts = $.extend({openClass: "box--open", closeClass: "box--close"}, options);
 
     // open action
     function open() {

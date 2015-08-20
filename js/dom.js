@@ -8,7 +8,7 @@ function insert(element, target, method, afterInsert) {
     var $target = h.to$(target), $element = h.to$(element);
 
     // add to DOM
-    $target[method]($element.data("dom-id", ++index));
+    $target[method]($element.data("domId", ++index));
 
     // cache element
     $elements[index] = $element;
@@ -26,7 +26,7 @@ function remove(IDorEL, beforeRemove) {
     if ($.isNumeric(IDorEL)) {
         index = IDorEL;
     } else {
-        index = h.to$(IDorEL).closest("[data-dom-id]").data("dom-id");
+        index = h.to$(IDorEL).closest("[data-domId]").data("domId");
     }
 
     if (!index) throw "no dom-id!";
@@ -44,11 +44,9 @@ function remove(IDorEL, beforeRemove) {
             // remove from DOM
             $element.remove();
 
-            // return deleted element
-            return $element;
+            return true;
         }
     }
-
     return false;
 }
 

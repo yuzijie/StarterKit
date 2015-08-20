@@ -16,7 +16,7 @@
 
         .box {
             border: 1px dashed black;
-            margin: 20px auto;
+            margin: 100px auto;
             padding: 10px;
             width: 421px;
         }
@@ -24,6 +24,7 @@
         button {
             padding: 8px 15px;
             margin: 5px;
+            position: relative;
         }
 
         #box {
@@ -41,7 +42,7 @@
             left: 600px;
         }
 
-        .box--open {
+        .box--open, .tooltip--open {
             animation-duration: 0.4s;
             animation-fill-mode: forwards;
             animation-name: anim-open;
@@ -50,7 +51,7 @@
             -webkit-animation-name: anim-open;
         }
 
-        .box--close {
+        .box--close, .tooltip--close {
             animation-duration: 0.3s;
             animation-fill-mode: forwards;
             animation-name: anim-close;
@@ -103,14 +104,18 @@
                 transform: scale3d(0.5, 0.5, 1);
             }
         }
+
+        .tooltip {
+            bottom: 3em;
+        }
     </style>
 </head>
 <body>
 
 <div class="box clearfix">
-    <button id="1">open</button>
-    <button id="2">toggle</button>
-    <button id="3">close</button>
+    <button id="1" data-tooltip>open</button>
+    <button id="2" data-tooltip>toggle</button>
+    <button id="3" data-tooltip>close</button>
     <button id="4">open overlay</button>
 </div>
 <div id="box">

@@ -11,12 +11,11 @@
     * anim-detect.js：浏览器 css3 animation 支持检测
 * 核心
     * box.js：定义页面中所有可以打开和关闭的元素的行为
-    * form.js：定义页面中 Form 的行为，简化 Form 编程过程
     * dom.js：管理页面中动态添加的元素
+    * form.js：定义页面中 Form 的行为，简化 Form 编程过程
 * 组合
     * overlay.js：为页面添加 overlay，依赖 box.js, dom.js
-    * alert.js：弹出一个 Modal 提示框
-    * tooltip.js：弹出一个 Tooltip
+    * tooltip.js：弹出一个 Tooltip，依赖 box.js, dom.js
     * form-with-validation.js：有验证提示的表单
 * 待完成
     * filter.js：根据关键词隐藏不相关的内容
@@ -29,3 +28,4 @@
     * window-scroll.js：可以手动停止页面滚动，但是用处不是很大
     * insert.js：按需要自动在页面内插入 HTML 元素
     * float-box.js：定义网页中浮动的窗口
+    * alert.js：弹出一个 Modal 提示框

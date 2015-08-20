@@ -183,18 +183,46 @@ if ($scrollTo.length > 0) {
 // box.js //
 var $box = $(".box");
 if ($box.length) {
-    var box = require("../../js/box");
-    var theBox = $("#box");
-    box.transform(theBox, {
-        hasOverlay: true
+    //var box = require("../../js/box");
+    //var theBox = $("#box");
+    //var info = {
+    //    beforeClose: "This is before Close",
+    //    afterClose: "This is after Close",
+    //    beforeOpen: "This is before Open",
+    //    afterOpen: "This is after Open"
+    //};
+    //box.transform(theBox, {
+    //    //closeOnScroll: true,
+    //    beforeClose: function (info) {
+    //        console.log(info.beforeClose);
+    //    },
+    //    afterClose: function (info) {
+    //        console.log(info.afterClose);
+    //    },
+    //    beforeOpen: function (info) {
+    //        console.log(info.beforeOpen);
+    //    },
+    //    afterOpen: function (info) {
+    //        console.log(info.afterOpen);
+    //    }
+    //});
+
+    var tooltip = require("../../js/tooltip");
+    var dom = require("../../js/dom");
+
+    $("#1").on("click", function (event) {
+        tooltip.toggle(event.target.innerHTML, event.target);
+        //theBox.trigger("open", info);
     });
-    $("#1").on("click", function () {
-        theBox.trigger("open");
+    $("#2").on("click", function (event) {
+        tooltip.toggle(event.target.innerHTML, event.target);
+        //theBox.trigger("toggle", info);
     });
-    $("#2").on("click", function () {
-        theBox.trigger("toggle");
+    $("#3").on("click", function (event) {
+        tooltip.toggle(event.target.innerHTML, event.target);
+        //theBox.trigger("close", info);
     });
-    $("#3").on("click", function () {
-        theBox.trigger("close");
+    $("#4").on("click", function () {
+        console.log(dom.element("all"));
     });
 }

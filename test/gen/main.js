@@ -128,14 +128,14 @@ var h = require("./helper"),
 // close box when clicking outside of it
 function closeOnClick($box, id) {
     $(window).on("click." + id, function (e) {
-        if (!h.within(e.target, $box)) $box.trigger("close");
+        if (!h.within(e.target, $box)) $box.trigger("close", {box: $box});
     });
 }
 
 // close box when page is scrolling
 function closeOnScroll($box, id) {
     $(window).on("scroll." + id, function () {
-        $box.trigger("close", false);
+        $box.trigger("close", {enableAnim: false, box: $box});
     });
 }
 
@@ -143,21 +143,14 @@ function closeOnScroll($box, id) {
 module.exports.transform = function (box, options) {
     if (!box) throw "box.on: Missing Box Element!";
 
-    var $box = h.to$(box), preventClose = false,
-        opts = $.extend({
-            openClass: "box--open",
-            closeClass: "box--close"
-        }, options);
-
-    // assign unique id
-    var id = h.r4();
-    $box.data("box-id", id);
+    var $box = h.to$(box), id = h.r4(), preventClose = false,
+        opts = $.extend({openClass: "box--open", closeClass: "box--close"}, options);
 
     // open action
     function open() {
         if ($box.is(":hidden")) {
-            var allow;
-            if (opts["beforeOpen"]) allow = opts["beforeOpen"]();
+            var allow, info = arguments[1] || {};
+            if (opts["beforeOpen"]) allow = opts["beforeOpen"](info);
 
             if (allow !== false) {
                 // open the box
@@ -166,7 +159,7 @@ module.exports.transform = function (box, options) {
 
                 // set animation finish action
                 animDetect.animFinish(true, $box, function () {
-                    if (opts["afterOpen"]) opts["afterOpen"]();
+                    if (opts["afterOpen"]) opts["afterOpen"](info);
                 });
 
                 // set listeners
@@ -183,8 +176,8 @@ module.exports.transform = function (box, options) {
     // close action
     function close() {
         if ($box.is(":visible") && preventClose === false) {
-            var allow, duration;
-            if (opts["beforeClose"]) allow = opts["beforeClose"]();
+            var allow, duration, info = arguments[1] || {};
+            if (opts["beforeClose"]) allow = opts["beforeClose"](info);
 
             if (allow !== false) {
                 // close the box
@@ -192,9 +185,9 @@ module.exports.transform = function (box, options) {
                 if (opts.hasOverlay === true) overlay.off();
 
                 // set animation finish action
-                duration = animDetect.animFinish(arguments[1], $box, function () {
+                duration = animDetect.animFinish(info.enableAnim, $box, function () {
                     $box.removeClass(opts.closeClass).hide();
-                    if (opts["afterClose"]) opts["afterClose"]();
+                    if (opts["afterClose"]) opts["afterClose"](info);
                 });
 
                 // reset listeners
@@ -212,19 +205,19 @@ module.exports.transform = function (box, options) {
     $box.on({
         open: open,
         close: close,
-        toggle: function () {
-            if (!close()) open();
+        toggle: function (event, info) {
+            if (!close(event, info)) open(event, info);
         }
     });
 
     // close on leave
     if (opts.closeOnLeave === true) $box.on("mouseleave", function () {
-        $box.trigger("close");
+        $box.trigger("close", {box: $box});
     });
 
     // assign close button
     $box.on("click", "[data-box-close]", function () {
-        $box.trigger("close");
+        $box.trigger("close", {box: $box});
     });
 
     // helper functions
@@ -236,14 +229,6 @@ module.exports.transform = function (box, options) {
     }
 };
 
-module.exports.getId = function (box) {
-    if (box) {
-        return h.to$(box).data("box-id");
-    } else {
-        throw "box.getId: Missing Box Element!";
-    }
-};
-
 },{"./anim-detect":2,"./helper":8,"./overlay":11}],4:[function(require,module,exports){
 var h = require("./helper");
 
@@ -252,14 +237,13 @@ var $elements = {}, // list of elements that have been inserted
 
 function insert(element, target, method, afterInsert) {
     if (!element || !target) throw "element or target missing!";
-
     var $target = h.to$(target), $element = h.to$(element);
 
     // add to DOM
-    $target[method]($element);
+    $target[method]($element.data("domId", ++index));
 
-    // cache in Elements object
-    $elements[++index] = $element;
+    // cache element
+    $elements[index] = $element;
 
     // after insert
     if (afterInsert) afterInsert($element);
@@ -268,8 +252,16 @@ function insert(element, target, method, afterInsert) {
     return index;
 }
 
-function remove(index, beforeRemove) {
-    if (!index) throw "you must provide a valid key!";
+function remove(IDorEL, beforeRemove) {
+    var index;
+
+    if ($.isNumeric(IDorEL)) {
+        index = IDorEL;
+    } else {
+        index = h.to$(IDorEL).data("domId");
+    }
+
+    if (!index) throw "no dom id!";
 
     if ($elements.hasOwnProperty(index)) {
         var allow, $element = $elements[index];
@@ -284,16 +276,15 @@ function remove(index, beforeRemove) {
             // remove from DOM
             $element.remove();
 
-            // return deleted element
-            return $element;
+            return true;
         }
     }
-
     return false;
 }
 
 function element(index) {
     if ($elements.hasOwnProperty(index)) return $elements[index];
+    if (index === "all") return $elements;
     return false;
 }
 
@@ -541,7 +532,7 @@ var BetterForm = function (target) {
 
 module.exports = BetterForm;
 
-},{"../templates/tooltip.hbs":29,"./alert":1,"./form":7,"./scroll-to":13}],7:[function(require,module,exports){
+},{"../templates/tooltip.hbs":30,"./alert":1,"./form":7,"./scroll-to":13}],7:[function(require,module,exports){
 var validator = require("./validator");
 var Listener = require("./listener");
 
@@ -789,7 +780,7 @@ Form.prototype.submit = function () {
 
 module.exports = Form;
 
-},{"./listener":10,"./validator":15}],8:[function(require,module,exports){
+},{"./listener":10,"./validator":16}],8:[function(require,module,exports){
 function to$(item) {
     return (item instanceof jQuery) ? item : $(item);
 }
@@ -1023,9 +1014,9 @@ module.exports.on = function () {
 };
 
 module.exports.off = function () {
-    var el = dom.element(id);
-    el.trigger("close");
+    dom.element(id).trigger("close");
 };
+
 },{"./box":3,"./dom":4,"./scrollbar":14}],12:[function(require,module,exports){
 require("../node_modules/jquery-mousewheel/jquery.mousewheel.js")($);
 var h = require("./helper");
@@ -1043,7 +1034,7 @@ var PreventScroll = function ($target) {
 
 module.exports = PreventScroll;
 
-},{"../node_modules/jquery-mousewheel/jquery.mousewheel.js":24,"./helper":8}],13:[function(require,module,exports){
+},{"../node_modules/jquery-mousewheel/jquery.mousewheel.js":25,"./helper":8}],13:[function(require,module,exports){
 var h = require("./helper.js");
 
 var scrollTo = function (target, options) {
@@ -1106,6 +1097,55 @@ module.exports = {
 };
 
 },{}],15:[function(require,module,exports){
+var box = require("./box"),
+    dom = require("./dom"),
+    h = require("./helper"),
+    template = function (msg) {
+        return '<div class="tooltip">' + msg + '&nbsp;<span data-box-close>&times;</span></div>';
+    };
+
+var show = function (msg, target) {
+    var tooltip = $(template(msg));
+    if (target) target = h.to$(target);
+
+    if (target.is("[data-tooltip]") && !dom.element(target.data("tooltip-id"))) {
+        var id = dom.append(tooltip, target, function ($el) {
+            box.transform($el, {
+                openClass: "tooltip--open",
+                closeClass: "tooltip--close",
+                afterClose: function (info) {
+                    if (info.tid) return dom.remove(info.tid);
+                    if (info.box) return dom.remove(info.box);
+                }
+            });
+            $el.trigger("open");
+        });
+        target.data("tooltip-id", id);
+        return true;
+    }
+    return false;
+};
+
+var remove = function (target) {
+    if (!target) throw "remove tooltip: target missing!";
+    target = h.to$(target);
+
+    if (target.is("[data-tooltip]")) {
+        var id = target.data("tooltip-id");
+        target.data("tooltip-id", "");
+        if (id && dom.element(id)) {
+            dom.element(id).trigger("close", {tid: id});
+        }
+    }
+};
+
+var toggle = function (msg, target) {
+    if (!show(msg, target)) remove(target);
+};
+
+module.exports = {show: show, remove: remove, toggle: toggle};
+
+},{"./box":3,"./dom":4,"./helper":8}],16:[function(require,module,exports){
 // helper function
 function to$(item) {
     return (item instanceof jQuery) ? item : $(item);
@@ -1185,7 +1225,7 @@ Validator.check = function (field) {
 
 module.exports = Validator;
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -1246,7 +1286,7 @@ inst['default'] = inst;
 
 exports['default'] = inst;
 module.exports = exports['default'];
-},{"./handlebars/base":17,"./handlebars/exception":18,"./handlebars/no-conflict":19,"./handlebars/runtime":20,"./handlebars/safe-string":21,"./handlebars/utils":22}],17:[function(require,module,exports){
+},{"./handlebars/base":18,"./handlebars/exception":19,"./handlebars/no-conflict":20,"./handlebars/runtime":21,"./handlebars/safe-string":22,"./handlebars/utils":23}],18:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -1520,7 +1560,7 @@ function createFrame(object) {
 }
 
 /* [args, ]options */
-},{"./exception":18,"./utils":22}],18:[function(require,module,exports){
+},{"./exception":19,"./utils":23}],19:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -1559,7 +1599,7 @@ Exception.prototype = new Error();
 
 exports['default'] = Exception;
 module.exports = exports['default'];
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1580,7 +1620,7 @@ exports['default'] = function (Handlebars) {
 
 module.exports = exports['default'];
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -1813,7 +1853,7 @@ function initData(context, data) {
   }
   return data;
 }
-},{"./base":17,"./exception":18,"./utils":22}],21:[function(require,module,exports){
+},{"./base":18,"./exception":19,"./utils":23}],22:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -1828,7 +1868,7 @@ SafeString.prototype.toString = SafeString.prototype.toHTML = function () {
 
 exports['default'] = SafeString;
 module.exports = exports['default'];
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -1943,12 +1983,12 @@ function blockParams(params, ids) {
 function appendContextPath(contextPath, id) {
   return (contextPath ? contextPath + '.' : '') + id;
 }
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 // Create a simple path alias to allow browserify to resolve
 // the runtime on a supported path.
 module.exports = require('./dist/cjs/handlebars.runtime')['default'];
 
-},{"./dist/cjs/handlebars.runtime":16}],24:[function(require,module,exports){
+},{"./dist/cjs/handlebars.runtime":17}],25:[function(require,module,exports){
 /*!
  * jQuery Mousewheel 3.1.13
  *
@@ -2171,7 +2211,7 @@ module.exports = require('./dist/cjs/handlebars.runtime')['default'];
 
 }));
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper;
 
@@ -2179,7 +2219,7 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
     + "\n        <button style=\"padding: 5px 8px; margin-left: 15px\" data-type=\"close\">Close</button>\n        <button style=\"padding: 5px 8px; margin-left: 15px\" data-type=\"alert\">Yes</button>\n    </div>\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":23}],26:[function(require,module,exports){
+},{"handlebars/runtime":24}],27:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper;
 
@@ -2187,7 +2227,7 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
     + "<br>\n        <button data-type=\"alert\" style=\"padding: 0;\">Yes</button>\n    </div>\n    <div style=\"height: 100px;overflow: hidden;margin-bottom: 10px\">\n        <div style=\"overflow: auto; height: 100px\" class=\"scroll1\">\n            <div style=\"height: 500px;background: blue\"></div>\n        </div>\n    </div>\n    <div style=\"height: 100px;overflow: hidden\">\n        <div style=\"overflow: auto; height: 100px\" class=\"scroll2\">\n            <div style=\"height: 500px;background: green\"></div>\n        </div>\n    </div>\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":23}],27:[function(require,module,exports){
+},{"handlebars/runtime":24}],28:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper;
 
@@ -2195,7 +2235,7 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
     + "<br>\n    <button data-type=\"alert\">Yes</button>\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":23}],28:[function(require,module,exports){
+},{"handlebars/runtime":24}],29:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper;
 
@@ -2203,7 +2243,7 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
     + this.escapeExpression(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper)))
     + "</div>\n";
 },"useData":true});
-},{"handlebars/runtime":23}],29:[function(require,module,exports){
+},{"handlebars/runtime":24}],30:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var stack1, helper;
 
@@ -2211,7 +2251,7 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
     + ((stack1 = ((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0,{"name":"text","hash":{},"data":data}) : helper))) != null ? stack1 : "")
     + "</div>";
 },"useData":true});
-},{"handlebars/runtime":23}],30:[function(require,module,exports){
+},{"handlebars/runtime":24}],31:[function(require,module,exports){
 var FloatBox = require("../../js/float-box");
 var Form = require("../../js/form-with-validation");
 var Insert = require("../../js/insert");
@@ -2397,36 +2437,63 @@ if ($scrollTo.length > 0) {
 // box.js //
 var $box = $(".box");
 if ($box.length) {
-    var box = require("../../js/box");
-    var theBox = $("#box");
-    box.transform(theBox, {
-        hasOverlay: true
+    //var box = require("../../js/box");
+    //var theBox = $("#box");
+    //var info = {
+    //    beforeClose: "This is before Close",
+    //    afterClose: "This is after Close",
+    //    beforeOpen: "This is before Open",
+    //    afterOpen: "This is after Open"
+    //};
+    //box.transform(theBox, {
+    //    //closeOnScroll: true,
+    //    beforeClose: function (info) {
+    //        console.log(info.beforeClose);
+    //    },
+    //    afterClose: function (info) {
+    //        console.log(info.afterClose);
+    //    },
+    //    beforeOpen: function (info) {
+    //        console.log(info.beforeOpen);
+    //    },
+    //    afterOpen: function (info) {
+    //        console.log(info.afterOpen);
+    //    }
+    //});
+
+    var tooltip = require("../../js/tooltip");
+    var dom = require("../../js/dom");
+
+    $("#1").on("click", function (event) {
+        tooltip.toggle(event.target.innerHTML, event.target);
+        //theBox.trigger("open", info);
     });
-    $("#1").on("click", function () {
-        theBox.trigger("open");
+    $("#2").on("click", function (event) {
+        tooltip.toggle(event.target.innerHTML, event.target);
+        //theBox.trigger("toggle", info);
     });
-    $("#2").on("click", function () {
-        theBox.trigger("toggle");
+    $("#3").on("click", function (event) {
+        tooltip.toggle(event.target.innerHTML, event.target);
+        //theBox.trigger("close", info);
     });
-    $("#3").on("click", function () {
-        theBox.trigger("close");
+    $("#4").on("click", function () {
+        console.log(dom.element("all"));
     });
 }
-
-},{"../../js/alert":1,"../../js/box":3,"../../js/float-box":5,"../../js/form-with-validation":6,"../../js/insert":9,"../../js/listener":10,"../../js/scroll-to":13,"../../templates/alert.hbs":25,"../../templates/dropdown.hbs":26,"../../templates/modal.hbs":27,"../../templates/text.hbs":28,"../../templates/tooltip.hbs":29,"../templates/alert1.hbs":31,"../templates/alert2.hbs":32,"../templates/alert3.hbs":33,"../templates/map.hbs":34}],31:[function(require,module,exports){
+},{"../../js/alert":1,"../../js/dom":4,"../../js/float-box":5,"../../js/form-with-validation":6,"../../js/insert":9,"../../js/listener":10,"../../js/scroll-to":13,"../../js/tooltip":15,"../../templates/alert.hbs":26,"../../templates/dropdown.hbs":27,"../../templates/modal.hbs":28,"../../templates/text.hbs":29,"../../templates/tooltip.hbs":30,"../templates/alert1.hbs":32,"../templates/alert2.hbs":33,"../templates/alert3.hbs":34,"../templates/map.hbs":35}],32:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     return "<div>\n    <button data-msg=\"alert1\">alert1</button>\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":23}],32:[function(require,module,exports){
+},{"handlebars/runtime":24}],33:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     return "<div>\n    <button data-msg=\"alert2\">alert2</button>\n</div>";
 },"useData":true});
-},{"handlebars/runtime":23}],33:[function(require,module,exports){
+},{"handlebars/runtime":24}],34:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     return "<div>\n    <button data-msg=\"alert3\">alert3</button>\n</div>";
 },"useData":true});
-},{"handlebars/runtime":23}],34:[function(require,module,exports){
+},{"handlebars/runtime":24}],35:[function(require,module,exports){
 var templater = require("handlebars/runtime")["default"].template;module.exports = templater({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     return "<div class=\"googleMap\">\n    <div id=\"map-canvas\" style=\"height: 200px\"></div>\n</div>\n";
 },"useData":true});
-},{"handlebars/runtime":23}]},{},[30]);
+},{"handlebars/runtime":24}]},{},[31]);

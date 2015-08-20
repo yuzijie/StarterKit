@@ -26,10 +26,10 @@ function remove(IDorEL, beforeRemove) {
     if ($.isNumeric(IDorEL)) {
         index = IDorEL;
     } else {
-        index = h.to$(IDorEL).closest("[data-domId]").data("domId");
+        index = h.to$(IDorEL).data("domId");
     }
 
-    if (!index) throw "no dom-id!";
+    if (!index) throw "no dom id!";
 
     if ($elements.hasOwnProperty(index)) {
         var allow, $element = $elements[index];

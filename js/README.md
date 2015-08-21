@@ -7,17 +7,19 @@
     * scrollbar.js：当 Body 设置为 `overflow: hidden` 时候，为解决滚动条消失问题，添加 right padding
     * geo.js：操作 HTML5 geolocation API
     * validator.js：验证表单
-    * scroll-to.js：滚动页面元素的对应位置
-    * anim-detect.js：浏览器 css3 animation 支持检测
+    * scroll-to.js：滚动页面到某元素的位置
+    * anim-detect.js：检测浏览器 css3 animation 的支持情况
 * 核心
     * box.js：定义页面中所有可以打开和关闭的元素的行为
     * dom.js：管理页面中动态添加的元素
-    * form.js：定义页面中 Form 的行为，简化 Form 编程过程
+    * form.js：定义页面中 Form 的行为，简化 Form 编程
+    * slider.js：提供 slide show 的解决方案
 * 组合
-    * overlay.js：为页面添加 overlay，依赖 box.js, dom.js
-    * tooltip.js：弹出一个 Tooltip，依赖 box.js, dom.js
+    * overlay.js：为页面添加 overlay
+    * tooltip.js：弹出一个 Tooltip
     * form-with-validation.js：有验证提示的表单
 * 待完成
+    * loader.js：按照需要异步加载图片
     * filter.js：根据关键词隐藏不相关的内容
     * slide-box.js：定义页面中所有嵌入页面并可以切换内容或自伸缩的元素的行为
     * fake-select.js：把 HTML select 替换成 checkbox，同时提供 select 的所有功能

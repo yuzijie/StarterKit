@@ -1,6 +1,8 @@
 var h = require("./helper"),
     template = '<div class="slider-stage"></div>',
-    transition = "left 0.6s ease";
+//transition = "left 0.6s ease";
+    transition = "all 0.6s ease";
+
 
 ///////////// Helper /////////////
 function toObject(slides) {
@@ -38,8 +40,7 @@ module.exports.transform = function (container, slides, options) {
 
     var $prosc = h.to$(container),     // visible area (proscenium)
         $stage = $(template),          // stage
-        $slides = toObject(slides),    // all slides
-        $clones = $slides.clone(true); // slides clone
+        $slides = toObject(slides);    // all slides
 
     // options
     var opts = $.extend({
@@ -48,66 +49,67 @@ module.exports.transform = function (container, slides, options) {
     }, options);
 
     // values
-    var numSlides = $slides.length,    // number of slides
-        scrollable = numSlides > opts.showNum,
-        i, origin, stageId = opts.showNum;
+    var numSlides = $slides.length;
+    var scrollable = numSlides > opts.showNum;
+    var currId = opts.showNum;
 
-    // build slider
-    if (scrollable) for (i = numSlides - 1; i >= numSlides - opts.showNum; i--) { // prepend
-        origin = $slides.eq(i);
-        $stage.prepend(origin.clone(true).attr("data-clone-id", i));
-    }
-
-    $stage.append($clones); // real slides
-
-    if (scrollable) for (i = 0; i < opts.showNum; i++) { // append
-        origin = $slides.eq(i);
-        $stage.append(origin.clone(true).attr("data-clone-id", i));
-    }
-
-    origin = null;
-
-    $prosc.html($stage);
-    var stageWidth = getWidth($stage.children());
-    var currSlide = $clones.eq(0);
-    $stage.css("width", stageWidth).css("left", currSlide.position().left * -1);
-
-    // set Listeners
-    $prosc.on("nextSlides", function () {
-        stageId += opts.scrollNum;
-
-        var stageEl = $stage.children(":eq(" + stageId + ")");
-        $stage.css({
-            left: stageEl.position().left * -1,
-            transition: transition
-        });
-        var cloneId = stageEl.data("clone-id");
-        if ($.isNumeric(cloneId)) {
-            stageId = opts.showNum;
-            $stage.one("transitionend", function () {
-                $stage.css({
-                    transition: "",
-                    left: $clones.eq(cloneId).position().left * -1
-                });
-
-            });
+    // Setup slider
+    if (scrollable) {
+        var i;
+        for (i = numSlides - 1; i >= numSlides - opts.showNum; i--) {
+            $stage.prepend($slides.eq(i).clone(true).data("slider-id", i));
         }
-    });
+        for (i = 0; i < numSlides; i++) {
+            $stage.append($slides.eq(i).clone(true).data("slider-id", i));
+        }
+        for (i = 0; i < opts.showNum; i++) {
+            $stage.append($slides.eq(i).clone(true).data("slider-id", i));
+        }
+    } else {
+        for (i = 0; i < numSlides; i++) {
+            $stage.append($slides.eq(i).clone(true).data("slider-id", i));
+        }
+    }
+    $prosc.html($stage);
 
-    $prosc.on("prevSlides", function () {
-        stageId -= opts.scrollNum;
-        var stageEl = $stage.children(":eq(" + stageId + ")");
+    var $clones = $stage.children();
+    var numClones = $clones.length;
+    var stageWidth = getWidth($clones);
+
+    // stage init
+    //$stage.css("width", stageWidth).css("left", $clones.eq(currId).position().left * -1);
+    $stage.css("width", stageWidth).css("transform", "translateX(" + $clones.eq(currId).position().left * -1 + "px)");
+
+
+    // set listeners
+    $prosc.on("nextSlides", function () {
+        currId += opts.scrollNum;
+        var currItem = $clones.eq(currId);
+
+        //$stage.css({
+        //    transition: transition,
+        //    left: currItem.position().left * -1
+        //});
+
         $stage.css({
-            left: stageEl.position().left * -1,
-            transition: transition
+            transition: transition,
+            transform: "translateX(" + currItem.position().left * -1 + "px)"
         });
-        var cloneId = stageEl.data("clone-id");
-        if ($.isNumeric(cloneId)) {
-            stageId = numSlides - opts.showNum + 1;
-            $stage.one("transitionend", function () {
+
+        if (numClones - currId < 2 * opts.showNum) {
+            $prosc.one("transitionend", function () {
+                var sliderId = currItem.data("slider-id");
+                currItem = $clones.filter(function () {
+                    return $(this).data("slider-id") === sliderId;
+                });
+                currId = currItem.index();
+                //$stage.css({
+                //    transition: "",
+                //    left: currItem.position().left * -1
+                //});
                 $stage.css({
                     transition: "",
-                    left: $clones.eq(cloneId).position().left * -1
+                    transform: "translateX(" + currItem.position().left * -1 + "px)"
                 });
             });
         }

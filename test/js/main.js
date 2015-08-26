@@ -18,7 +18,7 @@ var mapCanvasHBS = require("../templates/map.hbs");
 
 // float-box.js //
 var $floatBox = $(".float-box");
-if ($floatBox.length > 0) {
+if ($floatBox.length) {
     var $target = $(".target"); // to show elements
     var showcase = new Insert(dropdownHBS, $target);
     var $button = $floatBox.find("button");
@@ -83,7 +83,7 @@ if ($floatBox.length > 0) {
 
 // BetterForm.js //
 var $userForm = $("#usrForm");
-if ($userForm.length > 0) {
+if ($userForm.length) {
     var map;
     var geocoder = new google.maps.Geocoder();
     var mapCanvas = new Insert(mapCanvasHBS, "#location", "after");
@@ -118,7 +118,7 @@ if ($userForm.length > 0) {
 
 // insert.js //
 var $insert = $("#insert-test");
-if ($insert.length > 0) {
+if ($insert.length) {
 
     var insertButton1 = $insert.find("button.insert1");
     var insertButton2 = $insert.find("button.insert2");
@@ -224,5 +224,18 @@ if ($box.length) {
     });
     $("#4").on("click", function () {
         console.log(dom.element("all"));
+    });
+}
+
+// slider.js //
+var $slider = $("#slider");
+if ($slider.length) {
+    var slider = require("../../js/slider");
+    slider.transform($slider, ".slide");
+    $("#next").click(function () {
+        $slider.trigger("nextSlides");
+    });
+    $("#prev").click(function () {
+        $slider.trigger("prevSlides");
     });
 }

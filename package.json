@@ -14,14 +14,14 @@
   },
   "homepage": "https://github.com/yuzijie/StarterKit#readme",
   "dependencies": {
-    "bourbon": "^4.2.3",
-    "bourbon-neat": "^1.7.2",
-    "jquery-mousewheel": "^3.1.13"
+    "bourbon": "*",
+    "bourbon-neat": "*",
+    "jquery-mousewheel": "*"
   },
   "devDependencies": {
-    "browserify-handlebars": "^1.0.0",
-    "handlebars": "^3.0.3",
-    "watchify": "^3.3.0"
+    "browserify-handlebars": "*",
+    "handlebars": "*",
+    "watchify": "*"
   },
   "browserify": {
     "transform": "browserify-handlebars"

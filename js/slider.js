@@ -43,13 +43,14 @@ module.exports.transform = function (container, slides, options) {
 
     // values
     var currId = 0;
+    var numSlides = $clones.length;
 
     // Setup slider
     $stage.append($clones);
 
     // set listeners
     $stage.on("nextSlides", function () {
-        var nextId = currId + 1;
+        var nextId = currId + 1 >= numSlides ? 0 : currId + 1;
 
         var nextSlide = $clones.eq(nextId);
         var currSlide = $clones.eq(currId);

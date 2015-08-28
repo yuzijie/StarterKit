@@ -58,7 +58,8 @@ module.exports.transform = function (container, slides, options) {
         var width = getWidth(nextSlide);
 
         // prepare
-        nextSlide.css("right", width * -1).addClass("ready");
+        nextSlide.css("right", width * -1).addClass("ready anim");
+        currSlide.addClass("anim");
 
         // move
         currSlide.css(anim.transform, "translateX(-" + width + "px)");
@@ -69,8 +70,8 @@ module.exports.transform = function (container, slides, options) {
 
         // after transition finish
         anim.tranFinish(true, nextSlide, function () {
-            nextSlide.addClass("active").removeClass("ready");
-            currSlide.removeClass("active");
+            nextSlide.addClass("active").removeClass("ready anim");
+            currSlide.removeClass("active anim");
             nextSlide.css(anim.transform, "").css("right", "");
             currSlide.css(anim.transform, "");
         });

@@ -15,7 +15,7 @@
 @mixin slider($conf:()) {
     $default: (
             name: ".slide-show",
-            duration: "0.6s"
+            duration: 0.8s
     );
     $conf: map-merge($default, $conf);
 

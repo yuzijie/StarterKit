@@ -1,0 +1,29 @@
+%slider {
+    overflow: hidden;
+    position: relative;
+
+    & > * {
+        @include position(absolute, 0 null null null);
+        visibility: hidden;
+    }
+
+    .active, .ready {
+        visibility: visible;
+    }
+}
+
+@mixin slider($conf:()) {
+    $default: (
+            name: ".slide-show",
+            duration: "0.6s"
+    );
+    $conf: map-merge($default, $conf);
+
+    #{map_get($conf, name)} {
+        @extend %slider;
+
+        .anim {
+            @include transition(transform map_get($conf, duration));
+        }
+    }
+}

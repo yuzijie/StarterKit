@@ -51,10 +51,8 @@ module.exports.transform = function (container, slides, options) {
     // set listeners
     $stage.on("nextSlides", function () {
         var nextId = currId + 1 >= numSlides ? 0 : currId + 1;
-
         var nextSlide = $clones.eq(nextId);
         var currSlide = $clones.eq(currId);
-
         var width = getWidth(nextSlide);
 
         // prepare
@@ -64,16 +62,36 @@ module.exports.transform = function (container, slides, options) {
         // move
         currSlide.css(anim.transform, "translateX(-" + width + "px)");
         nextSlide.css(anim.transform, "translateX(-" + width + "px)");
-
-        // when done
         currId = nextId;
 
         // after transition finish
         anim.tranFinish(true, nextSlide, function () {
             nextSlide.addClass("active").removeClass("ready anim");
-            currSlide.removeClass("active anim");
-            nextSlide.css(anim.transform, "").css("right", "");
-            currSlide.css(anim.transform, "");
+            currSlide.removeClass("active anim").css(anim.transform, "");
+            nextSlide.css("right", "").css(anim.transform, "");
+        });
+    });
+
+    $stage.on("prevSlides", function () {
+        var prevId = currId === 0 ? numSlides - 1 : currId - 1;
+        var prevSlide = $clones.eq(prevId);
+        var currSlide = $clones.eq(currId);
+        var width = getWidth(prevSlide);
+
+        // prepare
+        prevSlide.css("left", width * -1).addClass("ready anim");
+        currSlide.addClass("anim");
+
+        // move
+        currSlide.css(anim.transform, "translateX(" + width + "px)");
+        prevSlide.css(anim.transform, "translateX(" + width + "px)");
+        currId = prevId;
+
+        // after transition finish
+        anim.tranFinish(true, prevSlide, function () {
+            prevSlide.addClass("active").removeClass("ready anim");
+            currSlide.removeClass("active anim").css(anim.transform, "");
+            prevSlide.css("left", "").css(anim.transform, "");
         });
     });
 };

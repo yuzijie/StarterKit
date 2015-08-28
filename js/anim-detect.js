@@ -47,6 +47,9 @@ supportTest.tranFinish = function (enable, $el, func) { // after transform finis
         $el.trigger("transitionend");
     } else { // no transition
         duration = $el.css("transition-duration").slice(0, -1) * 1000;
+
+        console.log(duration);
+
         if (duration === 0) $el.trigger("transitionend");
     }
 

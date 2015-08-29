@@ -85,44 +85,67 @@ Alert.prototype.onShow = function (func) {
 module.exports = Alert;
 
 },{"./float-box.js":5,"./insert.js":9}],2:[function(require,module,exports){
-function isSupported(property) {
-    return property in document.body.style;
+var h = require("./helper");
+
+function getSec(value) {
+    return value.slice(0, -1) * 1000;
 }
 
-var ias = isSupported("animation");
+function testAnim($el) {
+    // for transition
+    var duration = $el.css("transition-duration");
+    if (duration) return {type: "t", duration: getSec(duration)};
 
-var supportTest = {
-    transitionSupport: isSupported("transition"),
-    animationSupport: ias || isSupported("webkitAnimation"),
-    animationStart: ias ? "animationstart" : "webkitAnimationStart",
-    animationIteration: ias ? "animationiteration" : "webkitAnimationIteration",
-    animationEnd: ias ? "animationend" : "webkitAnimationEnd"
+    // for animation
+    duration = $el.css("animation-duration");
+    if (duration) return {type: "a", duration: getSec(duration)};
+
+    // last
+    return {type: null, duration: 0};
+}
+
+var sup = {
+    animation: h.isSupport("animation") || h.isSupport("webkitAnimation"),
+    transform: h.isSupport("transform") || h.isSupport("webkitTransform"),
+    animationEnd: h.isSupport("animation") ? "animationend" : "webkitAnimationEnd"
 };
 
-supportTest.animFinish = function (enable, $el, func) {
-    if (!$.isFunction(func)) throw "animation finish function error!";
+function finish(element, func, enable) {
+    if (!$.isFunction(func)) throw "Finish function error!";
+    var $el = h.to$(element);
 
-    var duration = null;
-
-    // listener
-    $el.one(supportTest.animationEnd, func);
-
-    // animation is not supported or turned off manually
-    if (!supportTest.animationSupport || enable === false) {
-        $el.trigger(supportTest.animationEnd);
-    } else { // no animation
-        duration = $el.css("animation-duration").slice(0, -1) * 1000;
-        if (duration === 0) $el.trigger(supportTest.animationEnd);
+    var anim = testAnim($el);
+    switch (anim) {
+        case "t":
+            $el.one("transitionend", func);
+            if (!sup.transform || enable === false) { // 如果没有 transform support，就自动认为没有 transition support
+                $el.trigger("transitionend");
+                return 0;
+            }
+            return anim.duration;
+        case "a":
+            $el.one(sup.animationEnd, func);
+            if (!sup.animation || enable === false) {
+                $el.trigger(sup.animationEnd);
+                return 0;
+            }
+            return anim.duration;
+        default:
+            func();
+            return 0;
     }
+}
 
-    return duration;
+module.exports = {
+    finish: finish,
+    transform: h.isSupport("transform") ? "transform" : "-webkit-transform",
+    supportAnimation: sup.animation,
+    supportTransition: sup.transform
 };
 
-module.exports = supportTest;
-
-},{}],3:[function(require,module,exports){
+},{"./helper":8}],3:[function(require,module,exports){
 var h = require("./helper"),
-    animDetect = require("./anim-detect"),
+    anim = require("./anim"),
     overlay = require("./overlay");
 
 // close box when clicking outside of it
@@ -158,7 +181,7 @@ module.exports.transform = function (box, options) {
                 $box.show().addClass(opts.openClass);
 
                 // set animation finish action
-                animDetect.animFinish(true, $box, function () {
+                anim.finish($box, function () {
                     if (opts["afterOpen"]) opts["afterOpen"](info);
                 });
 
@@ -185,10 +208,10 @@ module.exports.transform = function (box, options) {
                 if (opts.hasOverlay === true) overlay.off();
 
                 // set animation finish action
-                duration = animDetect.animFinish(info.enableAnim, $box, function () {
+                duration = anim.finish($box, function () {
                     $box.removeClass(opts.closeClass).hide();
                     if (opts["afterClose"]) opts["afterClose"](info);
-                });
+                }, info.enableAnim);
 
                 // reset listeners
                 $(window).off("." + id);
@@ -229,7 +252,7 @@ module.exports.transform = function (box, options) {
     }
 };
 
-},{"./anim-detect":2,"./helper":8,"./overlay":11}],4:[function(require,module,exports){
+},{"./anim":2,"./helper":8,"./overlay":11}],4:[function(require,module,exports){
 var h = require("./helper");
 
 var $elements = {}, // list of elements that have been inserted
@@ -794,10 +817,15 @@ function within(target, element) {
     return (element.is(target) || element.has(target).length);
 }
 
+function isSupport(property) {
+    return property in document.body.style;
+}
+
 module.exports = {
     to$: to$,
     r4: r4,
-    within: within
+    within: within,
+    isSupport: isSupport
 };
 
 },{}],9:[function(require,module,exports){
@@ -1098,10 +1126,7 @@ module.exports = {
 
 },{}],15:[function(require,module,exports){
 var h = require("./helper"),
-    template = '<div class="slider-stage"></div>',
-//transition = "left 0.6s ease";
-    transition = "all 0.6s ease";
-
+    anim = require("./anim");
 
 ///////////// Helper /////////////
 function toObject(slides) {
@@ -1125,21 +1150,17 @@ function toObject(slides) {
     return output;
 }
 
-function getWidth(elements) {
-    var width = 0;
-    elements.each(function () {
-        width += this.offsetWidth;
-    });
-    return width;
+function getWidth(element) {
+    return element.outerWidth();
 }
 
 ////////////// Main //////////////
 module.exports.transform = function (container, slides, options) {
     if (!container) throw "invalid slider container!";
 
-    var $prosc = h.to$(container),     // visible area (proscenium)
-        $stage = $(template),          // stage
-        $slides = toObject(slides);    // all slides
+    var $stage = h.to$(container),     // visible area
+        $slides = toObject(slides),    // all slides
+        $clones = $slides.clone(true); // all clones
 
     // options
     var opts = $.extend({
@@ -1148,74 +1169,72 @@ module.exports.transform = function (container, slides, options) {
     }, options);
 
     // values
-    var numSlides = $slides.length;
-    var scrollable = numSlides > opts.showNum;
-    var currId = opts.showNum;
+    var currId = 0;
+    var numSlides = $clones.length;
+    var running = false; // whether transition is running
 
     // Setup slider
-    if (scrollable) {
-        var i;
-        for (i = numSlides - 1; i >= numSlides - opts.showNum; i--) {
-            $stage.prepend($slides.eq(i).clone(true).data("slider-id", i));
-        }
-        for (i = 0; i < numSlides; i++) {
-            $stage.append($slides.eq(i).clone(true).data("slider-id", i));
-        }
-        for (i = 0; i < opts.showNum; i++) {
-            $stage.append($slides.eq(i).clone(true).data("slider-id", i));
-        }
-    } else {
-        for (i = 0; i < numSlides; i++) {
-            $stage.append($slides.eq(i).clone(true).data("slider-id", i));
-        }
-    }
-    $prosc.html($stage);
-
-    var $clones = $stage.children();
-    var numClones = $clones.length;
-    var stageWidth = getWidth($clones);
-
-    // stage init
-    //$stage.css("width", stageWidth).css("left", $clones.eq(currId).position().left * -1);
-    $stage.css("width", stageWidth).css("transform", "translateX(" + $clones.eq(currId).position().left * -1 + "px)");
-
+    $stage.append($clones);
 
     // set listeners
-    $prosc.on("nextSlides", function () {
-        currId += opts.scrollNum;
-        var currItem = $clones.eq(currId);
+    $stage.on("nextSlides", function () {
+        if (running === false) {
+            running = true;
 
-        //$stage.css({
-        //    transition: transition,
-        //    left: currItem.position().left * -1
-        //});
+            var nextId = currId + 1 >= numSlides ? 0 : currId + 1,
+                nextSlide = $clones.eq(nextId),
+                currSlide = $clones.eq(currId),
+                width = getWidth(nextSlide);
 
-        $stage.css({
-            transition: transition,
-            transform: "translateX(" + currItem.position().left * -1 + "px)"
-        });
+            // prepare
+            nextSlide.css("right", width * -1).addClass("ready anim");
+            currSlide.addClass("anim");
 
-        if (numClones - currId < 2 * opts.showNum) {
-            $prosc.one("transitionend", function () {
-                var sliderId = currItem.data("slider-id");
-                currItem = $clones.filter(function () {
-                    return $(this).data("slider-id") === sliderId;
-                });
-                currId = currItem.index();
-                //$stage.css({
-                //    transition: "",
-                //    left: currItem.position().left * -1
-                //});
-                $stage.css({
-                    transition: "",
-                    transform: "translateX(" + currItem.position().left * -1 + "px)"
-                });
+            // move
+            currSlide.css(anim.transform, "translateX(-" + width + "px)");
+            nextSlide.css(anim.transform, "translateX(-" + width + "px)");
+            currId = nextId;
+
+            // after transition finish
+            anim.finish(nextSlide, function () {
+                nextSlide.addClass("active").removeClass("ready anim");
+                currSlide.removeClass("active anim").css(anim.transform, "");
+                nextSlide.css("right", "").css(anim.transform, "");
+                running = false;
+            });
+        }
+    });
+
+    $stage.on("prevSlides", function () {
+        if (running === false) {
+            running = true;
+
+            var prevId = currId === 0 ? numSlides - 1 : currId - 1,
+                prevSlide = $clones.eq(prevId),
+                currSlide = $clones.eq(currId),
+                width = getWidth(prevSlide);
+
+            // prepare
+            prevSlide.css("left", width * -1).addClass("ready anim");
+            currSlide.addClass("anim");
+
+            // move
+            currSlide.css(anim.transform, "translateX(" + width + "px)");
+            prevSlide.css(anim.transform, "translateX(" + width + "px)");
+            currId = prevId;
+
+            // after transition finish
+            anim.finish(prevSlide, function () {
+                prevSlide.addClass("active").removeClass("ready anim");
+                currSlide.removeClass("active anim").css(anim.transform, "");
+                prevSlide.css("left", "").css(anim.transform, "");
+                running = false;
             });
         }
     });
 };
 
-},{"./helper":8}],16:[function(require,module,exports){
+},{"./anim":2,"./helper":8}],16:[function(require,module,exports){
 var box = require("./box"),
     dom = require("./dom"),
     h = require("./helper"),

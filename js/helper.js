@@ -11,8 +11,13 @@ function within(target, element) {
     return (element.is(target) || element.has(target).length);
 }
 
+function isSupport(property) {
+    return property in document.body.style;
+}
+
 module.exports = {
     to$: to$,
     r4: r4,
-    within: within
+    within: within,
+    isSupport: isSupport
 };

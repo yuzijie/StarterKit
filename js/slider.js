@@ -1,5 +1,5 @@
 var h = require("./helper"),
-    anim = require("./anim-detect");
+    anim = require("./anim");
 
 ///////////// Helper /////////////
 function toObject(slides) {
@@ -69,7 +69,7 @@ module.exports.transform = function (container, slides, options) {
             currId = nextId;
 
             // after transition finish
-            anim.tranFinish(true, nextSlide, function () {
+            anim.finish(nextSlide, function () {
                 nextSlide.addClass("active").removeClass("ready anim");
                 currSlide.removeClass("active anim").css(anim.transform, "");
                 nextSlide.css("right", "").css(anim.transform, "");
@@ -97,7 +97,7 @@ module.exports.transform = function (container, slides, options) {
             currId = prevId;
 
             // after transition finish
-            anim.tranFinish(true, prevSlide, function () {
+            anim.finish(prevSlide, function () {
                 prevSlide.addClass("active").removeClass("ready anim");
                 currSlide.removeClass("active anim").css(anim.transform, "");
                 prevSlide.css("left", "").css(anim.transform, "");

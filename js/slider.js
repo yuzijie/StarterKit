@@ -72,7 +72,7 @@ module.exports.transform = function (container, slides, options) {
             currSlide.addClass("anim");
 
             // adaptive height
-            if (opts.adaptive === true) $stage.css(nextSlide.outerHeight());
+            if (opts.adaptive === true) $stage.css("height", nextSlide.outerHeight());
 
             // move
             currSlide.css(anim.transform, "translateX(-" + width + "px)");
@@ -103,7 +103,7 @@ module.exports.transform = function (container, slides, options) {
             currSlide.addClass("anim");
 
             // adaptive height
-            if (opts.adaptive === true) $stage.css(prevSlide.outerHeight());
+            if (opts.adaptive === true) $stage.css("height", prevSlide.outerHeight());
 
             // move
             currSlide.css(anim.transform, "translateX(" + width + "px)");

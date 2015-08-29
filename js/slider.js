@@ -33,21 +33,27 @@ module.exports.transform = function (container, slides, options) {
 
     var $stage = h.to$(container),     // visible area
         $slides = toObject(slides),    // all slides
-        $clones = $slides.clone(true); // all clones
+        $clones;
 
     // options
     var opts = $.extend({
+        clone: true,                   // clone original elements
         scrollNum: 1,                  // number of slides to scroll
         showNum: 1                     // number of slides to show
     }, options);
+
+    // clone slides
+    if (opts.clone === true) {
+        $clones = $slides.clone(true); // clone all slides
+        $stage.append($clones);        // Setup slider
+    } else {
+        $clones = $slides;             // use original slides
+    }
 
     // values
     var currId = 0;
     var numSlides = $clones.length;
     var running = false; // whether transition is running
-
-    // Setup slider
-    $stage.append($clones);
 
     // set listeners
     $stage.on("nextSlides", function () {

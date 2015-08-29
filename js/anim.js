@@ -28,7 +28,7 @@ function finish(element, func, enable) {
     var $el = h.to$(element);
 
     var anim = testAnim($el);
-    switch (anim) {
+    switch (anim.type) {
         case "t":
             $el.one("transitionend", func);
             if (!sup.transform || enable === false) { // 如果没有 transform support，就自动认为没有 transition support

@@ -15,7 +15,7 @@
 @mixin slider($conf:()) {
     $default: (
             name: ".slide-show",
-            duration: 0.8s
+            transition: transform 0.8s
     );
     $conf: map-merge($default, $conf);
 
@@ -23,7 +23,7 @@
         @extend %slider;
 
         .anim {
-            @include transition(transform map_get($conf, duration));
+            @include transition(map_get($conf, transition));
         }
     }
 }

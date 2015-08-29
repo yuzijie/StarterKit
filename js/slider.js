@@ -111,4 +111,13 @@ module.exports.transform = function (container, slides, options) {
             });
         }
     });
+
+    // buttons click events
+    $stage.find("*[data-next-slides]").on("click", function () {
+        $stage.trigger("nextSlides");
+    });
+
+    $stage.find("*[data-prev-slides]").on("click", function () {
+        $stage.trigger("prevSlides");
+    });
 };

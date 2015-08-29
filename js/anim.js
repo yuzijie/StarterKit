@@ -1,17 +1,13 @@
 var h = require("./helper");
 
-function getSec(value) {
-    return value.slice(0, -1) * 1000;
-}
-
 function testAnim($el) {
     // for transition
-    var duration = $el.css("transition-duration");
-    if (duration) return {type: "t", duration: getSec(duration)};
+    var duration = $el.css("transition-duration").slice(0, -1);
+    if (duration > 0) return {type: "t", duration: duration * 1000};
 
     // for animation
-    duration = $el.css("animation-duration");
-    if (duration) return {type: "a", duration: getSec(duration)};
+    duration = $el.css("animation-duration").slice(0, -1);
+    if (duration > 0) return {type: "a", duration: duration * 1000};
 
     // last
     return {type: null, duration: 0};
@@ -31,7 +27,8 @@ function finish(element, func, enable) {
     switch (anim.type) {
         case "t":
             $el.one("transitionend", func);
-            if (!sup.transform || enable === false) { // 如果没有 transform support，就自动认为没有 transition support
+            // 如果没有 transform support，就自动认为没有 transition support
+            if (!sup.transform || enable === false) {
                 $el.trigger("transitionend");
                 return 0;
             }
@@ -45,7 +42,7 @@ function finish(element, func, enable) {
             return anim.duration;
         default:
             func();
-            return 0;
+            return anim.duration;
     }
 }
 

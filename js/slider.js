@@ -38,17 +38,19 @@ module.exports.transform = function (container, slides, options) {
     // options
     var opts = $.extend({
         clone: true,                   // clone original elements
+        adaptive: false,               // adaptive height
         scrollNum: 1,                  // number of slides to scroll
         showNum: 1                     // number of slides to show
     }, options);
 
-    // clone slides
+    // setup slides
     if (opts.clone === true) {
         $clones = $slides.clone(true); // clone all slides
         $stage.append($clones);        // Setup slider
     } else {
         $clones = $slides;             // use original slides
     }
+    $clones.eq(0).addClass("active");
 
     // values
     var currId = 0;
@@ -68,6 +70,9 @@ module.exports.transform = function (container, slides, options) {
             // prepare
             nextSlide.css("right", width * -1).addClass("ready anim");
             currSlide.addClass("anim");
+
+            // adaptive height
+            if (opts.adaptive === true) $stage.css(nextSlide.outerHeight());
 
             // move
             currSlide.css(anim.transform, "translateX(-" + width + "px)");
@@ -97,6 +102,9 @@ module.exports.transform = function (container, slides, options) {
             prevSlide.css("left", width * -1).addClass("ready anim");
             currSlide.addClass("anim");
 
+            // adaptive height
+            if (opts.adaptive === true) $stage.css(prevSlide.outerHeight());
+
             // move
             currSlide.css(anim.transform, "translateX(" + width + "px)");
             prevSlide.css(anim.transform, "translateX(" + width + "px)");
@@ -113,11 +121,13 @@ module.exports.transform = function (container, slides, options) {
     });
 
     // buttons click events
-    $stage.find("*[data-next-slides]").on("click", function () {
+    $stage.find("*[data-next-slides]").on("click", function (e) {
+        e.preventDefault();
         $stage.trigger("nextSlides");
     });
 
-    $stage.find("*[data-prev-slides]").on("click", function () {
+    $stage.find("*[data-prev-slides]").on("click", function (e) {
+        e.preventDefault();
         $stage.trigger("prevSlides");
     });
 };

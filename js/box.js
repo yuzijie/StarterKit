@@ -5,14 +5,14 @@ var h = require("./helper"),
 // close box when clicking outside of it
 function closeOnClick($box, id) {
     $(window).on("click." + id, function (e) {
-        if (!h.within(e.target, $box)) $box.trigger("close", {box: $box});
+        if (!h.within(e.target, $box)) $box.trigger("close", {box: $box, id: id});
     });
 }
 
 // close box when page is scrolling
 function closeOnScroll($box, id) {
     $(window).on("scroll." + id, function () {
-        $box.trigger("close", {enableAnim: false, box: $box});
+        $box.trigger("close", {enableAnim: false, box: $box, id: id});
     });
 }
 
@@ -89,12 +89,12 @@ module.exports.transform = function (box, options) {
 
     // close on leave
     if (opts.closeOnLeave === true) $box.on("mouseleave", function () {
-        $box.trigger("close", {box: $box});
+        $box.trigger("close", {box: $box, id: id});
     });
 
     // assign close button
     $box.on("click", "[data-box-close]", function () {
-        $box.trigger("close", {box: $box});
+        $box.trigger("close", {box: $box, id: id});
     });
 
     // helper functions

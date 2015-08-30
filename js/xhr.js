@@ -17,10 +17,7 @@ var XHR = function (url, data, options) {
 
 // Send XHR request
 XHR.prototype.send = function () {
-
-    if (this.xhr && this.xhr.readystate !== 4) {
-        this.xhr.abort();
-    }
+    if (this.xhr && this.xhr["readystate"] !== 4) this.xhr.abort();
 
     this.xhr = null;
 
@@ -59,6 +56,11 @@ XHR.prototype.updateData = function (data) {
         this.options.data = null;
         this.options.type = "GET";
     }
+    return this;
+};
+
+XHR.prototype.updateUrl = function (url) {
+    if (url && typeof url === "string") this.options.url = url;
     return this;
 };
 

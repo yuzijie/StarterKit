@@ -27,6 +27,132 @@ function getWidth(element) {
     return element.outerWidth();
 }
 
+function getHeight(element) {
+    return element.outerHeight();
+}
+
+function validateId(id, numSlides) {
+    return $.isNumeric(id) && id >= 0 && id < numSlides;
+}
+
+// move functions
+function moveLeft($current, $future, $stage, rState, opts) {
+    var cWidth = getWidth($current),
+        fWidth = getWidth($future);
+
+    // prepare
+    $future.css("right", fWidth * -1).addClass("ready anim");
+    $current.addClass("anim");
+
+    // adaptive Height
+    if (opts.adaptiveHeight === true) $stage.css("height", getHeight($future));
+
+    // move
+    $current.css(anim.transform, "translateX(-" + cWidth + "px)");
+    $future.css(anim.transform, "translateX(-" + cWidth + "px)");
+
+    // after transition finish
+    anim.finish($future, function () {
+        $future.addClass("active").removeClass("ready anim");
+        $current.removeClass("active anim").css(anim.transform, "");
+        $future.css("right", "").css(anim.transform, "");
+        rState(false);
+    });
+}
+
+function moveRight($current, $future, $stage, rState, opts) {
+    var cWidth = getWidth($current),
+        fWidth = getWidth($future);
+
+    // prepare
+    $future.css("left", fWidth * -1).addClass("ready anim");
+    $current.addClass("anim");
+
+    // adaptive height
+    if (opts.adaptiveHeight === true) $stage.css("height", getHeight($future));
+
+    // move
+    $current.css(anim.transform, "translateX(" + cWidth + "px)");
+    $future.css(anim.transform, "translateX(" + cWidth + "px)");
+
+    // after transition finish
+    anim.finish($future, function () {
+        $future.addClass("active").removeClass("ready anim");
+        $current.removeClass("active anim").css(anim.transform, "");
+        $future.css("left", "").css(anim.transform, "");
+        rState(false);
+    });
+}
+
+function moveUp($current, $future, $stage, rState, opts) {
+    var cHeight = getHeight($current),
+        fHeight = getHeight($future);
+
+    // prepare
+    $future.css("bottom", fHeight * -1).addClass("ready anim");
+    $current.addClass("anim");
+
+    // adaptive width
+    if (opts.adaptiveHeight === true) $stage.css("height", fHeight);
+
+    // move
+    $current.css(anim.transform, "translateY(-" + cHeight + "px)");
+    $future.css(anim.transform, "translateY(-" + cHeight + "px)");
+
+    // after transition finish
+    anim.finish($future, function () {
+        $future.addClass("active").removeClass("ready anim");
+        $current.removeClass("active anim").css(anim.transform, "");
+        $future.css("bottom", "").css(anim.transform, "");
+        rState(false);
+    });
+}
+
+function moveDown($current, $future, $stage, rState, opts) {
+    var cHeight = getHeight($current),
+        fHeight = getHeight($future);
+
+    // prepare
+    $future.css("top", fHeight * -1).addClass("ready anim");
+    $current.addClass("anim");
+
+    // adaptive width
+    if (opts.adaptiveHeight === true) $stage.css("height", fHeight);
+
+    // move
+    $current.css(anim.transform, "translateY(" + cHeight + "px)");
+    $future.css(anim.transform, "translateY(" + cHeight + "px)");
+
+    // after transition finish
+    anim.finish($future, function () {
+        $future.addClass("active").removeClass("ready anim");
+        $current.removeClass("active anim").css(anim.transform, "");
+        $future.css("top", "").css(anim.transform, "");
+        rState(false);
+    });
+}
+
+function fade($current, $future, $stage, rState, opts) {
+
+    // prepare
+    $future.addClass("anim");
+    $current.addClass("anim");
+
+    // adaptive width
+    if (opts.adaptiveHeight === true) $stage.css("height", getHeight($future));
+
+    // fade in and out
+    $current.removeClass("active");
+    $future.addClass("active");
+
+    // after transition finish
+    anim.finish($future, function () {
+        $future.removeClass("anim");
+        $current.removeClass("anim");
+        rState(false);
+    });
+}
+
 ////////////// Main //////////////
 module.exports.transform = function (container, slides, options) {
     if (!container) throw "invalid slider container!";
@@ -38,9 +164,10 @@ module.exports.transform = function (container, slides, options) {
     // options
     var opts = $.extend({
         clone: true,                   // clone original elements
-        adaptive: false,               // adaptive height
+        adaptiveHeight: false,         // adaptive height
         scrollNum: 1,                  // number of slides to scroll
-        showNum: 1                     // number of slides to show
+        showNum: 1,                    // number of slides to show
+        direction: "horizontal"        // horizontal or vertical or fade
     }, options);
 
     // setup slides
@@ -58,34 +185,41 @@ module.exports.transform = function (container, slides, options) {
     var running = false; // whether transition is running
 
     // set listeners
+    $stage.on("toSlides", function (event, options) { // go to slides by indices
+        var opts = options || {};
+        if (!validateId(opts.id, numSlides)) throw "slider.js: invalid IDs";
+        if (running === false) {
+            //running = true;
+        }
+    });
+
     $stage.on("nextSlides", function () {
         if (running === false) {
-            running = true;
+            rState(true);
 
             var nextId = currId + 1 >= numSlides ? 0 : currId + 1,
                 nextSlide = $clones.eq(nextId),
-                currSlide = $clones.eq(currId),
-                width = getWidth(nextSlide);
+                currSlide = $clones.eq(currId);
 
-            // prepare
-            nextSlide.css("right", width * -1).addClass("ready anim");
-            currSlide.addClass("anim");
-
-            // adaptive height
-            if (opts.adaptive === true) $stage.css("height", nextSlide.outerHeight());
-
-            // move
-            currSlide.css(anim.transform, "translateX(-" + width + "px)");
-            nextSlide.css(anim.transform, "translateX(-" + width + "px)");
             currId = nextId;
 
-            // after transition finish
-            anim.finish(nextSlide, function () {
-                nextSlide.addClass("active").removeClass("ready anim");
-                currSlide.removeClass("active anim").css(anim.transform, "");
-                nextSlide.css("right", "").css(anim.transform, "");
-                running = false;
-            });
+            switch (opts.direction) {
+                case "horizontal":
+                    moveLeft(currSlide, nextSlide, $stage, rState, {
+                        adaptiveHeight: opts.adaptiveHeight
+                    });
+                    break;
+                case "vertical":
+                    moveDown(currSlide, nextSlide, $stage, rState, {
+                        adaptiveHeight: opts.adaptiveHeight
+                    });
+                    break;
+                default:
+                    fade(currSlide, nextSlide, $stage, rState, {
+                        adaptiveHeight: opts.adaptiveHeight
+                    });
+                    break;
+            }
         }
     });
 
@@ -95,28 +229,27 @@ module.exports.transform = function (container, slides, options) {
 
             var prevId = currId === 0 ? numSlides - 1 : currId - 1,
                 prevSlide = $clones.eq(prevId),
-                currSlide = $clones.eq(currId),
-                width = getWidth(prevSlide);
+                currSlide = $clones.eq(currId);
 
-            // prepare
-            prevSlide.css("left", width * -1).addClass("ready anim");
-            currSlide.addClass("anim");
-
-            // adaptive height
-            if (opts.adaptive === true) $stage.css("height", prevSlide.outerHeight());
-
-            // move
-            currSlide.css(anim.transform, "translateX(" + width + "px)");
-            prevSlide.css(anim.transform, "translateX(" + width + "px)");
             currId = prevId;
 
-            // after transition finish
-            anim.finish(prevSlide, function () {
-                prevSlide.addClass("active").removeClass("ready anim");
-                currSlide.removeClass("active anim").css(anim.transform, "");
-                prevSlide.css("left", "").css(anim.transform, "");
-                running = false;
-            });
+            switch (opts.direction) {
+                case "horizontal":
+                    moveRight(currSlide, prevSlide, $stage, rState, {
+                        adaptiveHeight: opts.adaptiveHeight
+                    });
+                    break;
+                case "vertical":
+                    moveUp(currSlide, prevSlide, $stage, rState, {
+                        adaptiveHeight: opts.adaptiveHeight
+                    });
+                    break;
+                default:
+                    fade(currSlide, prevSlide, $stage, rState, {
+                        adaptiveHeight: opts.adaptiveHeight
+                    });
+                    break;
+            }
         }
     });
 
@@ -130,4 +263,9 @@ module.exports.transform = function (container, slides, options) {
         e.preventDefault();
         $stage.trigger("prevSlides");
     });
+
+    // helper
+    function rState(boolean) {
+        running = boolean;
+    }
 };

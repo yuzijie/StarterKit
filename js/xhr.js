@@ -1,7 +1,6 @@
 // Constructor
 var XHR = function (url, data, options) {
-    var type = (typeof data === 'object' && data !== null) ? "POST" : "GET";
-    options = options || {};
+    var type = data ? "POST" : "GET";
 
     var defaultOptions = {
         url: url,
@@ -9,8 +8,7 @@ var XHR = function (url, data, options) {
         type: type,
         dataType: "json"
     };
-
-    this.options = $.extend({}, defaultOptions, options);
+    this.options = $.extend(defaultOptions, options);
 
     this.xhr = null;
 };

@@ -23,8 +23,8 @@ var otherInputs = [
 ];
 
 // make form to be able to validate
-function transform(form) {
-    var $form = h.to$(form), timer = null;
+function transform(form, options) {
+    var $form = h.to$(form), timer = null, opts = options || {};
 
     // fix input problems
     fixInput($form);
@@ -75,7 +75,12 @@ function transform(form) {
         $form.find(textInputs.concat(otherInputs).join(",")).each(function () {
             validate($(this));
         });
-        if ($form.has(".invalid-field").length) e.preventDefault();
+        if ($form.has(".invalid-field").length) {
+            e.preventDefault();
+        } else if (opts["submit"]) {
+            e.preventDefault();
+            opts["submit"]($form);
+        }
     });
 }
 

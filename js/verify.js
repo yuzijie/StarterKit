@@ -79,6 +79,7 @@ function transform(form, options) {
             e.preventDefault();
         } else if (opts["submit"]) {
             e.preventDefault();
+            $form.find(":submit").prop("disabled", true);
             opts["submit"]($form);
         }
     });

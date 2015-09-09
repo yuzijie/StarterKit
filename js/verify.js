@@ -37,6 +37,10 @@ function transform(form, options) {
         }, 500);
     });
 
+    $form.find(textInputs.join(",")).on("blur", function (e) {
+        validate($(e.target));
+    });
+
     // remote validation listeners
     $form.find("input[data-remote-url]").on("blur", function () {
         var $this = $(this),

@@ -15,9 +15,15 @@ function isSupport(property) {
     return property in document.body.style;
 }
 
+function isFunction(fn) {
+    var getType = {};
+    return fn && getType.toString.call(fn) === '[object Function]';
+}
+
 module.exports = {
     to$: to$,
     r4: r4,
     within: within,
-    isSupport: isSupport
+    isSupport: isSupport,
+    isFunction: isFunction
 };

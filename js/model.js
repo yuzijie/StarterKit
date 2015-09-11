@@ -158,7 +158,7 @@ Model.prototype = {
         updateData(data, this);
     },
 
-    listen: function (event, fn) {
+    on: function (event, fn) {
         switch (event) {
             case "update":
                 this.updateEvent.attach(fn);

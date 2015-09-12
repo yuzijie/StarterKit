@@ -90,7 +90,7 @@ Model.prototype = {
             while (i--) {
                 if (this.syncKeys.indexOf(keys[i]) === -1) this.syncKeys.push(keys[i]);
             }
-            this.updateEvent.notify({keys: keys});
+            this.updateEvent.notify(keys);
         }
     },
 
@@ -123,7 +123,7 @@ Model.prototype = {
             this.data = {};
         }
 
-        if (deleted) this.deleteEvent.notify({data: deleted});
+        if (deleted) this.deleteEvent.notify(deleted);
     },
 
     sync: function (url, keys) {
@@ -138,7 +138,7 @@ Model.prototype = {
         }
 
         if (data) {
-            this.syncStartEvent.notify({data: data});
+            this.syncStartEvent.notify(data);
 
             if (url) this.request.updateUrl(url);
             this.request.updateData(data);
@@ -146,7 +146,7 @@ Model.prototype = {
             this.request.send()
                 .done(function (data) {
                     if (data.type !== "fail") _this.syncKeys = [];
-                    _this.syncFinishEvent.notify({response: data});
+                    _this.syncFinishEvent.notify(data);
                 })
                 .fail(function () {
                     _this.syncFailEvent.notify();
@@ -176,6 +176,30 @@ Model.prototype = {
                 this.syncFailEvent.attach(fn);
                 break;
         }
+    },
+
+    trigger: function (event, args) {
+        switch (event) {
+            case "update":
+                this.updateEvent.notify(args);
+                break;
+            case "delete":
+                this.deleteEvent.notify(args);
+                break;
+            case "syncStart":
+                this.syncStartEvent.notify(args);
+                break;
+            case "syncFinish":
+                this.syncFinishEvent.notify(args);
+                break;
+            case "syncFail":
+                this.syncFailEvent.notify(args);
+                break;
+        }
+    },
+
+    willSync: function (key) {
+        return this.syncKeys.indexOf(key) > -1;
     }
 };
 

@@ -132,7 +132,7 @@ Model.prototype = {
         keys = [].concat(this.syncKeys, keys || []);
 
         i = keys.length;
-        while (i--) {
+        while (i--) { // gather all data to sync
             key = keys[i];
             if (this.data.hasOwnProperty(key)) data[key] = this.data[key];
         }
@@ -140,10 +140,10 @@ Model.prototype = {
         if (data) {
             this.syncStartEvent.notify({data: data});
 
-            if (url) this.xhr.updateUrl(url);
-            this.xhr.updateData(data);
+            if (url) this.request.updateUrl(url);
+            this.request.updateData(data);
 
-            this.xhr.send()
+            this.request.send()
                 .done(function (data) {
                     if (data.type !== "fail") _this.syncKeys = [];
                     _this.syncFinishEvent.notify({response: data});

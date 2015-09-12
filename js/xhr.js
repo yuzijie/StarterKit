@@ -2,6 +2,8 @@
 var XHR = function (url, data, options) {
     var type = data ? "POST" : "GET";
 
+    if (data && data["FormData"] && data["FormData"] instanceof FormData) data = data["FormData"];
+
     var defaultOptions = {
         url: url,
         data: data,
@@ -54,6 +56,9 @@ XHR.prototype.send = function () {
 // Update the "data" to be sent
 XHR.prototype.updateData = function (data) {
     if (data) {
+
+        if (data["FormData"] && data["FormData"] instanceof FormData) data = data["FormData"];
+
         this.options.data = data;
         this.options.type = "POST";
 

@@ -8,7 +8,13 @@ var XHR = function (url, data, options) {
         type: type,
         dataType: "json"
     };
-    this.options = $.extend(defaultOptions, options);
+
+    var fileOptions = (data instanceof FormData) ? {
+        processData: false,
+        contentType: false
+    } : {};
+
+    this.options = $.extend(defaultOptions, fileOptions, options);
 
     this.xhr = null;
 };
@@ -50,6 +56,15 @@ XHR.prototype.updateData = function (data) {
     if (data) {
         this.options.data = data;
         this.options.type = "POST";
+
+        if (data instanceof FormData) {
+            this.options.processData = false;
+            this.options.contentType = false;
+        } else {
+            delete this.options.processData;
+            delete this.options.contentType;
+        }
+
     } else {
         this.options.data = null;
         this.options.type = "GET";

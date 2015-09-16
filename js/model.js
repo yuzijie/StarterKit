@@ -1,7 +1,8 @@
-var XHR = require("./xhr");
+var XHR = require("./xhr"),
+    uniqueId = 0;
 
-var Ev = function (sender) {
-    this.sender = sender;
+var Ev = function (model) {
+    this.model = model;
     this.listeners = [];
 };
 
@@ -11,196 +12,198 @@ Ev.prototype = {
         this.listeners.push(listener);
     },
 
+    detach: function (id) {
+        this.listeners.splice(id, 1);
+    },
+
     notify: function (args) {
-        var i = this.listeners.length;
-        while (i--) {
-            this.listeners[i](args, this.sender);
+        var l = this.listeners.length;
+        while (l--) {
+            this.listeners[l](args, this.model);
         }
     }
 
 };
 
-// for updating Model data
-function updateData(data, model) {
-    var i, keys = [], _data = model.data;
-
-    if (data instanceof Object) {
-        for (i in data) {
-            if (data.hasOwnProperty(i)) {
-
-                if (_data.hasOwnProperty(i)) {
-                    if (_data[i] !== data[i]) {
-                        _data[i] = data[i];
-                        keys.push(i);
-                    }
-                } else {
-                    _data[i] = data[i];
-                    keys.push(i);
-                }
-            }
-        }
-    } else {
-
-        var key = ++model.id + "";
-        _data[key] = data;
-        keys.push(key);
-    }
-
-    return keys;
-}
-
 var Model = function (data) {
-    this.id = 0;
+    // Data
     this.data = data || {};
 
     // events
-    this.updateEvent = new Ev(this);
-    this.deleteEvent = new Ev(this);
-    this.syncStartEvent = new Ev(this);
-    this.syncFinishEvent = new Ev(this);
-    this.syncFailEvent = new Ev(this);
+    this.events = {};
 
-    // Ajax
-    this.request = new XHR();
-    this.syncKeys = []; // data to sync
+    // Ajax request
+    this.syncKeys = [];
 };
 
 Model.prototype = {
 
     get: function (keys) {
-        if (keys || keys === 0) {
-            var i, key, output = {};
+        var i, key, output = {};
 
-            if (keys.constructor === Array) {
-                i = keys.length;
-                while (i--) {
-                    key = keys[i];
-                    output[key] = this.data[i];
-                }
+        // convert to array
+        if (keys.constructor !== Array) keys = (keys + "").split(" ");
+
+        // get key length
+        var length = keys.length;
+
+        // get keys
+        if (length === 1) {
+            key = keys[0];
+            if (key === "undefined") return this.data;
+            if (this.data.hasOwnProperty(key)) {
+                output[key] = this.data[key];
                 return output;
             }
-            return this.data[keys];
-        }
-        return this.data;
-    },
-
-    update: function (data) {
-        var i, keys = updateData(data, this);
-        if (i = keys.length) {
-            while (i--) {
-                if (this.syncKeys.indexOf(keys[i]) === -1) this.syncKeys.push(keys[i]);
+        } else if (length > 1) {
+            for (i = 0; i < length; i++) {
+                key = keys[i];
+                if (this.data.hasOwnProperty(key)) {
+                    output[key] = this.data[key];
+                }
             }
-            this.updateEvent.notify(keys);
+            return output;
         }
     },
 
-    delete: function (keys) {
-        var deleted = {};
+    set: function (data) {
+        var keys = this.init(data), i, key, l = keys.length;
+        if (l > 0) {
+            for (i = 0; i < l; i++) {
+                key = keys[i];
+                if (this.syncKeys.indexOf(key) === -1) this.syncKeys.push(key);
+            }
+            if (this.events["change"]) this.events["change"].notify(keys);
+        }
+    },
 
-        if (keys || keys === 0) {
-            var i, key;
+    del: function (keys) {
+        var deleted = {}, key, i;
 
-            if (keys.constructor === Array) {
-                i = keys.length;
+        // convert to array
+        if (keys.constructor !== Array) keys = (keys + "").split(" ");
 
-                while (i--) {
-                    key = keys[i];
-                    if (this.data.hasOwnProperty(key)) {
-                        deleted[key] = this.data[key];
-                        delete this.data[key];
-                    }
-                }
-            } else {
+        // get length
+        var length = keys.length;
 
-                if (this.data.hasOwnProperty(keys)) {
-                    deleted[keys] = this.data[keys];
-                    delete this.data[keys];
+        // delete by id
+        if (length === 1) {
+            key = keys[0];
+
+            if (key === "undefined") {
+                deleted = this.data;
+                this.data = {};
+            } else if (this.data.hasOwnProperty(key)) {
+                deleted[key] = this.data[key];
+                delete this.data[key];
+            }
+
+        } else if (length > 1) {
+
+            for (i = 0; i < length; i++) {
+                key = keys[i];
+                if (this.data.hasOwnProperty(key)) {
+                    deleted[key] = this.data[key];
+                    delete this.data[key];
                 }
             }
-        } else {
-
-            deleted = this.data;
-            this.data = {};
         }
 
-        if (deleted) this.deleteEvent.notify(deleted);
+        // notify observers
+        if (!isEmpty(deleted) && this.events["delete"]) {
+            this.events["delete"].notify(deleted);
+        }
     },
 
     sync: function (url, keys) {
-        var i, key, _this = this, data = {};
+        if (!url) throw "Error! no url for model syncing";
+        var _this = this, items = this.get(keys);
 
-        keys = [].concat(this.syncKeys, keys || []);
+        if (!isEmpty(items)) {
+            if (this.events["syncStart"]) this.events["syncStart"].notify(items);
 
-        i = keys.length;
-        while (i--) { // gather all data to sync
-            key = keys[i];
-            if (this.data.hasOwnProperty(key)) data[key] = this.data[key];
-        }
+            if (this.hasOwnProperty("request")) {
+                this.request.updateUrl(url).updateData(items);
+            } else {
+                this.request = new XHR(url, items);
+            }
 
-        if (data) {
-            this.syncStartEvent.notify(data);
-
-            if (url) this.request.updateUrl(url);
-            this.request.updateData(data);
-
+            // sending request
             this.request.send()
                 .done(function (data) {
-                    if (data.type !== "fail") _this.syncKeys = [];
-                    _this.syncFinishEvent.notify(data);
+                    if (data.type !== "fail") {
+                        var prop, id;
+                        for (prop in items) {
+                            if (items.hasOwnProperty(prop)) {
+                                id = _this.syncKeys.indexOf(prop);
+                                if (id !== -1) _this.syncKeys.splice(id, 1);
+                            }
+                        }
+                        if (_this.events["syncFinish"]) _this.events["syncFinish"].notify(data);
+                    } else {
+                        if (_this.events["syncFinish"]) _this.events["syncFailed"].notify(data);
+                    }
                 })
                 .fail(function () {
-                    _this.syncFailEvent.notify();
+                    if (_this.events["syncFinish"]) _this.events["syncFailed"].notify();
                 });
         }
     },
 
     init: function (data) {
-        updateData(data, this);
+        var key, keys = [];
+
+        if (data instanceof Object) { // accept both object ({}) and array ([])
+            for (key in data) {
+                if (data.hasOwnProperty(key)) {
+                    if (this.data.hasOwnProperty(key) && this.data[key] === data[key]) continue;
+                    this.data[key] = data[key];
+                    keys.push(key);
+                }
+            }
+        } else {
+            key = this.uniqueId();
+            this.data[key] = data;
+            keys.push(key);
+        }
+
+        return keys;
     },
 
     on: function (event, fn) {
-        switch (event) {
-            case "update":
-                this.updateEvent.attach(fn);
-                break;
-            case "delete":
-                this.deleteEvent.attach(fn);
-                break;
-            case "syncStart":
-                this.syncStartEvent.attach(fn);
-                break;
-            case "syncFinish":
-                this.syncFinishEvent.attach(fn);
-                break;
-            case "syncFail":
-                this.syncFailEvent.attach(fn);
-                break;
-        }
+        if (!this.events[event]) this.events[event] = new Ev(this);
+        this.events[event].attach(fn);
     },
 
-    trigger: function (event, args) {
-        switch (event) {
-            case "update":
-                this.updateEvent.notify(args);
-                break;
-            case "delete":
-                this.deleteEvent.notify(args);
-                break;
-            case "syncStart":
-                this.syncStartEvent.notify(args);
-                break;
-            case "syncFinish":
-                this.syncFinishEvent.notify(args);
-                break;
-            case "syncFail":
-                this.syncFailEvent.notify(args);
-                break;
-        }
+    fire: function (event, args) {
+        if (this.events[event]) this.events[event].notify(args);
     },
 
-    willSync: function (key) {
-        return this.syncKeys.indexOf(key) > -1;
+    uniqueId: function () { // generate an unique id
+        var i;
+        do {
+            i = ++uniqueId + "";
+        }
+        while (this.data.hasOwnProperty(id));
+        return i;
+    },
+
+    size: function () { // length of data
+        var length = 0, key;
+        for (key in this.data) {
+            if (this.data.hasOwnProperty(key)) length++;
+        }
+        return length;
     }
+
 };
+
+// helper
+function isEmpty(obj) {
+    for (var prop in obj) {
+        if (obj.hasOwnProperty(prop)) return false;
+    }
+    return true;
+}
 
 module.exports = Model;

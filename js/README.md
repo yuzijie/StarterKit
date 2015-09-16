@@ -9,8 +9,8 @@
     * validator.js：验证表单
     * scroll-to.js：滚动页面到某元素的位置
     * anim.js：和 animation、transition 有关的方法
-    * model.js：mvc 里面的 Model，和 Event
-    * view.js：mvc 里面的 View
+    * model.js：MVP 里面的 Model，和 Event
+    * make-view.js：用于生成 MVP 里面的 View
 * 核心
     * box.js：定义页面中所有可以打开和关闭的元素的行为
     * dom.js：管理页面中动态添加的元素

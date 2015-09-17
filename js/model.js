@@ -12,8 +12,13 @@ Ev.prototype = {
         this.listeners.push(listener);
     },
 
-    detach: function (id) {
-        this.listeners.splice(id, 1);
+    detach: function (listener) {
+        if (listener) {
+            var id = this.listeners.indexOf(listener);
+            if (id !== -1) this.listeners.splice(id, 1);
+        } else {
+            this.listeners = [];
+        }
     },
 
     notify: function (args) {

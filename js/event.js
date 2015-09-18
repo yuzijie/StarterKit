@@ -1,7 +1,7 @@
 var Event = function (model) {
-    this.model = model; // this event belongs to which model
-    this.listeners = []; // all listeners for this event
-    this.views = []; // records which view a listener belongs to
+    this.model = model;   // the model which this event belongs to
+    this.listeners = [];  // all listeners for this event
+    this.views = [];      // it records which view a listener belongs to
 };
 
 Event.prototype = {
@@ -29,7 +29,7 @@ Event.prototype = {
             }
             while (id !== -1);
 
-        } else {                                    // treat it as a viewId
+        } else {                                    // else treat object as a viewId
 
             id = this.views.length;
             while (id--) {

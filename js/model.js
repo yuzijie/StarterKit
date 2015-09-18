@@ -1,34 +1,6 @@
 var XHR = require("./xhr"),
-    uniqueId = 0;
-
-var Ev = function (model) {
-    this.model = model;
-    this.listeners = [];
-};
-
-Ev.prototype = {
-
-    attach: function (listener) {
-        this.listeners.push(listener);
-    },
-
-    detach: function (listener) {
-        if (listener) {
-            var id = this.listeners.indexOf(listener);
-            if (id !== -1) this.listeners.splice(id, 1);
-        } else {
-            this.listeners = [];
-        }
-    },
-
-    notify: function (args) {
-        var l = this.listeners.length;
-        while (l--) {
-            this.listeners[l](args, this.model);
-        }
-    }
-
-};
+    Ev = require("./event"),
+    h = require("./helper");
 
 var Model = function (data) {
     // Data
@@ -37,95 +9,53 @@ var Model = function (data) {
     // events
     this.events = {};
 
-    // Ajax request
-    this.syncKeys = [];
+    // watch modified data
+    this.watch = {set: [], add: []};
 };
 
 Model.prototype = {
 
     get: function (keys) {
-        var i, key, output = {};
-
-        // convert to array
-        if (keys.constructor !== Array) keys = (keys + "").split(" ");
-
-        // get key length
-        var length = keys.length;
-
-        // get keys
-        if (length === 1) {
-            key = keys[0];
-            if (key === "undefined") return this.data;
-            if (this.data.hasOwnProperty(key)) {
-                output[key] = this.data[key];
-                return output;
-            }
-        } else if (length > 1) {
-            for (i = 0; i < length; i++) {
-                key = keys[i];
-                if (this.data.hasOwnProperty(key)) {
-                    output[key] = this.data[key];
-                }
-            }
-            return output;
-        }
+        return _get(keys, this);
     },
 
     set: function (data) {
-        var keys = this.init(data), i, key, l = keys.length;
+        var keys = _set(data, this), i, key, l = keys.length;
+
         if (l > 0) {
             for (i = 0; i < l; i++) {
                 key = keys[i];
-                if (this.syncKeys.indexOf(key) === -1) this.syncKeys.push(key);
+                if (this.watch.set.indexOf(key) === -1) this.watch.set.push(key);
             }
-            if (this.events["change"]) this.events["change"].notify(keys);
+            if (this.events["set"]) this.events["set"].notify(keys);
         }
     },
 
-    del: function (keys) {
-        var deleted = {}, key, i;
+    add: function (data) {
+        var keys = _add(data, this), key, l = keys.length;
 
-        // convert to array
-        if (keys.constructor !== Array) keys = (keys + "").split(" ");
-
-        // get length
-        var length = keys.length;
-
-        // delete by id
-        if (length === 1) {
+        if (l > 0) {
             key = keys[0];
-
-            if (key === "undefined") {
-                deleted = this.data;
-                this.data = {};
-            } else if (this.data.hasOwnProperty(key)) {
-                deleted[key] = this.data[key];
-                delete this.data[key];
-            }
-
-        } else if (length > 1) {
-
-            for (i = 0; i < length; i++) {
-                key = keys[i];
-                if (this.data.hasOwnProperty(key)) {
-                    deleted[key] = this.data[key];
-                    delete this.data[key];
-                }
-            }
+            if (this.watch.add.indexOf(key) === -1) this.watch.add.push(key);
+            if (this.events["add"]) this.events["add"].notify(keys);
         }
+    },
 
-        // notify observers
-        if (!isEmpty(deleted) && this.events["delete"]) {
-            this.events["delete"].notify(deleted);
+    rm: function (keys) {
+        var deleted = _rm(keys, this);
+
+        if (!h.isEmptyObj(deleted)) {
+            cleanWatch(deleted, this);
+            if (this.events["rm"]) this.events["rm"].notify(deleted);
         }
     },
 
     sync: function (url, keys) {
-        if (!url) throw "Error! no url for model syncing";
+        if (!url) throw "Error! no url for syncing";
         var _this = this, items = this.get(keys);
 
-        if (!isEmpty(items)) {
-            if (this.events["syncStart"]) this.events["syncStart"].notify(items);
+        if (!h.isEmptyObj(items)) {
+            if (this.events["syncStarted"]) this.events["syncStarted"].notify(items);
 
             if (this.hasOwnProperty("request")) {
                 this.request.updateUrl(url).updateData(items);
@@ -137,78 +67,148 @@ Model.prototype = {
             this.request.send()
                 .done(function (data) {
                     if (data.type !== "fail") {
-                        var prop, id;
-                        for (prop in items) {
-                            if (items.hasOwnProperty(prop)) {
-                                id = _this.syncKeys.indexOf(prop);
-                                if (id !== -1) _this.syncKeys.splice(id, 1);
-                            }
-                        }
-                        if (_this.events["syncFinish"]) _this.events["syncFinish"].notify(data);
+                        cleanWatch(items, _this);
+                        if (_this.events["syncFinished"]) _this.events["syncFinished"].notify(data);
                     } else {
-                        if (_this.events["syncFinish"]) _this.events["syncFailed"].notify(data);
+                        if (_this.events["syncFailed"]) _this.events["syncFailed"].notify(data);
                     }
                 })
                 .fail(function () {
-                    if (_this.events["syncFinish"]) _this.events["syncFailed"].notify();
+                    if (_this.events["syncFailed"]) _this.events["syncFailed"].notify();
                 });
         }
     },
 
-    init: function (data) {
-        var key, keys = [];
-
-        if (data instanceof Object) { // accept both object ({}) and array ([])
-            for (key in data) {
-                if (data.hasOwnProperty(key)) {
-                    if (this.data.hasOwnProperty(key) && this.data[key] === data[key]) continue;
-                    this.data[key] = data[key];
-                    keys.push(key);
-                }
-            }
-        } else {
-            key = this.uniqueId();
-            this.data[key] = data;
-            keys.push(key);
+    init: function (type, data) {
+        switch (type) {
+            case "set":
+                _set(data, this);
+                break;
+            case "add":
+                _add(data, this);
+                break;
         }
-
-        return keys;
     },
 
-    on: function (event, fn) {
+    on: function (event, fn, viewId) {
         if (!this.events[event]) this.events[event] = new Ev(this);
-        this.events[event].attach(fn);
+        this.events[event].attach(fn, viewId);
     },
 
     fire: function (event, args) {
         if (this.events[event]) this.events[event].notify(args);
-    },
-
-    uniqueId: function () { // generate an unique id
-        var i;
-        do {
-            i = ++uniqueId + "";
-        }
-        while (this.data.hasOwnProperty(id));
-        return i;
-    },
-
-    size: function () { // length of data
-        var length = 0, key;
-        for (key in this.data) {
-            if (this.data.hasOwnProperty(key)) length++;
-        }
-        return length;
     }
 
+    // todo: filter
 };
 
-// helper
-function isEmpty(obj) {
-    for (var prop in obj) {
-        if (obj.hasOwnProperty(prop)) return false;
+// basic methods
+function _set(data, that) { // only allow object
+    var keys = [];
+
+    if (typeof data === 'object' && !!data) {
+        h.forEach(data, function (key, value) {
+            if (that.data.hasOwnProperty(key) && that.data[key] === value) return;
+            that.data[key] = data[key];
+            keys.push(key);
+        });
     }
-    return true;
+
+    return keys;
+}
+
+function _add(data, that) { // only push a single item
+    var key = h.r8(), keys = [];
+
+    if (typeof data !== "undefined") {
+        that.data[key] = data;
+        keys.push(key);
+    }
+
+    return keys;
+}
+
+function _rm(keys, that) { // remove property from data by keys
+    var rm = {}, key, i;
+
+    // convert to array
+    if (keys.constructor !== Array) keys = (keys + "").split(" ");
+
+    // get length
+    var length = keys.length;
+
+    // delete
+    if (length === 1) {
+        key = keys[0];
+
+        if (key === "undefined") { // delete everything
+            rm = that.data;
+            that.data = {};
+        } else if (that.data.hasOwnProperty(key)) {
+            rm[key] = that.data[key];
+            delete that.data[key];
+        }
+
+    } else if (length > 1) {
+
+        for (i = 0; i < length; i++) {
+            key = keys[i];
+            if (that.data.hasOwnProperty(key)) {
+                rm[key] = that.data[key];
+                delete that.data[key];
+            }
+        }
+    }
+
+    return rm;
+}
+
+function _get(keys, that) {
+    var i, key, output = {};
+
+    // convert to array
+    if (keys.constructor !== Array) keys = (keys + "").split(" ");
+
+    // get key length
+    var length = keys.length;
+
+    // get keys
+    if (length === 1) {
+        key = keys[0];
+
+        if (key === "undefined") {
+            output = that.data;
+        } else if (that.data.hasOwnProperty(key)) {
+            output[key] = that.data[key];
+        }
+
+    } else if (length > 1) {
+
+        for (i = 0; i < length; i++) {
+            key = keys[i];
+            if (that.data.hasOwnProperty(key)) {
+                output[key] = that.data[key];
+            }
+        }
+    }
+
+    return output;
+}
+
+function cleanWatch(obj, that) {
+    var i, l, k, key, array, tmp;
+
+    for (key in that.watch) {
+        if (that.watch.hasOwnProperty(key)) {
+            tmp = [];
+            array = that.watch[key];
+            for (i = 0, l = array.length; i < l; i++) {
+                k = array[i];
+                if (!obj.hasOwnProperty(k)) tmp.push(k);
+            }
+            array = tmp;
+        }
+    }
 }
 
 module.exports = Model;

@@ -97,6 +97,12 @@ Model.prototype = {
 
     fire: function (event, args) {
         if (this.events[event]) this.events[event].notify(args);
+    },
+
+    off: function (viewId) {
+        h.forEach(this.events, function (key, event) {
+            event.detach(viewId);
+        });
     }
 
     // todo: filter

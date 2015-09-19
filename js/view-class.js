@@ -1,58 +1,45 @@
 var h = require("./helper");
 
-function forEach(obj, callback) {
-    for (var i in obj) {
-        if (obj.hasOwnProperty(i)) callback(i, obj[i]);
+function bindEvents(that) {
+    // bind DOM events
+    if (that["domEvents"] && that.el) {
+        h.forEach(that["domEvents"], function (key, fn) {
+            var parts = key.split(" ");
+            that.el.on(parts[1], parts[0], fn); // parts[1]: event, parts[0]: selector
+        });
+    }
+    // bind Model events
+    if (that["modelEvents"] && that.models) {
+        h.forEach(that["modelEvents"], function (key, fn) {
+            var parts = key.split(" ");
+            that.models[parts[0]].on(parts[1], fn, that.viewId); // parts[1]: event, parts[0]: model name
+        });
     }
 }
 
-function bindEvents(type) {
-    var _this = this;
+function destroy(that) {
 
-    switch (type) {
-        case "dom":
-            if (this["domEvents"] && this.el) {
-                // detach all dom events
-                this.el.off();
-                // attach dom events
-                forEach(this["domEvents"], function (key, fn) {
-                    var parts = key.split(" ");
-                    _this.el.on(parts[1], parts[0], fn); // parts[1]: event, parts[0]: selector
-                });
-            }
-            return this;
-        case "model":
-            if (this["modelEvents"] && this.models) {
-                // detach all model events
-                forEach(this.models, function (name, model) {
-                    forEach(model.events, function (name, event) {
-                        event.detach();
-                    });
-                });
-                // attach model events
-                forEach(this["modelEvents"], function (key, fn) {
-                    var parts = key.split(" ");
-                    _this.models[parts[0]].on(parts[1], fn); // parts[1]: event, parts[0]: model name
-                });
-            }
-            return this;
-    }
-}
-
-function destroy() {
     // remove dom element
-    this.el.remove();
+    if (that.el) that.el.remove();
+
+    // remove model listeners
+    if (that.models) h.forEach(that.models, function (key, model) {
+        model.off(that.viewId);
+    });
+
     // delete properties
-    delete this.models;
-    delete this.el;
-    delete this.target;
+    delete that.models;
+    delete that.el;
+    delete that.target;
 }
 
 module.exports = function (options) {
-    options = options || {};
 
     var View = function (opts) {
         opts = opts || {};
+
+        // view unique id
+        this.viewId = h.r8();
 
         // model, element and target
         this.models = opts.models;
@@ -64,16 +51,19 @@ module.exports = function (options) {
         if (this.el) this.el = h.to$(this.el);
 
         // bind DOM and Model events
-        this.bindEvents("dom").bindEvents("model");
+        bindEvents(this);
 
         // initialize
         if (this.init) this.init();
     };
 
-    View.prototype.bindEvents = bindEvents.bind(View);
-    View.prototype.destroy = destroy.bind(View);
+    View.prototype.destroy = function () {
+        destroy(this);
+    };
 
-    forEach(options, function (key, item) {
+    options = options || {};
+
+    h.forEach(options, function (key, item) {
         View.prototype[key] = item;
     });
 

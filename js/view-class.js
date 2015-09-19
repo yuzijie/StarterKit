@@ -5,14 +5,16 @@ function bindEvents(that) {
     if (that["domEvents"] && that.el) {
         h.forEach(that["domEvents"], function (key, fn) {
             var parts = key.split(" ");
-            that.el.on(parts[1], parts[0], that[fn]); // parts[1]: event, parts[0]: selector
+            fn = that[fn].bind(that);
+            that.el.on(parts[1], parts[0], fn); // parts[1]: event, parts[0]: selector
         });
     }
     // bind Model events
     if (that["modelEvents"] && that.models) {
         h.forEach(that["modelEvents"], function (key, fn) {
             var parts = key.split(" ");
-            that.models[parts[0]].on(parts[1], that[fn], that.viewId); // parts[1]: event, parts[0]: model name
+            fn = that[fn].bind(that);
+            that.models[parts[0]].on(parts[1], fn, that.viewId); // parts[1]: event, parts[0]: model name
         });
     }
 }

@@ -70,7 +70,7 @@ module.exports = function (options) {
     };
 
     View.prototype.render = function (data) {
-        return render(data);
+        return render(data, this);
     };
 
     View.prototype.destroy = function () {

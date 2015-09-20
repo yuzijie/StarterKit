@@ -58,11 +58,12 @@ module.exports = function (options) {
         // view unique id
         this.viewId = h.r8();
 
-        // make sure this.el is jQuery object
-        if (this.el && this.el.constructor !== jQuery) this.el = $(this.el);
-
         // bind Model events
         bindModelEvents(this);
+
+        // make sure they are jQuery objects
+        if (this.el && this.el.constructor !== jQuery) this.el = $(this.el);
+        if (this.target && this.target.constructor !== jQuery) this.target = $(this.target);
 
         // initialize
         if (this.init) this.init();

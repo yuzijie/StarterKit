@@ -9,8 +9,8 @@ var Model = function (data) {
     // events
     this.events = {};
 
-    // watch modified data
-    this.watch = {set: [], add: []};
+    // watch set data
+    this.setList = [];
 };
 
 Model.prototype = {
@@ -19,63 +19,30 @@ Model.prototype = {
         return _get(keys, this);
     },
 
-    set: function (data) {
+    set: function (data, desc) {
         var keys = _set(data, this), i, key, l = keys.length;
 
         if (l > 0) {
             for (i = 0; i < l; i++) {
                 key = keys[i];
-                if (this.watch.set.indexOf(key) === -1) this.watch.set.push(key);
+                if (this.setList.indexOf(key) === -1) this.setList.push(key);
             }
-            if (this.events["set"]) this.events["set"].notify(keys);
+            this.fire("set", {keys: keys, desc: desc});
         }
     },
 
-    add: function (data) {
-        var keys = _add(data, this), key, l = keys.length;
+    add: function (data, desc) {
+        var keys = _add(data, this), l = keys.length;
 
-        if (l > 0) {
-            key = keys[0];
-            if (this.watch.add.indexOf(key) === -1) this.watch.add.push(key);
-            if (this.events["add"]) this.events["add"].notify(keys);
-        }
+        if (l > 0) this.fire("add", {keys: keys, desc: desc});
     },
 
-    rm: function (keys) {
+    rm: function (keys, desc) {
         var deleted = _rm(keys, this);
 
         if (!h.isEmptyObj(deleted)) {
-            cleanWatch(deleted, this);
-            if (this.events["rm"]) this.events["rm"].notify(deleted);
-        }
-    },
-
-    sync: function (url, keys) {
-        if (!url) throw "Error! no url for syncing";
-        var _this = this, items = this.get(keys);
-
-        if (!h.isEmptyObj(items)) {
-            if (this.events["syncStarted"]) this.events["syncStarted"].notify(items);
-
-            if (this.hasOwnProperty("request")) {
-                this.request.updateUrl(url).updateData(items);
-            } else {
-                this.request = new XHR(url, items);
-            }
-
-            // sending request
-            this.request.send()
-                .done(function (data) {
-                    if (data.type !== "fail") {
-                        cleanWatch(items, _this);
-                        if (_this.events["syncFinished"]) _this.events["syncFinished"].notify(data);
-                    } else {
-                        if (_this.events["syncFailed"]) _this.events["syncFailed"].notify(data);
-                    }
-                })
-                .fail(function () {
-                    if (_this.events["syncFailed"]) _this.events["syncFailed"].notify();
-                });
+            cleanSet(deleted, this);
+            this.fire("rm", {data: deleted, desc: desc});
         }
     },
 
@@ -95,24 +62,39 @@ Model.prototype = {
         this.events[event].attach(fn, viewId);
     },
 
-    fire: function (event, args) {
-        if (this.events[event]) this.events[event].notify(args);
-    },
-
     off: function (viewId) {
         h.forEach(this.events, function (key, event) {
             event.detach(viewId);
         });
+    },
+
+    fire: function (event, args) {
+        if (this.events[event]) this.events[event].notify(args);
+    },
+
+    GET: function (url, desc) {
+        desc = desc || "GET";
+        _sync(url, null, desc, this);
+    },
+
+    POST: function (url, desc) {
+        desc = desc || "POST";
+        _sync(url, this.setList, desc, this);
+    },
+
+    DELETE: function (url, keys, desc) {
+        desc = desc || "DELETE";
+        _sync(url, keys, desc, this);
     }
 
-    // todo: filter
+    //todo: filter
 };
 
 // basic methods
 function _set(data, that) { // only allow object
     var keys = [];
 
-    if (typeof data === 'object' && !!data) {
+    if (typeof data === 'object' && !!data) { // data must be object
         h.forEach(data, function (key, value) {
             if (that.data.hasOwnProperty(key) && that.data[key] === value) return;
             that.data[key] = data[key];
@@ -126,7 +108,7 @@ function _set(data, that) { // only allow object
 function _add(data, that) { // only push a single item
     var key = h.r8(), keys = [];
 
-    if (typeof data !== "undefined") {
+    if (data != null) { // don't allow null or undefined
         that.data[key] = data;
         keys.push(key);
     }
@@ -190,20 +172,46 @@ function _get(keys, that) {
     return output;
 }
 
-function cleanWatch(obj, that) {
-    var i, l, k, key, array, tmp;
+function _sync(url, keys, type, that) {
+    var obj;
 
-    for (key in that.watch) {
-        if (that.watch.hasOwnProperty(key)) {
-            tmp = [];
-            array = that.watch[key];
-            for (i = 0, l = array.length; i < l; i++) {
-                k = array[i];
-                if (!obj.hasOwnProperty(k)) tmp.push(k);
-            }
-            array = tmp;
-        }
+    if (!url) throw "Model Error! no url for syncing";
+
+    // get sync data
+    if (keys == null) {
+        obj = null;
+    } else {
+        obj = _get(keys, that);
     }
+
+    // data is null or data is none empty object
+    if (obj === null || !h.isEmptyObj(obj)) {
+        that.fire("syncStarted", {data: obj, desc: type});
+
+        if (that.hasOwnProperty("request")) {
+            that.request.updateUrl(url).updateData(obj);
+        } else {
+            that.request = new XHR(url, obj);
+        }
+
+        that.request.send().done(function (data) {
+            if (data.type !== "fail") {
+                if (obj) cleanSet(obj, that);
+                that.fire("syncFinished", {data: data, desc: type});
+            } else {
+                that.fire("syncFailed", {data: data, desc: type});
+            }
+        });
+    }
+}
+
+function cleanSet(obj, that) {
+    var i, l, key, array = that.setList, tmp = [];
+    for (i = 0, l = array.length; i < l; i++) {
+        key = array[i];
+        if (!obj.hasOwnProperty(key)) tmp.push(key);
+    }
+    that.setList = tmp;
 }
 
 module.exports = Model;

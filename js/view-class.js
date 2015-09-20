@@ -23,7 +23,12 @@ function bindModelEvents(that) {
 function render(model, that) {
     if (that.template) {
         var temp = that.el;
-        that.el = $(that.template(model.get()));
+
+        if (model) {
+            that.el = $(that.template(model.get()));
+        } else {
+            that.el = $(that.template());
+        }
 
         // if that.el already exists
         if (temp) temp.replaceWith(that.el);
@@ -53,17 +58,17 @@ function destroy(that) {
 module.exports = function (options) {
 
     var View = function (opts) {
+        opts = opts || {};
 
         this.models = opts.models || {};
 
         this.viewId = opts.viewId || h.r8();
 
+        if (opts.el) this.el = opts.el;
+        if (opts.target) this.target = opts.target;
+
         // bind Model events
         bindModelEvents(this);
-
-        // make sure they are jQuery objects
-        if (this.el && this.el.constructor !== jQuery) this.el = $(this.el);
-        if (this.target && this.target.constructor !== jQuery) this.target = $(this.target);
 
         // initialize
         if (this.init) this.init();

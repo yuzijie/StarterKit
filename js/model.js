@@ -19,6 +19,13 @@ Model.prototype = {
         return _get(keys, this);
     },
 
+    one: function (str) {
+        var i, obj = _get(str, this);
+        for (i in obj) {
+            if (obj.hasOwnProperty(i)) return obj[i];
+        }
+    },
+
     set: function (data, desc) {
         var keys = _set(data, this), i, key, l = keys.length;
 

@@ -53,10 +53,10 @@ function destroy(that) {
 module.exports = function (options) {
 
     var View = function (opts) {
-        this.models = opts || {};
 
-        // view unique id
-        this.viewId = h.r8();
+        this.models = opts.models || {};
+
+        this.viewId = opts.viewId || h.r8();
 
         // bind Model events
         bindModelEvents(this);

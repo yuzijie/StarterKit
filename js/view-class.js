@@ -20,10 +20,10 @@ function bindModelEvents(that) {
     }
 }
 
-function render(data, that) {
+function render(model, that) {
     if (that.template) {
         var temp = that.el;
-        that.el = $(that.template(data));
+        that.el = $(that.template(model.get()));
 
         // if that.el already exists
         if (temp) temp.replaceWith(that.el);

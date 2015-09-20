@@ -38,19 +38,16 @@ function destroy(that) {
 module.exports = function (options) {
 
     var View = function (opts) {
-        opts = opts || {};
+        this.models = opts || {};
 
         // view unique id
         this.viewId = h.r8();
 
-        // model, element and target
-        this.models = opts.models;
-        this.el = opts.el;
-        this.target = opts.target;
-
         // render
         if (this["render"] && !this.el) this["render"]();
-        if (this.el) this.el = h.to$(this.el);
+
+        // make sure this.el is jQuery object
+        if (this.el && this.el.constructor !== jQuery) this.el = $(this.el);
 
         // bind DOM and Model events
         bindEvents(this);

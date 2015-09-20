@@ -92,6 +92,14 @@ Model.prototype = {
     DELETE: function (url, keys, desc) {
         desc = desc || "DELETE";
         _sync(url, keys, desc, this);
+    },
+
+    size: function () {
+        var count = 0;
+        h.forEach(this.data, function () {
+            count++;
+        });
+        return count;
     }
 
     //todo: filter

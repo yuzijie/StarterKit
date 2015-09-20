@@ -137,26 +137,20 @@ function _add(data, that) { // only push a single item
 function _rm(keys, that) { // remove property from data by keys
     var rm = {}, key, i;
 
-    // convert to array
-    if (keys.constructor !== Array) keys = (keys + "").split(" ");
+    if (keys == null) { // keys is null or undefined
 
-    // get length
-    var length = keys.length;
+        rm = that.data;
+        that.data = {};
 
-    // delete
-    if (length === 1) {
-        key = keys[0];
+    } else {
 
-        if (key === "undefined") { // delete everything
-            rm = that.data;
-            that.data = {};
-        } else if (that.data.hasOwnProperty(key)) {
-            rm[key] = that.data[key];
-            delete that.data[key];
-        }
+        // convert to array
+        if (keys.constructor !== Array) keys = (keys + "").split(" ");
 
-    } else if (length > 1) {
+        // get length
+        var length = keys.length;
 
+        // delete data
         for (i = 0; i < length; i++) {
             key = keys[i];
             if (that.data.hasOwnProperty(key)) {
@@ -170,26 +164,21 @@ function _rm(keys, that) { // remove property from data by keys
 }
 
 function _get(keys, that) {
-    var i, key, output = {};
+    var output = {}, key, i;
 
-    // convert to array
-    if (keys.constructor !== Array) keys = (keys + "").split(" ");
+    if (keys == null) { // keys is null or undefined
 
-    // get key length
-    var length = keys.length;
+        output = that.data;
 
-    // get keys
-    if (length === 1) {
-        key = keys[0];
+    } else {
 
-        if (key === "undefined") {
-            output = that.data;
-        } else if (that.data.hasOwnProperty(key)) {
-            output[key] = that.data[key];
-        }
+        // convert to array
+        if (keys.constructor !== Array) keys = (keys + "").split(" ");
 
-    } else if (length > 1) {
+        // get key length
+        var length = keys.length;
 
+        // get data
         for (i = 0; i < length; i++) {
             key = keys[i];
             if (that.data.hasOwnProperty(key)) {

@@ -70,6 +70,9 @@ module.exports = function (options) {
         // bind Model events
         bindModelEvents(this);
 
+        // bind Dom events
+        bindDomEvents(this);
+
         // initialize
         if (this.init) this.init();
     };

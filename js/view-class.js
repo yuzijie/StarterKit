@@ -1,7 +1,6 @@
 var h = require("./helper");
 
-function bindEvents(that) {
-    // bind DOM events
+function bindDomEvents(that) {
     if (that["domEvents"] && that.el) {
         h.forEach(that["domEvents"], function (key, fn) {
             var parts = key.split(" ");
@@ -9,7 +8,9 @@ function bindEvents(that) {
             that.el.on(parts[1], parts[0], fn); // parts[1]: event, parts[0]: selector
         });
     }
-    // bind Model events
+}
+
+function bindModelEvents(that) {
     if (that["modelEvents"] && that.models) {
         h.forEach(that["modelEvents"], function (key, fn) {
             var parts = key.split(" ");
@@ -17,6 +18,20 @@ function bindEvents(that) {
             that.models[parts[0]].on(parts[1], fn, that.viewId); // parts[1]: event, parts[0]: model name
         });
     }
+}
+
+function render(data, that) {
+    if (that.template) {
+        var temp = that.el;
+        that.el = $(that.template(data));
+
+        // if that.el already exists
+        if (temp) temp.replaceWith(that.el);
+
+        // bind events
+        bindDomEvents(that);
+    }
+    return that;
 }
 
 function destroy(that) {
@@ -43,17 +58,18 @@ module.exports = function (options) {
         // view unique id
         this.viewId = h.r8();
 
-        // render
-        if (this["render"] && !this.el) this["render"]();
-
         // make sure this.el is jQuery object
         if (this.el && this.el.constructor !== jQuery) this.el = $(this.el);
 
-        // bind DOM and Model events
-        bindEvents(this);
+        // bind Model events
+        bindModelEvents(this);
 
         // initialize
         if (this.init) this.init();
+    };
+
+    View.prototype.render = function (data) {
+        return render(data);
     };
 
     View.prototype.destroy = function () {

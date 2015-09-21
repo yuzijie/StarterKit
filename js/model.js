@@ -34,14 +34,14 @@ Model.prototype = {
                 key = keys[i];
                 if (this.setList.indexOf(key) === -1) this.setList.push(key);
             }
-            this.fire("set", {keys: keys, desc: desc});
+            this.fire("set", {data: keys, desc: desc});
         }
     },
 
     add: function (data, desc) {
         var keys = _add(data, this), l = keys.length;
 
-        if (l > 0) this.fire("add", {keys: keys, desc: desc});
+        if (l > 0) this.fire("add", {data: keys, desc: desc});
     },
 
     rm: function (keys, desc) {

@@ -200,10 +200,10 @@ function _sync(url, keys, type, that) {
 
         that.request.send().done(function (data) {
             if (data.type === "fail") {
-                that.fire("callFailed", {data: data, desc: type});
+                that.fire("callFail", {data: data, desc: type});
             } else {
                 if (obj) cleanSet(obj, that);
-                that.fire("call", {data: data, desc: type});
+                that.fire("callDone", {data: data, desc: type});
             }
         });
     }

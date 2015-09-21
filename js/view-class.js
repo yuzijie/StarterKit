@@ -4,7 +4,7 @@ function bindDomEvents(that) {
     if (that["domEvents"] && that.el) {
         h.forEach(that["domEvents"], function (key, fn) {
             var parts = key.split(" ");
-            fn = that[fn].bind(that);
+            fn = fn.bind(that);
             that.el.on(parts[1], parts[0], fn); // parts[1]: event, parts[0]: selector
         });
     }
@@ -14,7 +14,7 @@ function bindModelEvents(that) {
     if (that["modelEvents"] && that.models) {
         h.forEach(that["modelEvents"], function (key, fn) {
             var parts = key.split(" ", 3);
-            fn = that[fn].bind(that);
+            fn = fn.bind(that);
             that.models[parts[0]].on(parts[1], function (args) { // parts[1]: event, parts[0]: model name, parts[2]: desc
                 if (!parts[2] || parts[2] === args.desc) fn(args.data);
             }, that.viewId);

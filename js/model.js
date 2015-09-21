@@ -203,7 +203,7 @@ function _sync(url, keys, type, that) {
                 that.fire("callFailed", {data: data, desc: type});
             } else {
                 if (obj) cleanSet(obj, that);
-                that.fire("callFinish", {data: data, desc: type});
+                that.fire("call", {data: data, desc: type});
             }
         });
     }

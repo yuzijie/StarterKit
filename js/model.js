@@ -79,18 +79,7 @@ Model.prototype = {
         if (this.events[event]) this.events[event].notify(args);
     },
 
-    GET: function (url, desc) {
-        desc = desc || "GET";
-        _sync(url, null, desc, this);
-    },
-
-    POST: function (url, desc) {
-        desc = desc || "POST";
-        _sync(url, this.setList, desc, this);
-    },
-
-    DELETE: function (url, keys, desc) {
-        desc = desc || "DELETE";
+    call: function (url, keys, desc) { // call remote server
         _sync(url, keys, desc, this);
     },
 
@@ -190,7 +179,7 @@ function _get(keys, that) {
 function _sync(url, keys, type, that) {
     var obj;
 
-    if (!url) throw "Model Error! no url for syncing";
+    if (!url) throw "Model Error! no url to call";
 
     // get sync data
     if (keys == null) {
@@ -201,7 +190,7 @@ function _sync(url, keys, type, that) {
 
     // data is null or data is none empty object
     if (obj === null || !h.isEmptyObj(obj)) {
-        that.fire("syncStarted", {data: obj, desc: type});
+        that.fire("callStart", {data: obj, desc: type});
 
         if (that.hasOwnProperty("request")) {
             that.request.updateUrl(url).updateData(obj);
@@ -210,11 +199,11 @@ function _sync(url, keys, type, that) {
         }
 
         that.request.send().done(function (data) {
-            if (data.type !== "fail") {
-                if (obj) cleanSet(obj, that);
-                that.fire("syncFinished", {data: data, desc: type});
+            if (data.type === "fail") {
+                that.fire("callFailed", {data: data, desc: type});
             } else {
-                that.fire("syncFailed", {data: data, desc: type});
+                if (obj) cleanSet(obj, that);
+                that.fire("callFinish", {data: data, desc: type});
             }
         });
     }

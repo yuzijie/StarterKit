@@ -19,9 +19,8 @@ function isSupport(property) { // is css3 style is support
     return property in document.body.style;
 }
 
-function isFunction(fn) {
-    var getType = {};
-    return fn && getType.toString.call(fn) === '[object Function]';
+function isFunction(object) {
+    return !!(object && object.constructor && object.call && object.apply);
 }
 
 function forEach(obj, callback) {

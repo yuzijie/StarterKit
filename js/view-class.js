@@ -3,8 +3,8 @@ var h = require("./helper");
 function bindDomEvents(that) {
     if (that["domEvents"] && that.el) {
         h.forEach(that["domEvents"], function (key, fn) {
+            fn = h.isFunction(fn) ? fn.bind(that) : that[fn].bind(that);
             var parts = key.split(" ");
-            fn = that[fn].bind(that);
             that.el.on(parts[1], parts[0], fn); // parts[1]: event, parts[0]: selector
         });
     }
@@ -13,8 +13,8 @@ function bindDomEvents(that) {
 function bindModelEvents(that) {
     if (that["modelEvents"] && that.models) {
         h.forEach(that["modelEvents"], function (key, fn) {
+            fn = h.isFunction(fn) ? fn.bind(that) : that[fn].bind(that);
             var parts = key.split(" ", 3);
-            fn = that[fn].bind(that);
             that.models[parts[0]].on(parts[1], function (args) { // parts[1]: event, parts[0]: model name, parts[2]: desc
                 if (!parts[2] || parts[2] === args.desc) fn(args.data);
             }, that.viewId);
@@ -64,9 +64,10 @@ module.exports = function (options) {
 
         this.models = opts.models || {};
 
-        this.viewId = opts.viewId || h.r8();
+        this.viewId = opts.viewId || h.r4();
 
         if (opts.el) this.el = opts.el;
+
         if (opts.target) this.target = opts.target;
 
         // bind Model events

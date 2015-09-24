@@ -27,7 +27,15 @@ Model.prototype = {
     },
 
     set: function (data, desc) {
-        var keys = _set(data, this), i, key, l = keys.length;
+        var keys, i, key, l;
+
+        if (data instanceof jQuery) {
+            keys = _setFormData(data, this);
+        } else {
+            keys = _set(data, this);
+        }
+
+        l = keys.length;
 
         if (l > 0) {
             for (i = 0; i < l; i++) {
@@ -207,6 +215,25 @@ function _sync(url, keys, type, that) {
             }
         });
     }
+}
+
+function _setFormData(form, that) { // set data from form
+    var serializeArray = form.serializeArray(),
+        output = {}, i, len, item, l;
+
+    for (i = 0, len = serializeArray.length; i < len; i++) {
+        item = serializeArray[i];
+        l = item.name.length;
+        if (item.name.indexOf("[]", l - 2) !== -1) {
+            var name = item.name.substring(0, l - 2);
+            if (!output[name]) output[name] = [];
+            output[name].push(item.value);
+        } else {
+            output[item.name] = item.value;
+        }
+    }
+
+    return _set(output, that);
 }
 
 function cleanSet(obj, that) {

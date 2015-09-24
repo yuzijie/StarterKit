@@ -57,27 +57,6 @@ function destroy(that) {
     delete that.target;
 }
 
-// format data into human readable array
-function formatData(model, that) {
-    var form = that.el;
-
-    var serializeArray = form.serializeArray(),
-        output = {};
-
-    $.each(serializeArray, function (key, item) {
-        var l = item.name.length;
-        if (item.name.indexOf("[]", l - 2) !== -1) {
-            var name = item.name.substring(0, l - 2);
-            if (!output[name]) output[name] = [];
-            output[name].push(item.value);
-        } else {
-            output[item.name] = item.value;
-        }
-    });
-
-    model.set(output);
-}
-
 module.exports = function (options) {
 
     var View = function (opts) {
@@ -106,10 +85,6 @@ module.exports = function (options) {
 
     View.prototype.destroy = function () {
         destroy(this);
-    };
-
-    View.prototype.setFormData = function (model) {
-        formatData(model, this);
     };
 
     options = options || {};

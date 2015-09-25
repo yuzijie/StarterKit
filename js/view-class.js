@@ -16,7 +16,7 @@ function bindModelEvents(that) {
             fn = h.isFunction(fn) ? fn.bind(that) : that[fn].bind(that);
             var parts = key.split(" ", 3);
             that.models[parts[0]].on(parts[1], function (args) { // parts[1]: event, parts[0]: model name, parts[2]: desc
-                if (!parts[2] || parts[2] === args.desc) fn(args.data);
+                if (parts[2] === args.desc) fn(args.data);
             }, that.viewId);
         });
     }

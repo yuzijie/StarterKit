@@ -189,9 +189,8 @@ function _get(keys, that) {
 }
 
 function _sync(url, keys, type, that) {
-    var obj;
-
     if (!url) throw "Model Error! no url to call";
+    var obj;
 
     // get sync data
     if (keys == null) {
@@ -202,8 +201,6 @@ function _sync(url, keys, type, that) {
 
     // data is null or data is none empty object
     if (obj === null || !h.isEmptyObj(obj)) {
-        that.fire("callStart", {data: obj, desc: type});
-
         if (that.hasOwnProperty("request")) {
             that.request.updateUrl(url).updateData(obj);
         } else {
@@ -211,12 +208,8 @@ function _sync(url, keys, type, that) {
         }
 
         that.request.send().done(function (data) {
-            if (data.type === "fail") {
-                that.fire("callFail", {data: data, desc: type});
-            } else {
-                if (obj) cleanSet(obj, that);
-                that.fire("callDone", {data: data, desc: type});
-            }
+            if (data.type === "success" && obj) cleanSet(obj, that);
+            that.fire("call", {data: data, desc: type});
         });
     }
 }

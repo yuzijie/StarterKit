@@ -65,6 +65,10 @@ Model.prototype = {
         }
     },
 
+    call: function (url, keys, options) { // call remote server
+        _sync(url, keys, options, this);
+    },
+
     init: function (type, data) {
         switch (type) {
             case "set":
@@ -89,10 +93,6 @@ Model.prototype = {
 
     fire: function (event, args) {
         if (this.events[event]) this.events[event].notify(args);
-    },
-
-    call: function (url, keys, desc) { // call remote server
-        _sync(url, keys, desc, this);
     },
 
     size: function () {
@@ -188,7 +188,7 @@ function _get(keys, that) {
     return output;
 }
 
-function _sync(url, keys, type, that) {
+function _sync(url, keys, options, that) {
     if (!url) throw "Model Error! no url to call";
     var obj;
 
@@ -209,7 +209,9 @@ function _sync(url, keys, type, that) {
 
         that.request.send().done(function (data) {
             if (data.type === "success" && obj) cleanSet(obj, that);
-            that.fire("call", {data: data, desc: type});
+            if (options[data.type]) options[data.type](data);
+        }).fail(function () {
+            if (options[error]) options[error]();
         });
     }
 }

@@ -26,12 +26,16 @@ Model.prototype = {
         }
     },
 
-    set: function (data, desc) {
-        var keys, i, key, l;
+    set: function (data, arg2, arg3) {
+        var keys, i, key, l, obj = {}, desc = arg2;
 
-        if (data instanceof jQuery) {
+        if (data instanceof jQuery) {              // data is a form element
             keys = _setFormData(data, this);
-        } else {
+        } else if (data.constructor === String) {  // data is a key
+            obj[data] = arg2;
+            desc = arg3;
+            keys = _set(obj, this);
+        } else {                                   // data is an object
             keys = _set(data, this);
         }
 

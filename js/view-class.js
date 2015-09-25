@@ -5,7 +5,11 @@ function bindDomEvents(that) {
         h.forEach(that["domEvents"], function (key, fn) {
             fn = h.isFunction(fn) ? fn.bind(that) : that[fn].bind(that);
             var parts = key.split(" ");
-            that.el.on(parts[1], parts[0], fn); // parts[1]: event, parts[0]: selector
+            if (parts[0] === "this") {
+                that.el.on(parts[1], fn); // parts[1]: event
+            } else {
+                that.el.on(parts[1], parts[0], fn); // parts[1]: event, parts[0]: selector
+            }
         });
     }
 }

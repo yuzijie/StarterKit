@@ -69,10 +69,16 @@ Model.prototype = {
         _sync(url, keys, options, this);
     },
 
-    "init": function (type, data) {
+    "init": function (type, data, arg3) {
+        var obj = {};
         switch (type) {
             case "set":
-                _set(data, this);
+                if (data instanceof jQuery) {              // data is a form element
+                    _setFormData(data, this);
+                } else if (data.constructor === String) {  // data is a key
+                    obj[data] = arg3;
+                    _set(obj, this);
+                } else _set(data, this);                   // data is an object
                 break;
             case "add":
                 _add(data, this);

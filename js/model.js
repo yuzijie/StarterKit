@@ -19,6 +19,10 @@ Model.prototype = {
         return _get(keys, this);
     },
 
+    "pick": function (options) { // filter and sort
+        return _pick(options, this);
+    },
+
     "one": function (str) {
         var i, obj = _get(str, this);
         for (i in obj) {
@@ -130,8 +134,6 @@ Model.prototype = {
         });
         return count;
     }
-
-    //todo: filter
 };
 
 // basic methods
@@ -261,6 +263,16 @@ function _setFormData(form, that) { // set data from form
     }
 
     return _set(output, that);
+}
+
+function _pick(options, that) {
+    var output = [];
+
+    h.forEach(that.data, function (key, value) {
+        output.push(value);
+    });
+
+    return output;
 }
 
 function cleanSet(obj, that) {

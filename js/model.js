@@ -266,11 +266,24 @@ function _setFormData(form, that) { // set data from form
 }
 
 function _pick(options, that) {
-    var output = [];
+    options = options || {};
 
-    h.forEach(that.data, function (key, value) {
-        output.push(value);
-    });
+    var output = [], item;
+
+    if (options.filter) {
+        h.forEach(that.data, function (key, value) {
+            item = options.filter(key, value);
+            output.push(item);
+        });
+    } else {
+        h.forEach(that.data, function (key, value) {
+            output.push(value);
+        });
+    }
+
+    if (options.sort) output.sort(options.sort);
+
+    if (options.reverse === true) output.reverse();
 
     return output;
 }

@@ -7,10 +7,6 @@ var checkers = {
         var result = re.test(content);
         if (!result) return "email";
     },
-    number: function (content) {
-        var result = isNaN(content);
-        if (result) return "number";
-    },
     min: function (content, condition) {
         var num = Number(content), min = Number(condition);
         if (num < min) return "min";

@@ -66,13 +66,14 @@ module.exports = function (options) {
     var View = function (opts) {
         opts = opts || {};
 
-        this.models = opts.models || {};
+        var _this = this;
 
-        this.viewId = opts.viewId || h.r4();
+        h.forEach(opts, function (key, item) {
+            _this[key] = item;
+        });
 
-        if (opts.el) this.el = opts.el;
-
-        if (opts.target) this.target = opts.target;
+        if (!this.viewId) this.viewId = h.r4();
+        if (!this.models) this.models = {};
 
         // bind Model events
         bindModelEvents(this);
@@ -84,11 +85,11 @@ module.exports = function (options) {
         if (this.init) this.init();
     };
 
-    View.prototype.render = function (model) {
+    View.prototype['render'] = function (model) {
         return render(model, this);
     };
 
-    View.prototype.destroy = function () {
+    View.prototype['destroy'] = function () {
         destroy(this);
     };
 

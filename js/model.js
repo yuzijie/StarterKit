@@ -15,18 +15,18 @@ var Model = function (data) {
 
 Model.prototype = {
 
-    get: function (keys) {
+    "get": function (keys) {
         return _get(keys, this);
     },
 
-    one: function (str) {
+    "one": function (str) {
         var i, obj = _get(str, this);
         for (i in obj) {
             if (obj.hasOwnProperty(i)) return obj[i];
         }
     },
 
-    set: function (data, arg2, arg3) {
+    "set": function (data, arg2, arg3) {
         var keys, i, key, l, obj = {}, desc = arg2;
 
         if (data instanceof jQuery) {              // data is a form element
@@ -50,13 +50,13 @@ Model.prototype = {
         }
     },
 
-    add: function (data, desc) {
+    "add": function (data, desc) {
         var keys = _add(data, this), l = keys.length;
 
         if (l > 0) this.fire("add", {data: keys, desc: desc});
     },
 
-    rm: function (keys, desc) {
+    "rm": function (keys, desc) {
         var deleted = _rm(keys, this);
 
         if (!h.isEmptyObj(deleted)) {
@@ -65,11 +65,11 @@ Model.prototype = {
         }
     },
 
-    call: function (url, keys, options) { // call remote server
+    "call": function (url, keys, options) { // call remote server
         _sync(url, keys, options, this);
     },
 
-    init: function (type, data) {
+    "init": function (type, data) {
         switch (type) {
             case "set":
                 _set(data, this);
@@ -80,22 +80,26 @@ Model.prototype = {
         }
     },
 
-    on: function (event, fn, viewId) {
+    "on": function (event, fn, viewId) {
         if (!this.events[event]) this.events[event] = new Ev(this);
         this.events[event].attach(fn, viewId);
     },
 
-    off: function (viewId) {
+    "off": function (viewId) {
         h.forEach(this.events, function (key, event) {
             event.detach(viewId);
         });
     },
 
-    fire: function (event, args) {
+    "fire": function (event, args) {
         if (this.events[event]) this.events[event].notify(args);
     },
 
-    size: function () {
+    "do": function (desc, data) {
+        this.fire("do", {data: data, desc: desc});
+    },
+
+    "size": function () {
         var count = 0;
         h.forEach(this.data, function () {
             count++;

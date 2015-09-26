@@ -211,7 +211,7 @@ function _sync(url, keys, options, that) {
             if (data.type === "success" && obj) cleanSet(obj, that);
             if (options[data.type]) options[data.type](data);
         }).fail(function () {
-            if (options[error]) options[error]();
+            if (options["error"]) options["error"]();
         });
     }
 }

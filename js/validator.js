@@ -23,7 +23,7 @@ var checkers = {
 
 //////// Input check ///////
 var checkInput = function ($input) {
-    var content = $input.val().trim(), type = $input.prop("type"), msg;
+    var content = $input.val().trim(), type = $input.prop("type"), msg, i, l, attr, obj;
 
     // check require
     if ($input.prop("required") && !content.length) return "require";
@@ -32,9 +32,13 @@ var checkInput = function ($input) {
     if (content.length && (type in checkers) && (msg = checkers[type](content))) return msg;
 
     // check content
-    if (content.length) $.each($input[0].attributes, function (key, item) {
-        if (checkers.hasOwnProperty(item.name) && (msg = checkers[item.name](content, item.value))) return msg;
-    });
+    if (content.length) {
+        attr = $input[0].attributes;
+        for (i = 0, l = attr.length; i < l; i++) {
+            obj = attr[i];
+            if (checkers.hasOwnProperty(obj.name) && (msg = checkers[obj.name](content, obj.value))) return msg;
+        }
+    }
 
     // no error
     return "ok";

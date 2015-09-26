@@ -99,6 +99,24 @@ Model.prototype = {
         this.fire("do", {data: data, desc: desc});
     },
 
+    "listen": function (model, event, arg3, arg4) {
+        var desc, fn;
+
+        if (h.isFunction(arg3)) { // model, event and function
+            desc = void 0; // undefined
+            fn = arg3;
+        } else { // model, event, desc and function
+            desc = arg3;
+            fn = arg4;
+        }
+
+        if (!this.modelId) this.modelId = h.r4();
+
+        model.on(event, function (args) {
+            if (desc === args.desc) fn(args.data);
+        }, this.modelId);
+    },
+
     "size": function () {
         var count = 0;
         h.forEach(this.data, function () {

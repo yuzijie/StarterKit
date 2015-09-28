@@ -152,6 +152,23 @@ Model.prototype = {
         }
 
         return this.setList;
+    },
+
+    "destroy": function () {
+        var id;
+
+        // remove listeners
+        if (id = this.modelId) h.forEach(this.data, function (key, obj) {
+            if (obj.hasOwnProperty(events)) obj.off(id);
+        });
+
+        // delete properties
+        h.forEach(this, function (prop) {
+            delete this[prop];
+        });
+
+        // trigger event
+        this.fire("destroy", {});
     }
 };
 

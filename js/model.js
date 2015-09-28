@@ -256,7 +256,7 @@ function _get(keys, that) {
 
 function _sync(url, keys, options, that) {
     if (!url) throw "Model Error! no url to call";
-    var obj;
+    var obj, _this = this;
 
     // get sync data
     if (keys == null) {
@@ -275,9 +275,9 @@ function _sync(url, keys, options, that) {
 
         that.request.send().done(function (data) {
             if (data.type === "success" && obj) cleanSet(obj, that);
-            if (options[data.type]) options[data.type](data);
+            if (options[data.type]) options[data.type].call(_this, data);
         }).fail(function () {
-            if (options["error"]) options["error"]();
+            if (options["error"]) options["error"].call(_this);
         });
     }
 }

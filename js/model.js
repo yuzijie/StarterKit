@@ -61,9 +61,14 @@ Model.prototype = {
     },
 
     "rm": function (keys, desc) {
-        var deleted = _rm(keys, this);
+        var deleted = _rm(keys, this), id;
 
         if (!h.isEmptyObj(deleted)) {
+
+            if (id = this.modelId) h.forEach(deleted, function (key, obj) {
+                if (obj.hasOwnProperty(events)) obj.off(id);
+            });
+
             cleanSet(deleted, this);
             this.fire("rm", {data: deleted, desc: desc});
         }

@@ -56,9 +56,9 @@ function destroy(that) {
     });
 
     // delete properties
-    delete that.models;
-    delete that.el;
-    delete that.target;
+    h.forEach(that, function (prop) {
+        delete that[prop];
+    });
 }
 
 module.exports = function (options) {

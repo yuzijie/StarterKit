@@ -140,10 +140,17 @@ Model.prototype = {
         return count;
     },
 
-    "changed": function (key) { // get a list of changed keys
-        if (key != null && this.data.hasOwnProperty(key) && this.setList.indexOf(key) === -1) {
-            this.setList.push(key);
+    "changed": function (keys) { // get a list of changed keys
+        var i, l, key;
+
+        if (keys != null) {
+            if (keys.constructor !== Array) keys = (keys + "").split(" ");
+            for (i = 0, l = keys.length; i < l; i++) {
+                key = keys[i];
+                if (this.data.hasOwnProperty(key) && this.setList.indexOf(key) === -1) this.setList.push(key);
+            }
         }
+
         return this.setList;
     }
 };

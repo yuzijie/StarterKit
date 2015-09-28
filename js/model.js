@@ -133,6 +133,13 @@ Model.prototype = {
             count++;
         });
         return count;
+    },
+
+    "changed": function (key) { // get a list of changed keys
+        if (key != null && this.data.hasOwnProperty(key) && this.setList.indexOf(key) === -1) {
+            this.setList.push(key);
+        }
+        return this.setList;
     }
 };
 

@@ -3,6 +3,8 @@ var XHR = require("./xhr"),
     h = require("./helper");
 
 var Model = function (data) {
+    this.modelId = h.r4();
+
     // Data
     this.data = data || {};
 
@@ -55,18 +57,17 @@ Model.prototype = {
     },
 
     "add": function (data, desc) {
-        var keys = _add(data, this), l = keys.length;
-
-        if (l > 0) this.fire("add", {data: keys, desc: desc});
+        var key = _add(data, this);
+        this.fire("add", {data: key, desc: desc});
     },
 
     "rm": function (keys, desc) {
-        var deleted = _rm(keys, this), id;
+        var deleted = _rm(keys, this), id = this.modelId;
 
         if (!h.isEmptyObj(deleted)) {
 
-            if (id = this.modelId) h.forEach(deleted, function (key, obj) {
-                if (obj.hasOwnProperty(events)) obj.off(id);
+            if (this.isListening) h.forEach(deleted, function (key, obj) {
+                if (obj.hasOwnProperty("modelId")) obj.off(id);
             });
 
             cleanSet(deleted, this);
@@ -119,13 +120,13 @@ Model.prototype = {
 
         if (h.isFunction(arg3)) { // model, event and function
             desc = void 0; // undefined
-            fn = arg3;
+            fn = arg3.bind(this);
         } else { // model, event, desc and function
             desc = arg3;
-            fn = arg4;
+            fn = arg4.bind(this);
         }
 
-        if (!this.modelId) this.modelId = h.r4();
+        if (!this.isListening) this.isListening = true;
 
         model.on(event, function (args) {
             if (desc === args.desc) fn(args.data);
@@ -155,11 +156,11 @@ Model.prototype = {
     },
 
     "destroy": function () {
-        var id;
+        var id = this.modelId;
 
         // remove listeners
-        if (id = this.modelId) h.forEach(this.data, function (key, obj) {
-            if (obj.hasOwnProperty(events)) obj.off(id);
+        if (this.isListening) h.forEach(this.data, function (key, obj) {
+            if (obj.hasOwnProperty("modelId")) obj.off(id);
         });
 
         // delete properties
@@ -187,19 +188,19 @@ function _set(data, that) { // only allow object
     return keys;
 }
 
-function _add(data, that) { // only push a single item
-    var key = h.r8(), keys = [];
-
-    if (data != null) { // don't allow null or undefined
+function _add(data, that) { // only push a model
+    var key;
+    if (data != null && data.hasOwnProperty("modelId")) {
+        key = data.modelId;
         that.data[key] = data;
-        keys.push(key);
+    } else {
+        throw "data must be a model!";
     }
-
-    return keys;
+    return key;
 }
 
 function _rm(keys, that) { // remove property from data by keys
-    var rm = {}, key, i;
+    var rm = {}, key, i, l;
 
     if (keys == null) { // keys is null or undefined
 
@@ -207,15 +208,11 @@ function _rm(keys, that) { // remove property from data by keys
         that.data = {};
 
     } else {
-
         // convert to array
         if (keys.constructor !== Array) keys = (keys + "").split(" ");
 
-        // get length
-        var length = keys.length;
-
         // delete data
-        for (i = 0; i < length; i++) {
+        for (i = 0, l = keys.length; i < l; i++) {
             key = keys[i];
             if (that.data.hasOwnProperty(key)) {
                 rm[key] = that.data[key];
@@ -228,22 +225,18 @@ function _rm(keys, that) { // remove property from data by keys
 }
 
 function _get(keys, that) {
-    var output = {}, key, i;
+    var output = {}, key, i, l;
 
     if (keys == null) { // keys is null or undefined
 
         output = that.data;
 
     } else {
-
         // convert to array
         if (keys.constructor !== Array) keys = (keys + "").split(" ");
 
-        // get key length
-        var length = keys.length;
-
         // get data
-        for (i = 0; i < length; i++) {
+        for (i = 0, l = keys.length; i < l; i++) {
             key = keys[i];
             if (that.data.hasOwnProperty(key)) {
                 output[key] = that.data[key];

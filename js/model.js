@@ -169,7 +169,7 @@ Model.prototype = {
         });
 
         // trigger event
-        this.fire("destroy", {});
+        this.fire("destroy", {data: id});
     }
 };
 

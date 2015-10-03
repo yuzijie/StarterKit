@@ -39,6 +39,14 @@ function isEmptyObj(obj) { // object is empty
     return true;
 }
 
+function size(obj) { // object size
+    var count = 0;
+    h.forEach(obj, function () {
+        count++;
+    });
+    return count;
+}
+
 module.exports = {
     to$: to$,
     r4: r4,
@@ -46,5 +54,6 @@ module.exports = {
     within: within,
     isSupport: isSupport,
     isFunction: isFunction,
-    isEmptyObj: isEmptyObj
+    isEmptyObj: isEmptyObj,
+    size: size
 };

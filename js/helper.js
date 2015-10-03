@@ -2,12 +2,9 @@ function to$(item) {
     return (item instanceof jQuery) ? item : $(item);
 }
 
-function r4() { // 4 位随机字符串
-    return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
-}
-
-function r8() { // 8 位随机字符串
-    return r4() + r4();
+function r4(prefix) { // 4 位随机字符串
+    var digits = Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+    return (prefix) ? prefix + digits : digits;
 }
 
 function within(target, element) { // if target within element
@@ -24,8 +21,14 @@ function isFunction(object) {
 }
 
 function forEach(obj, callback) {
-    for (var i in obj) {
-        if (obj.hasOwnProperty(i)) callback(i, obj[i]);
+    var i, l;
+    if (obj instanceof Array) {
+        l = obj.length;
+        for (i = 0; i < l; i++) callback(i, obj[i]);
+    } else {
+        for (i in obj) {
+            if (obj.hasOwnProperty(i)) callback(i, obj[i]);
+        }
     }
 }
 
@@ -39,7 +42,6 @@ function isEmptyObj(obj) { // object is empty
 module.exports = {
     to$: to$,
     r4: r4,
-    r8: r8,
     forEach: forEach,
     within: within,
     isSupport: isSupport,

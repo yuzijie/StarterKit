@@ -21,10 +21,13 @@ Ev.prototype = {
 
 var Model = function (data) {
     if (data != null && data.constructor !== Object) throw "data must be an object!";
+
     this.modelId = h.r4("m");
     this.data = data || {};
     this.events = {};
     this.setList = [];
+
+    if (this.init) this.init();
 };
 
 Model.prototype = {
@@ -101,21 +104,7 @@ Model.prototype = {
         this.fire("when", {data: data, desc: desc});
     },
     "listen": function (model, event, arg3, arg4) {
-        var desc, fn;
-
-        if (h.isFunction(arg3)) {    // model, event, function
-            desc = void 0; // undefined
-            fn = arg3;
-        } else {                     // model, event, desc and function
-            desc = arg3;
-            fn = arg4;
-        }
-
-        this.isListening = true;
-
-        model.on(event, function (args) {
-            if (desc === args.desc) fn.call(this, args.data);
-        }, this.modelId);
+        m.listen(model, event, arg3, arg4, this);
     },
     "size": function () {
         return h.size(this.data);

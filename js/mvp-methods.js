@@ -3,6 +3,36 @@ var h = require("./helper"),
 
     splitter = /\s+/;
 
+///////////// Event Methods /////////////
+
+function _detach(obj, that) {               // detach by listener or viewId
+    if (!obj) {                             // if object is a falsy value, remove all
+        that.listeners = [];
+    } else if (obj instanceof Function) {   // if object is a listener
+        h.forEach(that.listeners, function (i, listener) {
+            if (obj === listener) {
+                that.listeners.splice(i, 1);
+                that.views.splice(i, 1);
+            }
+        });
+    } else {                                // else treat object as a viewId
+        h.forEach(that.views, function (i, viewId) {
+            if (obj === viewId) {
+                that.listeners.splice(i, 1);
+                that.views.splice(i, 1);
+            }
+        });
+    }
+}
+
+function _notify(args, context, that) {
+    h.forEach(that.listeners, function (i, listener) {
+        listener.call(context, args);
+    });
+}
+
+///////////// Model Methods /////////////
+
 function _get(keys, that) {
     var output = {};
 
@@ -43,11 +73,15 @@ function _pick(opts, that) {
 function _set(data, that) {
     var keys = [];
 
-    if (typeof data === 'object' && !!data) h.forEach(data, function (key, value) {
-        if (that.data.hasOwnProperty(key) && that.data[key] === value) return;
-        that.data[key] = value;
-        keys.push(key);
-    });
+    if (typeof data === 'object' && !!data) {
+        h.forEach(data, function (key, value) {
+            if (that.data.hasOwnProperty(key) && that.data[key] === value) return;
+            that.data[key] = value;
+            keys.push(key);
+        });
+    } else {
+        throw "data must be an object!";
+    }
 
     return keys;
 }
@@ -147,6 +181,10 @@ function _changed(keys, that) {
 }
 
 module.exports = {
+    // event
+    "detach": _detach,
+    "notify": _notify,
+    // model
     "get": _get,
     "pick": _pick,
     "set": _set,

@@ -135,10 +135,11 @@ Model.prototype = {
         h.forEach(this, function (prop) {
             delete this[prop];
         });
-    },
-    "extend": function (props) {
-        return m.extend(props, this);
     }
+};
+
+Model.extend = function (props) {
+    return m.extend(props, this);
 };
 
 module.exports = Model;

@@ -123,10 +123,13 @@ Model.prototype = {
         if (this.isListening) h.forEach(this.data, function (key, obj) {
             if (obj.hasOwnProperty("modelId")) obj.off(id);
         });
+        if (this.models) h.forEach(this.models, function (key, obj) {
+            obj.off(id);
+        });
         // trigger event
         this.fire("destroy", {data: id});
         // delete properties
-        h.forEach(this, function (prop) {
+        h.forEach(_this, function (prop) {
             delete _this[prop];
         });
     }

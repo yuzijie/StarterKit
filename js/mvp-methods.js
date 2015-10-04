@@ -180,6 +180,26 @@ function _changed(keys, that) {
     return that.setList;
 }
 
+///////////// Inheritance Methods /////////////
+
+function _extend(props, that) {
+    var parent = that, child;
+
+    child = function () {
+        parent.apply(this, arguments);
+    };
+
+    child.prototype = Object.create(parent.prototype); // inherit
+
+    if (props) h.forEach(props, function (key, value) {
+        child.prototype[key] = value;
+    });
+
+    child.prototype.constructor = child;
+
+    return child;
+}
+
 module.exports = {
     // event
     "detach": _detach,
@@ -193,5 +213,7 @@ module.exports = {
     "rm": _rm,
     "call": _call,
     "cleanSet": _cleanSet,
-    "changed": _changed
+    "changed": _changed,
+    // inheritance
+    "extend": _extend
 };

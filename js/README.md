@@ -12,6 +12,7 @@
     * mvp-methods.js：MVP 用到的方法
     * mvp-model.js：MVP 的 Model 类和 Event 类
     * mvp-view.js：MVP 的 View 类
+    * polyfill.js：是 Javascript 兼容不同浏览器
 * 核心
     * box.js：定义页面中所有可以打开和关闭的元素的行为
     * dom.js：管理页面中动态添加的元素

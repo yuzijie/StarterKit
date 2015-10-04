@@ -29,6 +29,8 @@ var Model = function (data) {
     this.events = {};
     this.setList = [];
 
+    _bindModelEvents(this, this.modelId);
+
     if (this.init) this.init();
 };
 
@@ -145,9 +147,8 @@ var View = function (opts) {
     });
 
     if (!this.viewId) this.viewId = h.r4("v");
-    if (!this.models) this.models = {};
 
-    _bindModelEvents(this);
+    _bindModelEvents(this, this.viewId);
     _bindDomEvents(this);
 
     if (this.init) this.init();
@@ -305,6 +306,8 @@ function _call(url, keys, opts, that) {
 
     if (keys == null) {
         obj = null;
+    } else if (keys.constructor === Object) {
+        obj = keys;
     } else {
         obj = _get(keys, that);
     }
@@ -364,19 +367,6 @@ function _bindDomEvents(that) {
     }
 }
 
-function _bindModelEvents(that) {
-    if (that["modelEvents"] && that.models) {
-        h.forEach(that["modelEvents"], function (key, fn) {
-            if (!h.isFunction(fn)) fn = that[fn];
-            var parts = key.split(splitter, 3);
-
-            that.models[parts[0]].on(parts[1], function (args) { // [0]: model name, [1]: event
-                if (parts[2] === args.desc) fn.call(that, args.data); // [2]: desc
-            }, that.viewId);
-        });
-    }
-}
-
 function _render(model, that) {
     if (that.template) {
         var temp = that.el;
@@ -426,6 +416,19 @@ function _listen(model, event, arg3, arg4, that, id) {
     model.on(event, function (args) {
         if (desc === args.desc) fn.call(that, args.data);
     }, id);
+}
+
+function _bindModelEvents(that, id) {
+    if (that["modelEvents"] && that.models) {
+        h.forEach(that["modelEvents"], function (key, fn) {
+            if (!h.isFunction(fn)) fn = that[fn];
+            var parts = key.split(splitter, 3);
+
+            that.models[parts[0]].on(parts[1], function (args) { // [0]: model name, [1]: event
+                if (parts[2] === args.desc) fn.call(that, args.data); // [2]: desc
+            }, id);
+        });
+    }
 }
 
 //// Inheritance Methods /////

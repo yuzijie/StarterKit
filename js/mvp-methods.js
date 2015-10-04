@@ -5,21 +5,21 @@ var h = require("./helper"),
 
 ///////////// Event Methods /////////////
 
-function _detach(obj, that) {               // detach by listener or viewId
+function _detach(obj, that) {               // detach by listener or id
     if (!obj) {                             // if object is a falsy value, remove all
         that.listeners = [];
     } else if (obj instanceof Function) {   // if object is a listener
         h.forEach(that.listeners, function (i, listener) {
             if (obj === listener) {
                 that.listeners.splice(i, 1);
-                that.views.splice(i, 1);
+                that.ids.splice(i, 1);
             }
         });
-    } else {                                // else treat object as a viewId
-        h.forEach(that.views, function (i, viewId) {
-            if (obj === viewId) {
+    } else {                                // else treat object as an id
+        h.forEach(that.ids, function (i, id) {
+            if (obj === id) {
                 that.listeners.splice(i, 1);
-                that.views.splice(i, 1);
+                that.ids.splice(i, 1);
             }
         });
     }

@@ -180,24 +180,6 @@ function _changed(keys, that) {
     return that.setList;
 }
 
-function _listen(model, event, arg3, arg4, that) {
-    var desc, fn;
-
-    if (arg4 == null) {   // model, event, function
-        desc = void 0; // undefined
-        fn = h.isFunction(arg3) ? arg3 : that[arg3];
-    } else {              // model, event, desc and function
-        desc = arg3;
-        fn = h.isFunction(arg4) ? arg4 : that[arg4];
-    }
-
-    that.isListening = true;
-
-    model.on(event, function (args) {
-        if (desc === args.desc) fn.call(that, args.data);
-    }, that.modelId);
-}
-
 ///////////// View Methods /////////////
 
 function _bindDomEvents(that) {
@@ -266,6 +248,24 @@ function _destroy(that) {
     });
 }
 
+///////////// View and Model Methods /////////////
+
+function _listen(model, event, arg3, arg4, that, id) {
+    var desc, fn;
+
+    if (arg4 == null) {   // model, event, function
+        desc = void 0; // undefined
+        fn = h.isFunction(arg3) ? arg3 : that[arg3];
+    } else {              // model, event, desc and function
+        desc = arg3;
+        fn = h.isFunction(arg4) ? arg4 : that[arg4];
+    }
+
+    model.on(event, function (args) {
+        if (desc === args.desc) fn.call(that, args.data);
+    }, id);
+}
+
 ///////////// Inheritance Methods /////////////
 
 function _extend(props, that) {
@@ -300,12 +300,13 @@ module.exports = {
     "call": _call,
     "cleanSet": _cleanSet,
     "changed": _changed,
-    "listen": _listen,
     // view
     "bindDomEvents": _bindDomEvents,
     "bindModelEvents": _bindModelEvents,
     "render": _render,
     "destroy": _destroy,
+    // view and model
+    "listen": _listen,
     // inheritance
     "extend": _extend
 };

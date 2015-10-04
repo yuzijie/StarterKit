@@ -104,7 +104,8 @@ Model.prototype = {
         this.fire("when", {data: data, desc: desc});
     },
     "listen": function (model, event, arg3, arg4) {
-        m.listen(model, event, arg3, arg4, this);
+        m.listen(model, event, arg3, arg4, this, this.modelId);
+        if (!this.isListening) this.isListening = true;
     },
     "size": function () {
         return h.size(this.data);

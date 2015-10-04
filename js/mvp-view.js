@@ -25,6 +25,9 @@ View.prototype = {
     },
     "destroy": function () {
         m.destroy(this);
+    },
+    "listen": function (model, event, arg3, arg4) {
+        m.listen(model, event, arg3, arg4, this, this.viewId);
     }
 };
 

@@ -42,7 +42,7 @@ Model.prototype = {
         for (i in obj) if (obj.hasOwnProperty(i)) return obj[i];
     },
     "set": function (data, arg2, arg3) {
-        var keys = [], desc, obj = {};
+        var keys = [], desc, obj = {}, _this = this;
 
         if (data instanceof jQuery) {              // data is a jQuery form
             keys = m.setFormData(data, this);
@@ -57,7 +57,7 @@ Model.prototype = {
         }
 
         if (desc !== "init") h.forEach(keys, function (i, key) {
-            if (this.setList.indexOf(key) === -1) this.setList.push(key);
+            if (_this.setList.indexOf(key) === -1) _this.setList.push(key);
         });
 
         if (keys.length) this.fire("set", {data: keys, desc: desc});
@@ -114,7 +114,7 @@ Model.prototype = {
         return m.changed(keys, this);
     },
     "destroy": function () {
-        var id = this.modelId;
+        var id = this.modelId, _this = this;
         // remove listeners
         if (this.isListening) h.forEach(this.data, function (key, obj) {
             if (obj.hasOwnProperty("modelId")) obj.off(id);
@@ -123,7 +123,7 @@ Model.prototype = {
         this.fire("destroy", {data: id});
         // delete properties
         h.forEach(this, function (prop) {
-            delete this[prop];
+            delete _this[prop];
         });
     }
 };

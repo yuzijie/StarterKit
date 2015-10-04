@@ -180,6 +180,92 @@ function _changed(keys, that) {
     return that.setList;
 }
 
+function _listen(model, event, arg3, arg4, that) {
+    var desc, fn;
+
+    if (arg4 == null) {   // model, event, function
+        desc = void 0; // undefined
+        fn = h.isFunction(arg3) ? arg3 : that[arg3];
+    } else {              // model, event, desc and function
+        desc = arg3;
+        fn = h.isFunction(arg4) ? arg4 : that[arg4];
+    }
+
+    that.isListening = true;
+
+    model.on(event, function (args) {
+        if (desc === args.desc) fn.call(that, args.data);
+    }, that.modelId);
+}
+
+///////////// View Methods /////////////
+
+function _bindDomEvents(that) {
+    if (that["domEvents"] && that.el) {
+        h.forEach(that["domEvents"], function (key, fn) {
+            if (!h.isFunction(fn)) fn = that[fn];
+            var parts = key.split(splitter, 2);
+
+            if (parts[0] === "this") {
+                that.el.on(parts[1], function (e) { // [1]: event
+                    fn.call(that, e, this);
+                });
+            } else {
+                that.el.on(parts[1], parts[0], function (e) { // [1]: event, [0]: selector
+                    fn.call(that, e, this);
+                });
+            }
+        });
+    }
+}
+
+function _bindModelEvents(that) {
+    if (that["modelEvents"] && that.models) {
+        h.forEach(that["modelEvents"], function (key, fn) {
+            if (!h.isFunction(fn)) fn = that[fn];
+            var parts = key.split(splitter, 3);
+
+            that.models[parts[0]].on(parts[1], function (args) { // [0]: model name, [1]: event
+                if (parts[2] === args.desc) fn.call(that, args.data); // [2]: desc
+            }, that.viewId);
+        });
+    }
+}
+
+function _render(model, that) {
+    if (that.template) {
+        var temp = that.el;
+
+        if (model) {
+            that.el = $(that.template(model.get()));
+        } else {
+            that.el = $(that.template());
+        }
+
+        // if that.el already exists
+        if (temp) temp.replaceWith(that.el);
+
+        // bind events
+        _bindDomEvents(that);
+    }
+    return that;
+}
+
+function _destroy(that) {
+    // remove dom element
+    if (that.el) that.el.remove();
+
+    // remove model listeners
+    if (that.models) h.forEach(that.models, function (key, model) {
+        model.off(that.viewId);
+    });
+
+    // delete properties
+    h.forEach(that, function (prop) {
+        delete that[prop];
+    });
+}
+
 ///////////// Inheritance Methods /////////////
 
 function _extend(props, that) {
@@ -214,6 +300,12 @@ module.exports = {
     "call": _call,
     "cleanSet": _cleanSet,
     "changed": _changed,
+    "listen": _listen,
+    // view
+    "bindDomEvents": _bindDomEvents,
+    "bindModelEvents": _bindModelEvents,
+    "render": _render,
+    "destroy": _destroy,
     // inheritance
     "extend": _extend
 };

@@ -1,7 +1,7 @@
 var h = require("./helper"), XHR = require("./xhr");
 var splitter = /\s+/;
 
-/////////// Event ////////////
+//////////////// Event ////////////////
 var Ev = function () {
     this.listeners = [];
     this.ids = [];
@@ -19,6 +19,37 @@ Ev.prototype = {
         _notify(args, context, this);
     }
 };
+/////// Event Methods ////////
+function _detach(obj, that) { // detach by listener or id
+    if (!obj) {
+
+        that.listeners = [];
+
+    } else if (obj instanceof Function) { // if object is a listener
+
+        h.forEach(that.listeners, function (i, listener) {
+            if (obj === listener) {
+                that.listeners.splice(i, 1);
+                that.ids.splice(i, 1);
+            }
+        });
+
+    } else { // else treat object as an id
+
+        h.forEach(that.ids, function (i, id) {
+            if (obj === id) {
+                that.listeners.splice(i, 1);
+                that.ids.splice(i, 1);
+            }
+        });
+    }
+}
+
+function _notify(args, context, that) {
+    h.forEach(that.listeners, function (i, listener) {
+        listener.call(context, args);
+    });
+}
 
 /////////// Model ////////////
 var Model = function (data) {
@@ -172,33 +203,6 @@ View.prototype = {
 View.extend = function (props) {
     return _extend(props, this);
 };
-
-/////// Event Methods ////////
-function _detach(obj, that) {               // detach by listener or id
-    if (!obj) {                             // if object is a falsy value, remove all
-        that.listeners = [];
-    } else if (obj instanceof Function) {   // if object is a listener
-        h.forEach(that.listeners, function (i, listener) {
-            if (obj === listener) {
-                that.listeners.splice(i, 1);
-                that.ids.splice(i, 1);
-            }
-        });
-    } else {                                // else treat object as an id
-        h.forEach(that.ids, function (i, id) {
-            if (obj === id) {
-                that.listeners.splice(i, 1);
-                that.ids.splice(i, 1);
-            }
-        });
-    }
-}
-
-function _notify(args, context, that) {
-    h.forEach(that.listeners, function (i, listener) {
-        listener.call(context, args);
-    });
-}
 
 /////// Model Methods ////////
 function _get(keys, that) {

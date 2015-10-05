@@ -55,12 +55,10 @@ function _notify(args, context, that) {
 var Model = function (data) {
     if (data != null && data.constructor !== Object) throw "data must be an object!";
 
-    this.modelId = h.r4("m-");
+    this.modelId = h.r4("M");
     this.data = data || {};
     this.events = {};
     this.setList = [];
-
-    _bindModelEvents(this, this.modelId);
 
     if (this.init) this.init();
 };
@@ -69,13 +67,16 @@ Model.prototype = {
     "get": function (keys) {
         return _get(keys, this);
     },
+
     "pick": function (opts) {
         return _pick(opts, this);
     },
+
     "one": function (key) {
         var i, obj = _get(key, this);
         for (i in obj) if (obj.hasOwnProperty(i)) return obj[i];
     },
+
     "set": function (data, arg2, arg3) {
         var keys = [], desc, obj = {}, _this = this;
 
@@ -97,6 +98,7 @@ Model.prototype = {
 
         if (keys.length) this.fire("set", {data: keys, desc: desc});
     },
+
     "add": function (data, desc) {
         var _this = this;
         if (data.constructor === Array) {
@@ -110,6 +112,7 @@ Model.prototype = {
             this.fire("add", {data: key, desc: desc});
         }
     },
+
     "rm": function (keys, desc) {
         var deleted = _rm(keys, this), id = this.modelId;
         if (!h.isEmptyObj(deleted)) {
@@ -120,40 +123,50 @@ Model.prototype = {
             this.fire("rm", {data: deleted, desc: desc});
         }
     },
+
     "call": function (url, keys, opts) {
         _call(url, keys, opts, this);
     },
+
     "on": function (event, fn, id) {
         if (!this.events[event]) this.events[event] = new Ev();
         this.events[event].attach(fn, id);
     },
+
     "off": function (id) {
         h.forEach(this.events, function (key, event) {
             event.detach(id);
         });
     },
+
     "fire": function (event, args) {
         if (this.events[event]) this.events[event].notify(args, this);
     },
+
     "is": function (desc, data) {
         this.fire("when", {data: data, desc: desc});
     },
+
     "listen": function (model, event, arg3, arg4) {
+        var id = model.modelId;
+
+        if (!this.models) this.models = {};
+        if (!this.models[id]) this.models[id] = model;
+
         _listen(model, event, arg3, arg4, this, this.modelId);
-        if (!this.isListening) this.isListening = true;
     },
+
     "size": function () {
         return h.size(this.data);
     },
+
     "changed": function (keys) {
         return _changed(keys, this);
     },
+
     "destroy": function () {
         var id = this.modelId, _this = this;
         // remove listeners
-        if (this.isListening) h.forEach(this.data, function (key, obj) {
-            if (obj.hasOwnProperty("modelId")) obj.off(id);
-        });
         if (this.models) h.forEach(this.models, function (key, obj) {
             obj.off(id);
         });
@@ -167,40 +180,6 @@ Model.prototype = {
 };
 
 Model.extend = function (props) {
-    return _extend(props, this);
-};
-
-//////////////// View /////////////////
-var View = function (opts) {
-    opts = opts || {};
-
-    var _this = this;
-
-    h.forEach(opts, function (key, item) {
-        _this[key] = item;
-    });
-
-    if (!this.viewId) this.viewId = h.r4("v-");
-
-    _bindModelEvents(this, this.viewId);
-    _bindDomEvents(this);
-
-    if (this.init) this.init();
-};
-
-View.prototype = {
-    "render": function (model) {
-        return _render(model, this);
-    },
-    "destroy": function () {
-        _destroy(this);
-    },
-    "listen": function (model, event, arg3, arg4) {
-        _listen(model, event, arg3, arg4, this, this.viewId);
-    }
-};
-
-View.extend = function (props) {
     return _extend(props, this);
 };
 
@@ -354,24 +333,82 @@ function _changed(keys, that) {
     return that.setList;
 }
 
-//////// View Methods ////////
-function _bindDomEvents(that) {
-    if (that["domEvents"] && that.el) {
-        h.forEach(that["domEvents"], function (key, fn) {
-            if (!h.isFunction(fn)) fn = that[fn];
-            var parts = key.split(splitter, 2);
+//////////////// View /////////////////
+var View = function (opts) {
+    opts = opts || {};
 
-            if (parts[0] === "this") {
-                that.el.on(parts[1], function (e) { // [1]: event
-                    fn.call(that, e, this);
-                });
-            } else {
-                that.el.on(parts[1], parts[0], function (e) { // [1]: event, [0]: selector
-                    fn.call(that, e, this);
-                });
-            }
+    var _this = this;
+
+    h.forEach(opts, function (key, item) {
+        _this[key] = item;
+    });
+
+    if (!this.viewId) this.viewId = h.r4("V");
+
+    _bindModelEvents(this);
+    _bindDomEvents(this);
+
+    if (this.init) this.init();
+};
+
+View.prototype = {
+    "render": function (model) {
+        return _render(model, this);
+    },
+
+    "listen": function (modelName, event, arg3, arg4) {
+        var model = this.models[modelName];
+        if (!model) throw "invalid model name";
+
+        _listen(model, event, arg3, arg4, this, this.viewId);
+    },
+
+    "destroy": function () {
+        var id = this.viewId, _this = this;
+        // remove dom element
+        if (this.el) this.el.remove();
+        // remove listeners
+        if (this.models) h.forEach(this.models, function (key, obj) {
+            obj.off(id);
+        });
+        // delete properties
+        h.forEach(_this, function (prop) {
+            delete _this[prop];
         });
     }
+};
+
+View.extend = function (props) {
+    return _extend(props, this);
+};
+
+//////// View Methods ////////
+function _bindModelEvents(that) {
+    if (that["modelEvents"] && that.models) h.forEach(that["modelEvents"], function (key, fn) {
+        if (!h.isFunction(fn)) fn = that[fn];
+        var parts = key.split(splitter, 3);
+
+        that.models[parts[0]].on(parts[1], function (args) { // [0]: model name, [1]: event
+            if (parts[2] === args.desc) fn.call(that, args.data); // [2]: desc
+        }, that.viewId);
+    });
+}
+
+function _bindDomEvents(that) {
+    if (that["domEvents"] && that.el) h.forEach(that["domEvents"], function (key, fn) {
+        if (!h.isFunction(fn)) fn = that[fn];
+        var parts = key.split(splitter, 2);
+
+        if (parts[0] === "this") {
+            that.el.on(parts[1], function (e) { // [1]: event
+                fn.call(that, e, this);
+            });
+        } else {
+            that.el.on(parts[1], parts[0], function (e) { // [1]: event, [0]: selector
+                fn.call(that, e, this);
+            });
+        }
+    });
 }
 
 function _render(model, that) {
@@ -393,21 +430,6 @@ function _render(model, that) {
     return that;
 }
 
-function _destroy(that) {
-    // remove dom element
-    if (that.el) that.el.remove();
-
-    // remove model listeners
-    if (that.models) h.forEach(that.models, function (key, model) {
-        model.off(that.viewId);
-    });
-
-    // delete properties
-    h.forEach(that, function (prop) {
-        delete that[prop];
-    });
-}
-
 /// View and Model Methods ///
 function _listen(model, event, arg3, arg4, that, id) {
     var desc, fn;
@@ -423,19 +445,6 @@ function _listen(model, event, arg3, arg4, that, id) {
     model.on(event, function (args) {
         if (desc === args.desc) fn.call(that, args.data);
     }, id);
-}
-
-function _bindModelEvents(that, id) {
-    if (that["modelEvents"] && that.models) {
-        h.forEach(that["modelEvents"], function (key, fn) {
-            if (!h.isFunction(fn)) fn = that[fn];
-            var parts = key.split(splitter, 3);
-
-            that.models[parts[0]].on(parts[1], function (args) { // [0]: model name, [1]: event
-                if (parts[2] === args.desc) fn.call(that, args.data); // [2]: desc
-            }, id);
-        });
-    }
 }
 
 //// Inheritance Methods /////

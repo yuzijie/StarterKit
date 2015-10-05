@@ -89,7 +89,7 @@ Model.prototype = {
             desc = arg3;
         }
 
-        if (desc !== "init") h.forEach(keys, function (i, key) {
+        if (!desc || !desc.charAt || desc.charAt(0) !== "_") h.forEach(keys, function (i, key) {
             if (_this.setList.indexOf(key) === -1) _this.setList.push(key);
         });
 

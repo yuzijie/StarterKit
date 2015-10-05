@@ -390,7 +390,7 @@ View.extend = function (props) {
 
 //////// View Methods ////////
 function _bindModelEvents(that) {
-    if (that["modelEvents"] && that.models) h.forEach(that["modelEvents"], function (key, fn) {
+    if (that["modelEvents"]) h.forEach(that["modelEvents"], function (key, fn) {
         if (!h.isFunction(fn)) fn = that[fn];
         var parts = key.split(splitter, 3);
 
@@ -401,7 +401,7 @@ function _bindModelEvents(that) {
 }
 
 function _bindDomEvents(that) {
-    if (that["domEvents"] && that.el) h.forEach(that["domEvents"], function (key, fn) {
+    if (that["domEvents"]) h.forEach(that["domEvents"], function (key, fn) {
         if (!h.isFunction(fn)) fn = that[fn];
         var parts = key.split(splitter, 2);
 

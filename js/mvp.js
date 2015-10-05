@@ -106,7 +106,7 @@ Model.prototype = {
 
         if (!h.isEmptyObj(deleted)) {
             if (this.models) h.forEach(deleted, function (key, obj) {
-                if (_this.models.hasOwnProperty(key)) {
+                if (obj.modelId && _this.models.hasOwnProperty(key)) {
                     obj.off(id);
                     delete _this.models[key];
                 }

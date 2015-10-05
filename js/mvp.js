@@ -84,7 +84,7 @@ Model.prototype = {
             if (_this.setList.indexOf(key) === -1) _this.setList.push(key);
         });
 
-        if (keys.length) this.fire("set", {data: keys, desc: desc});
+        if (keys.length) this.fire("set", {data: keys, desc: desc, model: _this});
     },
 
     "add": function (data, desc) {
@@ -93,11 +93,11 @@ Model.prototype = {
             h.forEach(data, function (i, item) {
                 var mod = new Model(item), key;
                 key = _add(mod, _this);
-                _this.fire("add", {data: key, desc: desc});
+                _this.fire("add", {data: key, desc: desc, model: _this});
             });
         } else {
             var key = _add(data, this);
-            this.fire("add", {data: key, desc: desc});
+            this.fire("add", {data: key, desc: desc, model: _this});
         }
     },
 
@@ -112,7 +112,7 @@ Model.prototype = {
                 }
             });
             _cleanSet(deleted, this);
-            this.fire("rm", {data: deleted, desc: desc});
+            this.fire("rm", {data: deleted, desc: desc, model: _this});
         }
     },
 
@@ -136,7 +136,7 @@ Model.prototype = {
     },
 
     "is": function (desc, data) {
-        this.fire("when", {data: data, desc: desc});
+        this.fire("when", {data: data, desc: desc, model: this});
     },
 
     "listen": function (model, event, arg3, arg4) {
@@ -164,7 +164,7 @@ Model.prototype = {
             obj.off(id);
         });
         // trigger event
-        this.fire("destroy", {data: id});
+        this.fire("destroy", {data: id, model: _this});
         // delete properties
         h.forEach(_this, function (prop) {
             delete _this[prop];
@@ -284,7 +284,7 @@ function _rm(keys, that) {
 }
 
 function _call(url, keys, opts, that) {
-    var obj;
+    var obj, _this = this;
 
     if (keys == null) {
         obj = null;
@@ -303,9 +303,9 @@ function _call(url, keys, opts, that) {
 
         that.xhr.send().done(function (data) {
             if (data.type === "success" && obj) _cleanSet(obj, that);
-            if (opts[data.type]) opts[data.type].call(that, data);
+            if (opts[data.type]) opts[data.type].call(that, data, _this);
         }).fail(function () {
-            if (opts["error"]) opts["error"].call(that);
+            if (opts["error"]) opts["error"].call(that, null, _this);
         });
     }
 }
@@ -385,7 +385,7 @@ function _bindModelEvents(that) {
         var parts = key.split(splitter, 3);
 
         that.models[parts[0]].on(parts[1], function (args) { // [0]: model name, [1]: event
-            if (parts[2] === args.desc) fn.call(that, args.data); // [2]: desc
+            if (parts[2] === args.desc) fn.call(that, args.data, args.model); // [2]: desc
         }, that.viewId);
     });
 }
@@ -439,7 +439,7 @@ function _listen(model, event, arg3, arg4, that, id) {
     }
 
     model.on(event, function (args) {
-        if (desc === args.desc) fn.call(that, args.data);
+        if (desc === args.desc) fn.call(that, args.data, args.model);
     }, id);
 }
 

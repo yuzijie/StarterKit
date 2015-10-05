@@ -51,11 +51,11 @@ function _notify(args, context, that) {
     });
 }
 
-/////////// Model ////////////
+//////////////// Model ////////////////
 var Model = function (data) {
     if (data != null && data.constructor !== Object) throw "data must be an object!";
 
-    this.modelId = h.r4("m");
+    this.modelId = h.r4("m-");
     this.data = data || {};
     this.events = {};
     this.setList = [];
@@ -170,7 +170,7 @@ Model.extend = function (props) {
     return _extend(props, this);
 };
 
-/////////// View /////////////
+//////////////// View /////////////////
 var View = function (opts) {
     opts = opts || {};
 
@@ -180,7 +180,7 @@ var View = function (opts) {
         _this[key] = item;
     });
 
-    if (!this.viewId) this.viewId = h.r4("v");
+    if (!this.viewId) this.viewId = h.r4("v-");
 
     _bindModelEvents(this, this.viewId);
     _bindDomEvents(this);

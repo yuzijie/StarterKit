@@ -461,21 +461,21 @@ function _listen(model, event, arg3, arg4, that, id) {
 
 //// Inheritance Methods /////
 function _extend(props, that) {
-    var parent = that, child;
+    var parent = that, Extend;
 
-    child = function () {
+    Extend = function () {
         parent.apply(this, arguments);
     };
 
-    child.prototype = Object.create(parent.prototype); // inherit
+    Extend.prototype = Object.create(parent.prototype); // inherit
 
     if (props) h.forEach(props, function (key, value) {
-        child.prototype[key] = value;
+        Extend.prototype[key] = value;
     });
 
-    child.prototype.constructor = child;
+    Extend.prototype.constructor = Extend;
 
-    return child;
+    return Extend;
 }
 
 module.exports = {

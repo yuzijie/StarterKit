@@ -12,44 +12,32 @@ Ev.prototype = {
         this.listeners.push(listener);
         this.ids.push(id);
     },
-    detach: function (obj) {
-        _detach(obj, this);
+    detach: function (obj) { // detach by listener or id
+        var that = this;
+        if (!obj) {
+            that.listeners = [];
+        } else if (obj instanceof Function) { // if object is a listener
+            h.forEach(that.listeners, function (i, listener) {
+                if (obj === listener) {
+                    that.listeners.splice(i, 1);
+                    that.ids.splice(i, 1);
+                }
+            });
+        } else { // else treat object as an id
+            h.forEach(that.ids, function (i, id) {
+                if (obj === id) {
+                    that.listeners.splice(i, 1);
+                    that.ids.splice(i, 1);
+                }
+            });
+        }
     },
     notify: function (args, context) {
-        _notify(args, context, this);
+        h.forEach(this.listeners, function (i, listener) {
+            listener.call(context, args);
+        });
     }
 };
-/////// Event Methods ////////
-function _detach(obj, that) { // detach by listener or id
-    if (!obj) {
-
-        that.listeners = [];
-
-    } else if (obj instanceof Function) { // if object is a listener
-
-        h.forEach(that.listeners, function (i, listener) {
-            if (obj === listener) {
-                that.listeners.splice(i, 1);
-                that.ids.splice(i, 1);
-            }
-        });
-
-    } else { // else treat object as an id
-
-        h.forEach(that.ids, function (i, id) {
-            if (obj === id) {
-                that.listeners.splice(i, 1);
-                that.ids.splice(i, 1);
-            }
-        });
-    }
-}
-
-function _notify(args, context, that) {
-    h.forEach(that.listeners, function (i, listener) {
-        listener.call(context, args);
-    });
-}
 
 //////////////// Model ////////////////
 var Model = function (data) {
@@ -114,10 +102,14 @@ Model.prototype = {
     },
 
     "rm": function (keys, desc) {
-        var deleted = _rm(keys, this), id = this.modelId;
+        var deleted = _rm(keys, this), id = this.modelId, _this = this;
+
         if (!h.isEmptyObj(deleted)) {
-            if (this.isListening) h.forEach(deleted, function (key, obj) {
-                if (obj.hasOwnProperty("modelId")) obj.off(id);
+            if (this.models) h.forEach(deleted, function (key, obj) {
+                if (_this.models.hasOwnProperty(key)) {
+                    obj.off(id);
+                    delete _this.models[key];
+                }
             });
             _cleanSet(deleted, this);
             this.fire("rm", {data: deleted, desc: desc});
@@ -272,9 +264,12 @@ function _rm(keys, that) {
     var rm = {};
 
     if (keys == null) {
+
         rm = that.data;
         that.data = {};
+
     } else {
+
         if (keys.constructor !== Array) keys = (keys + "").split(splitter);
         h.forEach(keys, function (i, key) {
             if (that.data.hasOwnProperty(key)) {

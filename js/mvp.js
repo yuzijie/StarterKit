@@ -41,7 +41,7 @@ Ev.prototype = {
 
 //////////////// Model ////////////////
 var Model = function (data) {
-    if (data != null && data.constructor !== Object) throw "data must be an object!";
+    if (data != null && data.constructor !== Object) throw "Model data must be an object!";
 
     this.modelId = h.r4("M");
     this.data = data || {};
@@ -102,13 +102,13 @@ Model.prototype = {
     },
 
     "rm": function (keys, desc) {
-        var deleted = _rm(keys, this), id = this.modelId, _this = this;
+        var deleted = _rm(keys, this), id = this.modelId, mid, _this = this;
 
         if (!h.isEmptyObj(deleted)) {
             if (this.models) h.forEach(deleted, function (key, obj) {
-                if (obj.modelId && _this.models.hasOwnProperty(key)) {
-                    obj.off(id);
-                    delete _this.models[key];
+                if (mid = obj.modelId && _this.models[mid]) {
+                    _this.models[mid].off(id);
+                    delete _this.models[mid];
                 }
             });
             _cleanSet(deleted, this);
@@ -141,6 +141,7 @@ Model.prototype = {
 
     "listen": function (model, event, arg3, arg4) {
         var id = model.modelId;
+        if (!id) throw "You can only listen to model";
 
         if (!this.models) this.models = {};
         if (!this.models[id]) this.models[id] = model;
@@ -223,7 +224,7 @@ function _set(data, that) {
             keys.push(key);
         });
     } else {
-        throw "data must be an object!";
+        throw "Only object can be set!";
     }
 
     return keys;

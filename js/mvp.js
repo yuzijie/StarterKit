@@ -42,9 +42,18 @@ Ev.prototype = {
 //////////////// Model ////////////////
 var Model = function (data) {
     if (data != null && data.constructor !== Object) throw "Model data must be an object!";
+    var tmp = {};
 
+    if (this.data) h.forEach(this.data, function (key, value) {
+        tmp[key] = value;
+    });
+
+    if (data) h.forEach(data, function (key, value) {
+        tmp[key] = value;
+    });
+
+    this.data = tmp;
     this.modelId = h.r4("M");
-    this.data = data || {};
     this.events = {};
     this.setList = [];
 
@@ -340,6 +349,7 @@ var View = function (opts) {
     });
 
     if (!this.viewId) this.viewId = h.r4("V");
+    if (!this.models) this.models = {};
 
     _bindModelEvents(this);
     _bindDomEvents(this);

@@ -41,7 +41,7 @@ function isEmptyObj(obj) { // object is empty
 
 function size(obj) { // object size
     var count = 0;
-    h.forEach(obj, function () {
+    forEach(obj, function () {
         count++;
     });
     return count;

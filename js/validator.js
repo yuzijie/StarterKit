@@ -14,6 +14,10 @@ var checkers = {
     max: function (content, condition) {
         var num = Number(content), max = Number(condition);
         if (num > max) return "max";
+    },
+    "data-not-zero": function (content) {
+        var num = Number(content);
+        if (num === 0) return "zero";
     }
 };
 

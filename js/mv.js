@@ -53,7 +53,7 @@ var Model = function (data) {
     });
 
     this.data = tmp;
-    this.modelId = h.r4("M");
+    this.modelId = this.modelId || h.r4("M");
     this.events = {};
     this.setList = [];
 
@@ -134,15 +134,12 @@ Model.prototype = {
         return _changed(keys, this);
     },
 
-    // todo: 看看需不需要修改
     "destroy": function () {
         var id = this.modelId, _this = this;
-        // remove listeners
-        if (this.models) h.forEach(this.models, function (key, obj) {
-            obj.off(id);
-        });
+
         // trigger event
         this.fire("destroy", {data: id, model: _this});
+
         // delete properties
         h.forEach(_this, function (prop) {
             delete _this[prop];
@@ -169,6 +166,8 @@ var View = function (opts) {
         if (this.attributes) this.el.attr(this.attributes);
     }
 
+    this.viewId = this.viewId || h.r4("V");
+
     _bindModelEvents(this);
     _bindDomEvents(this);
 
@@ -180,39 +179,53 @@ View.prototype = {
         return _render(model, this);
     },
 
-    "listen": function (modelName, event, arg3, arg4) {
-        var model = this.models[modelName];
-        if (!model) throw "invalid model name";
-
-        _listen(model, event, arg3, arg4, this, this.viewId);
+    // todo: 修改
+    "listen": function (model, event, arg3, arg4) {
+        if (!this.models[model.modelId]) this.add(model);
+        _listen(model, event, arg3, arg4, this);
     },
 
+    // todo: edit
     "pick": function (opts) {
         return _pick(opts, this);
     },
 
-    "add": function (data, desc) {
-        var _this = this;
-        if (data.constructor === Array) {
-            h.forEach(data, function (i, item) {
-                var mod = new Model(item), key;
-                key = _add(mod, _this);
-                _this.fire("add", {data: key, desc: desc, model: _this});
-            });
+    "add": function (model) {
+        var key;
+
+        if (model != null && data.hasOwnProperty("modelId")) {
+            key = model.modelId;
+            this.models[key] = model;
+            this.listen(model, "destroy", this.rm);
         } else {
-            var key = _add(data, this);
-            this.fire("add", {data: key, desc: desc, model: _this});
+            throw "Invalid model!";
         }
+
+        return key;
+    },
+
+    "rm": function (keys) {
+        var rm = _rm(keys, this.models), id = this.viewId;
+
+        // detach all events
+        h.forEach(rm, function (i, model) {
+            model.off(id);
+        });
+
+        return rm;
     },
 
     "destroy": function () {
         var id = this.viewId, _this = this;
+
         // remove dom element
         if (this.el) this.el.remove();
+
         // remove listeners
         if (this.models) h.forEach(this.models, function (key, obj) {
             obj.off(id);
         });
+
         // delete properties
         h.forEach(_this, function (prop) {
             delete _this[prop];
@@ -296,34 +309,18 @@ function _setFormData(form, that) {
     return _set(output, that);
 }
 
-function _add(data, that) {
-    var key;
-
-    if (data != null && data.hasOwnProperty("modelId")) {
-        key = data.modelId;
-        that.data[key] = data;
-    } else {
-        throw "You can only add a model";
-    }
-
-    return key;
-}
-
-function _rm(keys, that) {
+function _rm(keys, obj) {
     var rm = {};
 
-    if (keys == null) {
-
-        rm = that.data;
-        that.data = {};
-
+    if (keys == null) { // remove all
+        rm = obj;
+        obj = {};
     } else {
-
         if (keys.constructor !== Array) keys = (keys + "").split(splitter);
         h.forEach(keys, function (i, key) {
-            if (that.data.hasOwnProperty(key)) {
-                rm[key] = that.data[key];
-                delete that.data[key];
+            if (obj.hasOwnProperty(key)) {
+                rm[key] = obj[key];
+                delete obj[key];
             }
         });
     }
@@ -419,20 +416,20 @@ function _render(model, that) {
     return that.el;
 }
 
-function _listen(model, event, arg3, arg4, that, id) {
+function _listen(model, event, arg3, arg4, that) {
     var desc, fn;
 
     if (arg4 == null) {   // model, event, function
         desc = void 0; // undefined
-        fn = h.isFunction(arg3) ? arg3 : that[arg3];
+        fn = arg3;
     } else {              // model, event, desc and function
         desc = arg3;
-        fn = h.isFunction(arg4) ? arg4 : that[arg4];
+        fn = arg4;
     }
 
     model.on(event, function (args) {
         if (desc === args.desc) fn.call(that, args.data, args.model);
-    }, id);
+    }, that.viewId);
 }
 
 ///////////// Inheritance /////////////

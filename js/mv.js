@@ -157,21 +157,11 @@ Model.extend = function (props) {
 //////////////// View /////////////////
 var View = function (opts) {
     opts = opts || {};
-
-    var _this = this, tmp;
-
-    if (this.models) tmp = this.models; // store parent models
+    var _this = this;
 
     h.forEach(opts, function (key, item) {
         _this[key] = item;
     });
-
-    // this.models has been over written
-    if (tmp && this.models && tmp !== this.models) h.forEach(tmp, function (key, obj) {
-        if (!_this.models.hasOwnProperty(key)) _this.models[key] = obj;
-    });
-
-    if (!this.viewId) this.viewId = h.r4("V");
 
     _bindModelEvents(this);
     _bindDomEvents(this);

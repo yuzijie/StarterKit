@@ -163,9 +163,10 @@ var View = function (opts) {
         _this[key] = item;
     });
 
-    if (el = this.el) {
+    if (el = this.el) { // prepare element
         if (el.charAt) el = document.createElement(el); // el is a string
         this.el = h.to$(el);
+        if (this.attributes) this.el.attr(this.attributes);
     }
 
     _bindModelEvents(this);

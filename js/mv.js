@@ -89,21 +89,15 @@ Model.prototype = {
             if (_this.setList.indexOf(key) === -1) _this.setList.push(key);
         });
 
-        if (keys.length) this.fire("set", {data: keys, desc: desc, model: _this});
+        if (keys.length) this.fire("set", {data: keys, desc: desc, model: this});
     },
 
     "rm": function (keys, desc) {
-        var deleted = _rm(keys, this), id = this.modelId, mid, _this = this;
+        var deleted = _rm(keys, this.data);
 
         if (!h.isEmptyObj(deleted)) {
-            if (this.models) h.forEach(deleted, function (key, obj) {
-                if (mid = obj.modelId && _this.models[mid]) {
-                    _this.models[mid].off(id);
-                    delete _this.models[mid];
-                }
-            });
             _cleanSet(deleted, this);
-            this.fire("rm", {data: deleted, desc: desc, model: _this});
+            this.fire("rm", {data: deleted, desc: desc, model: this});
         }
     },
 
@@ -179,7 +173,6 @@ View.prototype = {
         return _render(model, this);
     },
 
-    // todo: 修改
     "listen": function (model, event, arg3, arg4) {
         if (!this.models[model.modelId]) this.add(model);
         _listen(model, event, arg3, arg4, this);

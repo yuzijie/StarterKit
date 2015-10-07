@@ -321,18 +321,9 @@ function _rm(keys, obj) {
     return rm;
 }
 
-function _call(url, keys, opts, that) {
-    var obj, _this = this;
-
-    if (keys == null) {
-        obj = null;
-    } else if (keys.constructor === Object) {
-        obj = keys;
-    } else {
-        obj = _get(keys, that);
-    }
-
+function _call(url, obj, opts, that) {
     if (obj === null || !h.isEmptyObj(obj)) {
+
         if (that.hasOwnProperty("xhr")) {
             that.xhr.updateUrl(url).updateData(obj);
         } else {
@@ -341,11 +332,12 @@ function _call(url, keys, opts, that) {
 
         that.xhr.send().done(function (data) {
             if (data.type === "success" && obj) _cleanSet(obj, that);
-            if (opts[data.type]) opts[data.type].call(that, data, _this);
+            if (opts[data.type]) opts[data.type].call(that, data);
         }).fail(function () {
-            if (opts["error"]) opts["error"].call(that, null, _this);
+            if (opts["error"]) opts["error"].call(that);
         });
-    }
+
+    } else throw "obj cannot be empty";
 }
 
 function _cleanSet(obj, that) {

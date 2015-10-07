@@ -10,7 +10,7 @@
     * scroll-to.js：滚动页面到某元素的位置
     * anim.js：和 animation、transition 有关的方法
     * polyfill.js：帮助 Javascript 兼容不同浏览器
-    * mvp.js：A very simple Model-View-Presenter Framework
+    * mv.js：A very simple Model-View-Whatever Library
 * 核心
     * box.js：定义页面中所有可以打开和关闭的元素的行为
     * dom.js：管理页面中动态添加的元素
@@ -41,3 +41,4 @@
     * mvp-methods.js：MVP 用到的方法
     * mvp-model.js：MVP 的 Model 类和 Event 类
     * mvp-view.js：MVP 的 View 类
+    * mvp.js：old Model-View-Presenter Library

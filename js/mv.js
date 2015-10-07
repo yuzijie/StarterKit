@@ -62,11 +62,22 @@ var Model = function (data) {
 
 Model.prototype = {
     "get": function (keys) {
-        return _get(keys, this);
+        var output = {}, that = this;
+
+        if (keys == null) {
+            output = that.data;
+        } else {
+            if (keys.constructor !== Array) keys = (keys + "").split(splitter);
+            h.forEach(keys, function (i, key) {
+                if (that.data.hasOwnProperty(key)) output[key] = that.data[key];
+            });
+        }
+
+        return output;
     },
 
     "one": function (key) {
-        var i, obj = _get(key, this);
+        var i, obj = this.get(key);
         for (i in obj) if (obj.hasOwnProperty(i)) return obj[i];
     },
 
@@ -102,7 +113,30 @@ Model.prototype = {
     },
 
     "call": function (url, keys, opts) {
-        _call(url, keys, opts, this);
+        var obj;
+
+        if (keys == null) {
+            obj = null;
+        } else if (typeof keys === 'object') {
+            obj = keys;
+        } else {
+            obj = this.get(keys);
+        }
+
+        _call(url, obj, opts, this);
+    },
+
+    "save": function (url, arg2, arg3) {
+        var opts, keys;
+
+        if (arg3 == null) {
+            opts = arg2;
+        } else {
+            keys = arg2;
+            opts = arg3;
+        }
+
+        _call(url, this.changed(keys), opts, this);
     },
 
     "on": function (event, fn, id) {
@@ -178,9 +212,12 @@ View.prototype = {
         _listen(model, event, arg3, arg4, this);
     },
 
-    // todo: edit
     "pick": function (opts) {
         return _pick(opts, this);
+    },
+
+    "call": function (url, obj, opts) {
+        _call(url, obj, opts, this);
     },
 
     "add": function (model) {
@@ -231,33 +268,18 @@ View.extend = function (props) {
 };
 
 /////////////// Methods ///////////////
-function _get(keys, that) {
-    var output = {};
-
-    if (keys == null) {
-        output = that.data;
-    } else {
-        if (keys.constructor !== Array) keys = (keys + "").split(splitter);
-        h.forEach(keys, function (i, key) {
-            if (that.data.hasOwnProperty(key)) output[key] = that.data[key];
-        });
-    }
-
-    return output;
-}
-
 function _pick(opts, that) {
     opts = opts || {};
 
     var output = [], item;
 
     if (opts.filter) {
-        h.forEach(that.data, function (key, value) {
+        h.forEach(that.models, function (key, value) {
             item = opts.filter(key, value);
-            output.push(item);
+            if (item) output.push(item);
         });
     } else {
-        h.forEach(that.data, function (key, value) {
+        h.forEach(that.models, function (key, value) {
             output.push(value);
         });
     }

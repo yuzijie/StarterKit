@@ -65,10 +65,6 @@ Model.prototype = {
         return _get(keys, this);
     },
 
-    "pick": function (opts) {
-        return _pick(opts, this);
-    },
-
     "one": function (key) {
         var i, obj = _get(key, this);
         for (i in obj) if (obj.hasOwnProperty(i)) return obj[i];
@@ -94,20 +90,6 @@ Model.prototype = {
         });
 
         if (keys.length) this.fire("set", {data: keys, desc: desc, model: _this});
-    },
-
-    "add": function (data, desc) {
-        var _this = this;
-        if (data.constructor === Array) {
-            h.forEach(data, function (i, item) {
-                var mod = new Model(item), key;
-                key = _add(mod, _this);
-                _this.fire("add", {data: key, desc: desc, model: _this});
-            });
-        } else {
-            var key = _add(data, this);
-            this.fire("add", {data: key, desc: desc, model: _this});
-        }
     },
 
     "rm": function (keys, desc) {
@@ -144,28 +126,15 @@ Model.prototype = {
         if (this.events[event]) this.events[event].notify(args, this);
     },
 
-    "is": function (desc, data) {
+    "exec": function (desc, data) {
         this.fire("when", {data: data, desc: desc, model: this});
-    },
-
-    "listen": function (model, event, arg3, arg4) {
-        var id = model.modelId;
-        if (!id) throw "You can only listen to model";
-
-        if (!this.models) this.models = {};
-        if (!this.models[id]) this.models[id] = model;
-
-        _listen(model, event, arg3, arg4, this, this.modelId);
-    },
-
-    "size": function () {
-        return h.size(this.data);
     },
 
     "changed": function (keys) {
         return _changed(keys, this);
     },
 
+    // todo: 看看需不需要修改
     "destroy": function () {
         var id = this.modelId, _this = this;
         // remove listeners
@@ -185,7 +154,81 @@ Model.extend = function (props) {
     return _extend(props, this);
 };
 
-/////// Model Methods ////////
+//////////////// View /////////////////
+var View = function (opts) {
+    opts = opts || {};
+
+    var _this = this, tmp;
+
+    if (this.models) tmp = this.models; // store parent models
+
+    h.forEach(opts, function (key, item) {
+        _this[key] = item;
+    });
+
+    // this.models has been over written
+    if (tmp && this.models && tmp !== this.models) h.forEach(tmp, function (key, obj) {
+        if (!_this.models.hasOwnProperty(key)) _this.models[key] = obj;
+    });
+
+    if (!this.viewId) this.viewId = h.r4("V");
+
+    _bindModelEvents(this);
+    _bindDomEvents(this);
+
+    if (this.init) this.init();
+};
+
+View.prototype = {
+    "render": function (model) {
+        return _render(model, this);
+    },
+
+    "listen": function (modelName, event, arg3, arg4) {
+        var model = this.models[modelName];
+        if (!model) throw "invalid model name";
+
+        _listen(model, event, arg3, arg4, this, this.viewId);
+    },
+
+    "pick": function (opts) {
+        return _pick(opts, this);
+    },
+
+    "add": function (data, desc) {
+        var _this = this;
+        if (data.constructor === Array) {
+            h.forEach(data, function (i, item) {
+                var mod = new Model(item), key;
+                key = _add(mod, _this);
+                _this.fire("add", {data: key, desc: desc, model: _this});
+            });
+        } else {
+            var key = _add(data, this);
+            this.fire("add", {data: key, desc: desc, model: _this});
+        }
+    },
+
+    "destroy": function () {
+        var id = this.viewId, _this = this;
+        // remove dom element
+        if (this.el) this.el.remove();
+        // remove listeners
+        if (this.models) h.forEach(this.models, function (key, obj) {
+            obj.off(id);
+        });
+        // delete properties
+        h.forEach(_this, function (prop) {
+            delete _this[prop];
+        });
+    }
+};
+
+View.extend = function (props) {
+    return _extend(props, this);
+};
+
+/////////////// Methods ///////////////
 function _get(keys, that) {
     var output = {};
 
@@ -338,63 +381,6 @@ function _changed(keys, that) {
     return that.setList;
 }
 
-//////////////// View /////////////////
-var View = function (opts) {
-    opts = opts || {};
-
-    var _this = this, tmp;
-
-    if (this.models) tmp = this.models; // store parent models
-
-    h.forEach(opts, function (key, item) {
-        _this[key] = item;
-    });
-
-    // this.models has been over written
-    if (tmp && this.models && tmp !== this.models) h.forEach(tmp, function (key, obj) {
-        if (!_this.models.hasOwnProperty(key)) _this.models[key] = obj;
-    });
-
-    if (!this.viewId) this.viewId = h.r4("V");
-
-    _bindModelEvents(this);
-    _bindDomEvents(this);
-
-    if (this.init) this.init();
-};
-
-View.prototype = {
-    "render": function (model) {
-        return _render(model, this);
-    },
-
-    "listen": function (modelName, event, arg3, arg4) {
-        var model = this.models[modelName];
-        if (!model) throw "invalid model name";
-
-        _listen(model, event, arg3, arg4, this, this.viewId);
-    },
-
-    "destroy": function () {
-        var id = this.viewId, _this = this;
-        // remove dom element
-        if (this.el) this.el.remove();
-        // remove listeners
-        if (this.models) h.forEach(this.models, function (key, obj) {
-            obj.off(id);
-        });
-        // delete properties
-        h.forEach(_this, function (prop) {
-            delete _this[prop];
-        });
-    }
-};
-
-View.extend = function (props) {
-    return _extend(props, this);
-};
-
-//////// View Methods ////////
 function _bindModelEvents(that) {
     if (that["modelEvents"]) h.forEach(that["modelEvents"], function (key, fn) {
         if (!h.isFunction(fn)) fn = that[fn];
@@ -442,7 +428,6 @@ function _render(model, that) {
     return that;
 }
 
-/// View and Model Methods ///
 function _listen(model, event, arg3, arg4, that, id) {
     var desc, fn;
 
@@ -459,7 +444,7 @@ function _listen(model, event, arg3, arg4, that, id) {
     }, id);
 }
 
-//// Inheritance Methods /////
+///////////// Inheritance /////////////
 function _extend(props, that) {
     var parent = that, Extend;
 

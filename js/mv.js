@@ -406,22 +406,17 @@ function _bindDomEvents(that) {
 }
 
 function _render(model, that) {
-    if (that.template) {
-        var temp = that.el;
+    var output;
 
-        if (model) {
-            that.el = $(that.template(model.get()));
-        } else {
-            that.el = $(that.template());
-        }
-
-        // if that.el already exists
-        if (temp) temp.replaceWith(that.el);
-
-        // bind events
-        _bindDomEvents(that);
+    if (model) {
+        output = that.template(model.get());
+    } else {
+        output = that.template();
     }
-    return that;
+
+    that.el.html(output);
+
+    return that.el;
 }
 
 function _listen(model, event, arg3, arg4, that, id) {

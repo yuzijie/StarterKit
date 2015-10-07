@@ -157,11 +157,16 @@ Model.extend = function (props) {
 //////////////// View /////////////////
 var View = function (opts) {
     opts = opts || {};
-    var _this = this;
+    var _this = this, el;
 
     h.forEach(opts, function (key, item) {
         _this[key] = item;
     });
+
+    if (el = this.el) {
+        if (el.charAt) el = document.createElement(el); // el is a string
+        this.el = h.to$(el);
+    }
 
     _bindModelEvents(this);
     _bindDomEvents(this);

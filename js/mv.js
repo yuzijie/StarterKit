@@ -81,26 +81,22 @@ Model.prototype = {
         for (i in obj) if (obj.hasOwnProperty(i)) return obj[i];
     },
 
-    "set": function (data, arg2, arg3) {
-        var keys = [], desc, obj = {}, _this = this;
+    "set": function (key, value, desc) {
+        var old, obj = {}, _this = this;
 
-        if (data instanceof jQuery) {              // data is a jQuery form
-            keys = _setFormData(data, this);
-            desc = arg2;
-        } else if (data.constructor === Object) {  // data is an object
-            keys = _set(data, this);
-            desc = arg2;
-        } else {                                   // data is a key
-            obj[data] = arg2;
-            keys = _set(obj, this);
-            desc = arg3;
+        if (desc == null) { // data, desc, undefined
+            desc = value;
+            old = (key instanceof jQuery) ? _setFormData(key, this) : _set(key, this);
+        } else {
+            obj[key] = value;
+            old = _set(obj, this);
         }
 
-        if (!desc || !desc.charAt || desc.charAt(0) !== "_") h.forEach(keys, function (i, key) {
-            if (_this.setList.indexOf(key) === -1) _this.setList.push(key);
+        if (!desc || !desc.charAt || desc.charAt(0) !== "_") h.forEach(old, function (i) {
+            if (_this.setList.indexOf(i) === -1) _this.setList.push(i);
         });
 
-        if (keys.length) this.fire("set", {data: keys, desc: desc, model: this});
+        if (!h.isEmptyObj(old)) this.fire("set", {data: old, desc: desc, model: this});
     },
 
     "rm": function (keys, desc) {
@@ -290,20 +286,22 @@ function _pick(opts, that) {
     return output;
 }
 
-function _set(data, that) {
-    var keys = [];
+function _set(data, obj) {
+    var old = {};
 
     if (typeof data === 'object' && !!data) {
         h.forEach(data, function (key, value) {
-            if (that.data.hasOwnProperty(key) && that.data[key] === value) return;
-            that.data[key] = value;
-            keys.push(key);
+            if (obj[key]) {
+                if (obj[key] === value) return;
+                old[key] = obj[key];
+            }
+            obj[key] = value;
         });
     } else {
-        throw "Only object can be set!";
+        throw "Invalid data!";
     }
 
-    return keys;
+    return old;
 }
 
 function _setFormData(form, that) {
@@ -321,7 +319,7 @@ function _setFormData(form, that) {
         }
     });
 
-    return _set(output, that);
+    return _set(output, that.data);
 }
 
 function _rm(keys, obj) {
@@ -423,15 +421,11 @@ function _render(model, that) {
     return that.el;
 }
 
-function _listen(model, event, arg3, arg4, that) {
-    var desc, fn;
+function _listen(model, event, desc, fn, that) {
 
-    if (arg4 == null) {   // model, event, function
-        desc = void 0; // undefined
-        fn = arg3;
-    } else {              // model, event, desc and function
-        desc = arg3;
-        fn = arg4;
+    if (fn == null) {   // model, event, function
+        fn = desc;
+        desc = void 0;
     }
 
     model.on(event, function (args) {

@@ -103,7 +103,7 @@ Model.prototype = {
         var deleted = _rm(keys, this.data);
 
         if (!h.isEmptyObj(deleted)) {
-            _cleanSet(deleted, this);
+            this.setList = _restOf(this.setList, deleted);
             this.fire("rm", {data: deleted, desc: desc, model: this});
         }
     },

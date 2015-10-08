@@ -123,7 +123,7 @@ Model.prototype = {
     },
 
     "save": function (url, keys, opts) {
-        if (opts == null) { // url, opts
+        if (opts == null) { // url, opts, undefined
             opts = keys;
             keys = null;
         }
@@ -227,8 +227,12 @@ View.prototype = {
         return _pick(opts, this);
     },
 
-    // todo: update
     "call": function (url, obj, opts) {
+        if (opts == null) { // url, opts, undefined
+            opts = obj;
+            obj = null;
+        }
+
         _call(url, obj, opts, this);
     },
 

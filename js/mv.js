@@ -108,6 +108,7 @@ Model.prototype = {
         }
     },
 
+    // todo: update
     "call": function (url, keys, opts) {
         var obj;
 
@@ -199,26 +200,34 @@ View.prototype = {
         return _render(model, this);
     },
 
-    "listen": function (model, event, desc, fn) {
-        if (!this.models[model.modelId]) this.add(model);
-        _listen(model, event, desc, fn, this);
+    "listen": function (modelName, event, desc, fn) {
+        var model = this.models[modelName];
+        if (model) {
+            _listen(model, event, desc, fn, this);
+        } else throw "model not found";
     },
 
     "pick": function (opts) {
         return _pick(opts, this);
     },
 
+    // todo: update
     "call": function (url, obj, opts) {
         _call(url, obj, opts, this);
     },
 
-    "add": function (model) {
-        var key;
+    "add": function (model, name) {
+        var key, _this = this;
 
         if (model != null && data.hasOwnProperty("modelId")) {
-            key = model.modelId;
+            key = name || model.modelId;
+            if (this.models[key]) throw "Model already exists";
+
             this.models[key] = model;
-            this.listen(model, "destroy", this.rm);
+
+            this.listen(model, "destroy", function () {
+                _this.rm(key);
+            });
         } else {
             throw "Invalid model!";
         }
@@ -375,6 +384,7 @@ function _changed(keys, that) {
     return that.setList;
 }
 
+// todo: update
 function _bindModelEvents(that) {
     if (that["modelEvents"]) h.forEach(that["modelEvents"], function (key, fn) {
         if (!h.isFunction(fn)) fn = that[fn];
@@ -386,6 +396,7 @@ function _bindModelEvents(that) {
     });
 }
 
+// todo: update
 function _bindDomEvents(that) {
     if (that["domEvents"]) h.forEach(that["domEvents"], function (key, fn) {
         if (!h.isFunction(fn)) fn = that[fn];
@@ -418,7 +429,6 @@ function _render(model, that) {
 }
 
 function _listen(model, event, desc, fn, that) {
-
     if (fn == null) {   // model, event, function
         fn = desc;
         desc = void 0;

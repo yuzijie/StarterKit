@@ -373,7 +373,7 @@ function _call(url, obj, opts, that) {
         }
 
         that.xhr.send().done(function (data) {
-            if (data.type === "success" && obj) _cleanSet(obj, that);
+            if (obj && data.type === "success") that.setList = _restOf(that.setList, obj);
             if (opts[data.type]) opts[data.type].call(that, data);
         }).fail(function () {
             if (opts["error"]) opts["error"].call(that);
@@ -382,12 +382,12 @@ function _call(url, obj, opts, that) {
     } else throw "obj cannot be empty";
 }
 
-function _cleanSet(obj, that) {
+function _restOf(list, obj) {
     var tmp = [];
-    h.forEach(that.setList, function (i, key) {
+    h.forEach(list, function (i, key) {
         if (!obj.hasOwnProperty(key)) tmp.push(key);
     });
-    that.setList = tmp;
+    return tmp;
 }
 
 function _changed(keys, that) {

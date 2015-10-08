@@ -122,14 +122,10 @@ Model.prototype = {
         _call(url, obj, opts, this);
     },
 
-    "save": function (url, arg2, arg3) {
-        var opts, keys;
-
-        if (arg3 == null) {
-            opts = arg2;
-        } else {
-            keys = arg2;
-            opts = arg3;
+    "save": function (url, keys, opts) {
+        if (opts == null) { // url, opts
+            opts = keys;
+            keys = null;
         }
 
         _call(url, this.changed(keys), opts, this);
@@ -203,9 +199,9 @@ View.prototype = {
         return _render(model, this);
     },
 
-    "listen": function (model, event, arg3, arg4) {
+    "listen": function (model, event, desc, fn) {
         if (!this.models[model.modelId]) this.add(model);
-        _listen(model, event, arg3, arg4, this);
+        _listen(model, event, desc, fn, this);
     },
 
     "pick": function (opts) {

@@ -173,21 +173,36 @@ Model.extend = function (props) {
 };
 
 //////////////// View /////////////////
-
-// todo: update
 var View = function (opts) {
     opts = opts || {};
-    var _this = this, el;
+    var _this = this, el, models;
+
+    if (this.models) models = this.models; // get parent models
 
     h.forEach(opts, function (key, item) {
         _this[key] = item;
     });
 
-    if (el = this.el) { // prepare element
+    // prepare element
+    if (el = this.el) {
         if (el.charAt) el = document.createElement(el); // el is a string
         this.el = h.to$(el);
         if (this.attributes) this.el.attr(this.attributes);
     }
+
+    // inherent parent models
+    this.models = this.models || {};
+
+    if (models) h.forEach(models, function (name, model) {
+        if (!_this.models.hasOwnProperty(name)) _this.models[name] = model;
+    });
+
+    // attach destroy event
+    h.forEach(this.models, function (name) {
+        _this.listen(name, "destroy", function () {
+            _rm(name, _this.models);
+        });
+    });
 
     this.viewId = this.viewId || h.r4("V");
 
@@ -227,8 +242,8 @@ View.prototype = {
 
             this.models[key] = model;
 
-            this.listen(model, "destroy", function () {
-                _this.rm(key);
+            this.listen(key, "destroy", function () {
+                _rm(key, _this.models);
             });
         } else {
             throw "Invalid model!";

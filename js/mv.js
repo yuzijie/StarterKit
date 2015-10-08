@@ -411,18 +411,17 @@ function _bindModelEvents(that) {
     });
 }
 
-// todo: update
 function _bindDomEvents(that) {
     if (that["domEvents"]) h.forEach(that["domEvents"], function (key, fn) {
         if (!h.isFunction(fn)) fn = that[fn];
         var parts = key.split(splitter, 2);
 
         if (parts[0] === "this") {
-            that.el.on(parts[1], function (e) { // [1]: event
+            that.el.on(parts[1], function (e) { // 1: event
                 fn.call(that, e, this);
             });
         } else {
-            that.el.on(parts[1], parts[0], function (e) { // [1]: event, [0]: selector
+            that.el.on(parts[1], parts[0], function (e) { // 1: event, 0: selector
                 fn.call(that, e, this);
             });
         }

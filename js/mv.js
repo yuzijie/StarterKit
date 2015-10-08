@@ -108,16 +108,15 @@ Model.prototype = {
         }
     },
 
-    // todo: update
     "call": function (url, keys, opts) {
         var obj;
 
-        if (keys == null) {
+        if (opts == null) { // url, opts, undefined
             obj = null;
-        } else if (typeof keys === 'object') {
-            obj = keys;
+            opts = keys;
         } else {
-            obj = this.get(keys);
+            if (keys === void 0) keys = null;
+            obj = (typeof keys === "object") ? keys : this.get(keys);
         }
 
         _call(url, obj, opts, this);
@@ -364,22 +363,20 @@ function _rm(keys, obj) {
 }
 
 function _call(url, obj, opts, that) {
-    if (obj === null || !h.isEmptyObj(obj)) {
+    if (h.isEmptyObj(obj)) obj = null;
 
-        if (that.hasOwnProperty("xhr")) {
-            that.xhr.updateUrl(url).updateData(obj);
-        } else {
-            that.xhr = new XHR(url, obj);
-        }
+    if (that.hasOwnProperty("xhr")) {
+        that.xhr.updateUrl(url).updateData(obj);
+    } else {
+        that.xhr = new XHR(url, obj);
+    }
 
-        that.xhr.send().done(function (data) {
-            if (obj && data.type === "success") that.setList = _restOf(that.setList, obj);
-            if (opts[data.type]) opts[data.type].call(that, data);
-        }).fail(function () {
-            if (opts["error"]) opts["error"].call(that);
-        });
-
-    } else throw "obj cannot be empty";
+    that.xhr.send().done(function (data) {
+        if (obj && data.type === "success") that.setList = _restOf(that.setList, obj);
+        if (opts[data.type]) opts[data.type].call(that, data);
+    }).fail(function () {
+        if (opts["error"]) opts["error"].call(that);
+    });
 }
 
 function _restOf(list, obj) {

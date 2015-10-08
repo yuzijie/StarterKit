@@ -248,9 +248,7 @@ View.prototype = {
             this.listen(key, "destroy", function () {
                 _rm(key, _this.models);
             });
-        } else {
-            throw "Invalid model!";
-        }
+        } else throw "Invalid model!";
 
         return key;
     },
@@ -322,9 +320,7 @@ function _set(data, obj) {
             }
             obj[key] = value;
         });
-    } else {
-        throw "Invalid data!";
-    }
+    } else throw "Invalid data!";
 
     return old;
 }

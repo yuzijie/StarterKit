@@ -173,6 +173,8 @@ Model.extend = function (props) {
 };
 
 //////////////// View /////////////////
+
+// todo: update
 var View = function (opts) {
     opts = opts || {};
     var _this = this, el;
@@ -384,15 +386,13 @@ function _changed(keys, that) {
     return that.setList;
 }
 
-// todo: update
 function _bindModelEvents(that) {
-    if (that["modelEvents"]) h.forEach(that["modelEvents"], function (key, fn) {
-        if (!h.isFunction(fn)) fn = that[fn];
-        var parts = key.split(splitter, 3);
+    var events = that['modelEvents'], p;
 
-        that.models[parts[0]].on(parts[1], function (args) { // [0]: model name, [1]: event
-            if (parts[2] === args.desc) fn.call(that, args.data, args.model); // [2]: desc
-        }, that.viewId);
+    if (events) h.forEach(events, function (key, fn) {
+        if (!h.isFunction(fn)) fn = that[fn];
+        p = key.split(splitter, 3);
+        that.listen(p[0], p[1], p[2], fn); // 0: modelName, 1: event, 2: desc
     });
 }
 

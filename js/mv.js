@@ -82,18 +82,18 @@ Model.prototype = {
     },
 
     "set": function (key, value, desc) {
-        var old, obj = {}, _this = this;
+        var old, obj = {}, d = this.data, l = this.setList;
 
         if (key.charAt) { // key, value, desc
             obj[key] = value;
-            old = _set(obj, this);
+            old = _set(obj, d);
         } else { // obj, desc
             desc = value;
-            old = (key instanceof jQuery) ? _setFormData(key, this) : _set(key, this);
+            old = (key instanceof jQuery) ? _setFormData(key, d) : _set(key, d);
         }
 
         if (!desc || !desc.charAt || desc.charAt(0) !== "_") h.forEach(old, function (i) {
-            if (_this.setList.indexOf(i) === -1) _this.setList.push(i);
+            if (l.indexOf(i) === -1) l.push(i);
         });
 
         if (!h.isEmptyObj(old)) this.fire("set", {data: old, desc: desc, model: this});
@@ -328,7 +328,7 @@ function _set(data, obj) {
     return old;
 }
 
-function _setFormData(form, that) {
+function _setFormData(form, obj) {
     var dataArray = form.serializeArray(), output = {}, name, l, key;
 
     h.forEach(dataArray, function (i, item) {
@@ -343,7 +343,7 @@ function _setFormData(form, that) {
         }
     });
 
-    return _set(output, that.data);
+    return _set(output, obj);
 }
 
 function _rm(keys, obj) {

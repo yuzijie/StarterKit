@@ -213,6 +213,7 @@ var View = function (opts) {
 
 View.prototype = {
     "render": function (model) {
+        if (!!model && model.charAt) model = this.models[model];
         return _render(model, this);
     },
 

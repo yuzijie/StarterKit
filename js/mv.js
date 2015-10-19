@@ -186,7 +186,7 @@ var View = function (opts) {
     if (el = this.el) {
         if (el.charAt) el = document.createElement(el); // el is a string
         this.el = h.to$(el);
-        if (this.attributes) this.el.attr(this.attributes);
+        if (this.attr) this.el.attr(this.attr);
     }
 
     // inherent parent models

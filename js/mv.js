@@ -84,12 +84,12 @@ Model.prototype = {
     "set": function (key, value, desc) {
         var old, obj = {}, _this = this;
 
-        if (desc == null) { // data, desc, undefined
-            desc = value;
-            old = (key instanceof jQuery) ? _setFormData(key, this) : _set(key, this);
-        } else {
+        if (key.charAt) { // key, value, desc
             obj[key] = value;
             old = _set(obj, this);
+        } else { // obj, desc
+            desc = value;
+            old = (key instanceof jQuery) ? _setFormData(key, this) : _set(key, this);
         }
 
         if (!desc || !desc.charAt || desc.charAt(0) !== "_") h.forEach(old, function (i) {

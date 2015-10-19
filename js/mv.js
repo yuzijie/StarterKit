@@ -319,10 +319,8 @@ function _set(data, obj) {
 
     if (typeof data === 'object' && !!data) {
         h.forEach(data, function (key, value) {
-            if (obj[key]) {
-                if (obj[key] === value) return;
-                old[key] = obj[key];
-            }
+            if (obj[key] === value) return;
+            old[key] = obj[key];
             obj[key] = value;
         });
     } else throw "Invalid data!";

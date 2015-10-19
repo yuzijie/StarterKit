@@ -240,7 +240,7 @@ View.prototype = {
     "add": function (model, name) {
         var key, _this = this;
 
-        if (model != null && data.hasOwnProperty("modelId")) {
+        if (model != null && model.hasOwnProperty("modelId")) {
             key = name || model.modelId;
             if (this.models[key]) throw "Model already exists";
 

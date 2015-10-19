@@ -280,6 +280,10 @@ View.prototype = {
         h.forEach(_this, function (prop) {
             delete _this[prop];
         });
+    },
+
+    "size": function () {
+        return h.size(this.models);
     }
 };
 
